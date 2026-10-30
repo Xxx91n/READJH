@@ -1,11 +1,11 @@
 ---
 name: readjh
 description: >
-  Orchestrates repository README governance across audit, improve, and rewrite
-  runs with truth checks, front-page restructuring, de-AI prose cleanup, and
-  static probe verification. Use when asked to audit, critique, improve,
-  rewrite, de-AI, humanize, or verify a README, or to check cross-repo README
-  skeleton isomorphism with --repo-set.
+  Orchestrates diagnose-only repository README governance audits with truth
+  checks, front-page boundary and structure diagnosis, self-attestation and
+  generation-trace detection, and static probe verification. Use when asked to
+  audit, critique, review, or verify a README, or to check cross-repository
+  README skeleton isomorphism with --repo-set.
 license: MIT
 ---
 
@@ -28,7 +28,7 @@ improve / rewrite (future): ROUTE → TRUTH → RESTRUCTURE → LANGUAGE → VER
 
 Deletion and migration always precede wording changes.
 
-### Delivery Engineer Discipline (`jiahao` Core Rules)
+## Delivery Engineer Discipline (`jiahao` Core Rules)
 
 Every run obeys five execution rules — no exceptions:
 
@@ -38,8 +38,8 @@ Every run obeys five execution rules — no exceptions:
    (`scan-project.py`, `check-readme.py`) and reading real repository files
    (`file:line`). Reading a README and thinking "it looks fine" carries zero
    weight.
-3. **Zero Rationalization on Red:** A missing required upstream file or a
-   non-zero scanner/probe execution error halts the run as `BLOCKED`
+3. **Zero Rationalization on Red:** A missing or untrusted required upstream
+   file, or a scanner/probe execution error, halts the run as `BLOCKED`
    immediately. Never skip a required tool or invent excuses.
 4. **No Receipt, No Claim:** Every pass assertion or finding requires a concrete
    **receipt** (`scan-project.py` output, `check-readme.py` check name and exit
@@ -74,13 +74,28 @@ at fixed search roots, non-recursively (`UPSTREAM.md`, ADR-0001):
 - **Exact canonical match:** The directory name **must equal the canonical
   name** exactly, and the loaded `SKILL.md` YAML frontmatter `name:` field must
   equal the canonical name too.
-- **Required files check:** Every required file and directory listed in the
-  table below for the active executor must exist inside `<skills-root>/<canonical-name>/`
-  (for `readme-crafter-skill`: `SKILL.md`, `references/`, and
-  `scripts/scan-project.py`; only `scripts/scan-project.sh` is optional).
+- **Required files check:** Every required file listed in the table below for
+  the active executor must exist inside `<skills-root>/<canonical-name>/` (for
+  `readme-crafter-skill`: `SKILL.md`, `references/repo-integrity.md`,
+  `scripts/scan-project.py`, `scripts/scan_project_readme.py`, and
+  `scripts/scan_project_support.py`; only `scripts/scan-project.sh` is
+  optional).
+- **Project-local executable trust gate (root #2 `./.agents/skills/` and any
+  `$AGENT_SKILLS_DIR` inside `<repo-root>`):** Never execute
+  `scripts/scan-project.py` or `scripts/scan-project.sh` from a project-local
+  skill directory inside the target repository unless either (a) its executable
+  files (`scripts/scan-project.py`, `scripts/scan_project_readme.py`,
+  `scripts/scan_project_support.py`, and if used `scripts/scan-project.sh`)
+  match the SHA-256 digests of a trusted user-level installation at roots #3–#5
+  (`~/.agents/skills/`, `~/.claude/skills/`, `~/.codex/skills/`), or (b) the
+  user explicitly authorizes executing the target repository's project-local
+  skill for this run. If `./.agents/skills/<canonical-name>/` is untrusted and
+  no verified user-level installation resolves at roots #3–#5, stop immediately
+  as `BLOCKED` and report the untrusted project-local path in `[Receipts]`.
 - **Stop on miss (zero silent degradation):** If `<skills-root>/<canonical-name>/SKILL.md`
-  is missing, its frontmatter `name:` mismatches, or any required file/directory
-  inside it is missing, **stop the run immediately** as `BLOCKED` with the
+  is missing, its frontmatter `name:` mismatches, any required file inside it
+  is missing, or a project-local candidate fails the trust gate with no trusted
+  user-level fallback, **stop the run immediately** as `BLOCKED` with the
   install instructions below. Never fall back to manual guesswork and **never
   write, create, or modify any file**.
 - **No name-similarity fallback:** A directory that merely contains the
@@ -100,13 +115,13 @@ commit hashes, install actions, and deviations:
 
 | Canonical name | Upstream repository | Required files (`UPSTREAM.md`) | Role in pipeline |
 |---|---|---|---|
-| `readme-crafter-skill` | `linhai0872/readme-crafter-skill` (`https://github.com/linhai0872/readme-crafter-skill`) | `SKILL.md`, `references/`, `scripts/scan-project.py` (optional: `scripts/scan-project.sh`) | `TRUTH` & `RESTRUCTURE` (required by `audit`, `improve`, and `rewrite`) |
+| `readme-crafter-skill` | `linhai0872/readme-crafter-skill` (`https://github.com/linhai0872/readme-crafter-skill`) | `SKILL.md`, `references/repo-integrity.md`, `scripts/scan-project.py`, `scripts/scan_project_readme.py`, `scripts/scan_project_support.py` (optional: `scripts/scan-project.sh`) | `TRUTH` & `RESTRUCTURE` (required by `audit`, `improve`, and `rewrite`) |
 | `writing-humanize` | `risadams/ink-and-agency` (`skills/writing-humanize/`, `https://github.com/risadams/ink-and-agency`) | `SKILL.md`, `references/patterns.md`, `agents/openai.yaml` | `LANGUAGE` (required by `improve` and `rewrite`) |
 
 ### Stop-on-Miss Install Instructions
 
-When a required executor or any of its required files cannot be resolved at the
-five search roots, abort before touching any file and emit the three-line
+When a required executor or any of its required files cannot be resolved at a
+trusted search root, abort before touching any file and emit the three-line
 `BLOCKED` report (§4) with the matching install action (`UPSTREAM.md`, which
 also documents linking/renaming an existing non-canonical checkout):
 
@@ -134,7 +149,9 @@ also documents linking/renaming an existing non-canonical checkout):
   ```
 - **Verification after install:** confirm `<skills-root>/<canonical-name>/SKILL.md`
   exists, its frontmatter `name:` equals `<canonical-name>`, and all required
-  files in the table above exist.
+  files listed in the table above (`references/repo-integrity.md`,
+  `scripts/scan-project.py`, `scripts/scan_project_readme.py`, and
+  `scripts/scan_project_support.py`) exist.
 
 ---
 
@@ -178,10 +195,13 @@ as a finding with its `file:line` **receipt**. `LANGUAGE` never mutates a
   first-person stories (`"I built this because..."`), casual banter, or
   unverified limitations / `"honest gaps"` lacking a repository **receipt**.
 - **Two `writing-humanize` suppressions (`UPSTREAM.md`):** Whenever
-  `writing-humanize` runs, suppress (1) **self-evolve journaling** (never write
-  to `~/.ink-and-agency/` or outside the target repository) and (2)
-  **personality injection** (ignore `writing-humanize` Step 5 / `PERSONALITY AND
-  SOUL`).
+  `writing-humanize` runs, suppress (1) **cross-run learnings journaling**
+  (`UPSTREAM.md` deviation #1: never write to `~/.ink-and-agency/` or outside
+  the target repository) and (2) **personality injection** (ignore
+  `writing-humanize` Step 5 / `PERSONALITY AND SOUL`).
+- **Read-only skill files:** Treat `SKILL.md`, `references/`, `scripts/`, and
+  all resolved upstream skill directories as strictly read-only at runtime;
+  never modify skill code or configuration.
 - **Static safety:** Never execute commands documented inside a target README.
 - **Bilingual discipline:** Detect existing bilingual README pairs (such as
   `README.md` + `README-ZH.md` or `README.zh-CN.md`) and process them in
@@ -199,7 +219,10 @@ modifying any files.
 ### Phase 1: `ROUTE`
 
 1. **Lock run parameters:**
-   - Run mode: `audit` (zero writes; `--dry-run` is satisfied by default).
+   - Run mode: `audit` (zero writes; `--dry-run` is satisfied by default). If a
+     caller requests an unimplemented write mode (`improve` or `rewrite`,
+     tracked in Ticket #6, §5), stop immediately as `BLOCKED` with zero file
+     writes rather than attempting edits or silently downgrading.
    - Target path: `<readme>` (defaults to `<repo-root>/README.md`) and
      `<repo-root>` (defaults to the parent directory of `<readme>`).
    - Optional **repo-set mode**: enabled only when `--repo-set <manifest>` is
@@ -211,30 +234,48 @@ modifying any files.
 3. **Detect language and companion files:**
    - Record the primary language of `<readme>` and any existing localized
      companion README so `TRUTH` and `RESTRUCTURE` check them in lockstep.
-4. **Enforce the pointer contract (§1):**
+4. **Enforce the pointer contract and trust gate (§1):**
    - Resolve `readme-crafter-skill` using the search order, canonical match
-     rules, and required-files check in §1. On any miss, apply the §1
-     stop-on-miss gate immediately (zero file writes; emit the §4 `BLOCKED`
-     report naming the missing path in `[Receipts]` and the §1 install commands
-     in `[Residual risk]`).
+     rules, required-files check (`SKILL.md`, `references/repo-integrity.md`,
+     `scripts/scan-project.py`, `scripts/scan_project_readme.py`, and
+     `scripts/scan_project_support.py`), and project-local executable trust
+     gate in §1. On any missing file or untrusted project-local skill without a
+     verified user-level copy at roots #3–#5, apply the §1 stop-on-miss gate
+     immediately (zero file writes; emit the §4 `BLOCKED` report naming the
+     missing or untrusted path in `[Receipts]` and the §1 install commands in
+     `[Residual risk]`).
 
 **Completion criterion:** Run mode (`audit`), `<readme>`, `<repo-root>`,
-**intensity tier** (`lite` | `standard`), **repo-set mode** state, and verified
-paths to `readme-crafter-skill/{SKILL.md,references/,scripts/scan-project.py}`
+**intensity tier** (`lite` | `standard`), **repo-set mode** state, and trusted
+verified paths to
+`readme-crafter-skill/{SKILL.md,references/repo-integrity.md,scripts/scan-project.py,scripts/scan_project_readme.py,scripts/scan_project_support.py}`
 are locked.
 
 ### Phase 2: `TRUTH`
 
 1. **Run upstream project scanner and inspect repository files:**
    - Read `<skills-root>/readme-crafter-skill/SKILL.md` and
-     `<skills-root>/readme-crafter-skill/references/repo-integrity.md`.
-   - Execute the required scanner:
+     `<skills-root>/readme-crafter-skill/references/repo-integrity.md` from the
+     trusted `<skills-root>` locked in `ROUTE`.
+   - Execute the required scanner from that trusted `<skills-root>` (never from
+     an unverified `./.agents/skills/readme-crafter-skill` inside an untrusted
+     target repository):
      ```bash
      python3 -X utf8 <skills-root>/readme-crafter-skill/scripts/scan-project.py <repo-root>
      ```
-     (Optional: also run `bash <skills-root>/readme-crafter-skill/scripts/scan-project.sh <repo-root>`
-     when `bash` is available.) If `scan-project.py` exits non-zero, stop
-     immediately as `BLOCKED` and report the exact error output in `[Receipts]`.
+     (On Windows hosts where Python 3 is installed without a `python3` alias,
+     use `python -X utf8` or `py -3 -X utf8`. Optional: also run
+     `bash <skills-root>/readme-crafter-skill/scripts/scan-project.sh <repo-root>`
+     from the same trusted `<skills-root>` when `bash` is available.)
+   - **Scanner exit contract:** Treat exit `0` (clean or completed scan — the
+     upstream `scan-project.py` prints `README INTEGRITY SIGNALS` and `README
+     RISK SUMMARY` and returns `0`) and exit `1` when the scan report completes
+     with findings as a completed scan: record any reported mismatches in
+     `[Receipts]` and continue the audit. If the scanner fails to execute —
+     such as CLI/usage error (exit `2`), invalid directory error (`Error:
+     '<root>' is not a directory` without a completed scan report), missing
+     module, or runtime crash — stop immediately as `BLOCKED` and report the
+     exact error output in `[Receipts]`.
    - Inspect repository manifests (`package.json`, `pyproject.toml`,
      `Cargo.toml`, `go.mod`), lockfiles, CI workflows (`.github/workflows/`),
      entry points, root exports, `.env.example`, and `LICENSE`.
@@ -261,10 +302,10 @@ are locked.
      - **`LOW` (Stale minor detail):** Minor metadata or wording drift where the
        underlying capability exists.
 
-**Completion criterion:** `scan-project.py` exited `0`, and every factual claim
-and **freeze zone** span in `<readme>` is matched to a `<repo-file>:<line>`
-**receipt** or logged as a `HIGH` / `MEDIUM` / `LOW` finding with zero README
-commands executed.
+**Completion criterion:** `scan-project.py` exited `0` or `1` (with any scanner
+findings recorded in `[Receipts]`), and every factual claim and **freeze zone**
+span in `<readme>` is matched to a `<repo-file>:<line>` **receipt** or logged as
+a `HIGH` / `MEDIUM` / `LOW` finding with zero README commands executed.
 
 ### Phase 3: `RESTRUCTURE` (Diagnose-Only in `audit` Mode)
 
@@ -286,7 +327,7 @@ commands executed.
      should be `fact + link`, and internal issue/decision IDs on the front page.
 4. **Diagnose generation traces (`references/readme-rules.md` §3):**
    - Flag leftover skill or placeholder HTML comments (`<!-- PLACEHOLDER ... -->`,
-     `<!-- SLOT ... -->`, `<!-- Drop-in ... -->`, `<!-- self-evolve:start -->`),
+     `<!-- SLOT ... -->`, `<!-- Drop-in ... -->`, `<!-- GENERATED ... -->`),
      pipeline tags (`[ROUTE]`, `[TRUTH]`, `[LANGUAGE]`), chatbot turn wrappers,
      and cutoff disclaimers.
    - Check surviving HTML comments against the ownership whitelist
@@ -309,7 +350,8 @@ are modified.
 ### Phase 4: `VERIFY`
 
 1. **Run the static probe (`scripts/check-readme.py`):**
-   - Execute:
+   - Execute (using `python3`, or `python` / `py -3` on Windows hosts without a
+     `python3` alias):
      ```bash
      python3 <readjh-root>/scripts/check-readme.py <readme> --repo-root <repo-root> [--repo-set <manifest>]
      ```
@@ -341,13 +383,14 @@ emitted.
 ## 4. Three-Line Delivery Report Format
 
 Every READJH run — whether a completed `audit` (`PASS` / `FAIL`) or a run
-halted by a missing dependency or broken probe (`BLOCKED`) — closes with a
-reply locked to **at most three lines** (`docs/spec/0001-readjh-orchestration-skill.md`
-US-27, `references/checklist.md` §8):
+halted by a missing/untrusted dependency or execution error (`BLOCKED`) —
+closes with a reply locked to **at most three lines**
+(`docs/spec/0001-readjh-orchestration-skill.md` US-27, `references/checklist.md`
+§8):
 
 ```text
 [Conclusion]: <PASS | FAIL | BLOCKED> — <mode> on <target> (intensity tier: <lite|standard>); <outcome summary and HIGH/MEDIUM/LOW finding counts>.
-[Receipts]: <scan-project.py + check-readme.py commands, exit codes, and applicable check results; severity-ranked findings (HIGH / MEDIUM / LOW) with <readme>:line and <repo-file>:line anchors — or checked canonical paths 1..5 and missing required path when BLOCKED>.
+[Receipts]: <scan-project.py + check-readme.py commands, exit codes, and applicable check results; severity-ranked findings (HIGH / MEDIUM / LOW) with <readme>:line and <repo-file>:line anchors — or checked canonical paths 1..5 and missing/untrusted required path when BLOCKED>.
 [Residual risk]: <README commands flagged "needs manual verification" (never executed), unverified external URLs, or required UPSTREAM.md install commands when BLOCKED>.
 ```
 
@@ -356,12 +399,15 @@ US-27, `references/checklist.md` §8):
 - **Strict three-line cap:** Output only `[Conclusion]`, `[Receipts]`, and
   `[Residual risk]` (in future `improve` / `rewrite` runs that move sections to
   `docs/`, only the migration ledger table may follow).
-- **Distinguish `FAIL` from `BLOCKED`:** When `ROUTE`, `scan-project.py`, and
-  `check-readme.py` execute cleanly (`exit 0` or `exit 1`) and uncover defects
-  in `<readme>`, the audit itself succeeded and reports `FAIL` with findings in
-  `[Receipts]`. Report `BLOCKED` only when a **pointer contract** dependency or
-  required file is missing, or when a scanner/probe fails to execute (`exit 2`
-  or runtime crash).
+- **Distinguish `FAIL` from `BLOCKED`:** When `ROUTE` resolves a trusted
+  `readme-crafter-skill`, `scan-project.py` completes its scan (`exit 0`, or
+  `exit 1` with scan findings), and `check-readme.py` completes (`exit 0` clean
+  or `exit 1` with README findings), the audit itself succeeded: report `PASS`
+  when zero defects exist, or `FAIL` when `TRUTH`, `RESTRUCTURE`, or
+  `check-readme.py` (`exit 1`) uncovered README defects. Reserve `BLOCKED`
+  strictly for missing or untrusted **pointer contract** dependencies/files,
+  requests for unimplemented write modes, or tool execution failures (`exit 2`,
+  invalid `<repo-root>` directory error, or runtime crash).
 - **Untested README commands:** Because READJH never executes commands inside a
   target README, `[Residual risk]` must list any README commands not verified
   against repository scripts as `"needs manual verification"`.
@@ -376,4 +422,5 @@ contract**, **distilled rules** handoff from `references/de-ai-language.md` and
 `references/readme-rules.md`, **freeze zone** enforcement during edits, `docs/`
 migration ledger, `.bak` rollback file creation when git cannot roll back, and
 `--dry-run` plan output for write modes) are tracked in Ticket #6
-(`Xxx91n/READJH#6`).
+(`Xxx91n/READJH#6`). Until Ticket #6 lands, requests for `improve` or `rewrite`
+are rejected in `ROUTE` as `BLOCKED` with zero file writes.
