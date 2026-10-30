@@ -53,7 +53,7 @@ Run this binary assertion checklist during `VERIFY` (and as the diagnostic rubri
 > **Attribution:** `READJH` orchestration layer (`docs/spec/0001-readjh-orchestration-skill.md` US-20, US-21, US-34; `references/readme-rules.md` §4.2); `readme-crafter-skill` (`SKILL.md` §Core Philosophy #3 & `references/style-guide.md`); `sepia` (`.agents/skills/sepia/references/professional-pass.md` `SLOPSHAPE-2026` & Check #8).
 
 - [ ] **Project-specific section sequence (`references/readme-rules.md` §4.2):** headings follow this repository's project type and distribution posture rather than a generic boilerplate outline.
-- [ ] **Repo-set mode (when `--repo-set <manifest>` is enabled):** `python3 scripts/check-readme.py <readme> --repo-set <manifest>` receipt confirms no **skeleton isomorphism** across distinct project types (`N/A` on default single-repo runs).
+- [ ] **Repo-set mode (when `--repo-set <manifest>` is enabled):** `python3 scripts/check-readme.py <readme> --repo-set <manifest>` receipt confirms no **skeleton isomorphism** across all repositories listed in the manifest, regardless of project type (`N/A` on default single-repo runs).
 
 ---
 
