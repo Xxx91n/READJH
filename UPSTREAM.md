@@ -27,8 +27,29 @@ Rules, inherited from ADR-0001:
 
 - The directory name **must equal the canonical name** exactly, and the loaded
   `SKILL.md` frontmatter `name:` must equal it too.
-- A missing dependency **stops the run** with the install instructions in the
-  table below. READJH never degrades silently.
+- Every file listed under **required files** in the table below must exist inside
+  `<skills-root>/<canonical-name>/` before the skill is accepted.
+- **Project-local executable trust gate (root #2 `./.agents/skills/` and any
+  `$AGENT_SKILLS_DIR` inside the target repository):** Because `TRUTH` reads
+  upstream instructions (`SKILL.md`, `references/repo-integrity.md`) and
+  executes `readme-crafter-skill/scripts/scan-project.py`,
+  a project-local skill directory inside the target repository is never trusted
+  implicitly:
+  1. Without explicit user authorization for that project-local tree, READJH
+     **never executes code or loads `SKILL.md` / `references/` from the
+     project-local directory**. If a verified user-level installation exists at
+     roots #3–#5 (`~/.agents/skills/`, `~/.claude/skills/`, `~/.codex/skills/`),
+     READJH reads and executes (`python3 -s -E -B -X utf8`) directly from that
+     trusted user-level installation instead; if no trusted user-level
+     installation resolves, the run stops immediately as `BLOCKED`.
+  2. Even when the user explicitly authorizes a project-local skill for the
+     current run, READJH verifies `SKILL.md`, `references/repo-integrity.md`,
+     and every file in `scripts/` (confirming no extra `.py` or `.pth` modules
+     exist in `scripts/` beyond `scan-project.py`, `scan_project_readme.py`,
+     and `scan_project_support.py`) and runs Python with environment and user
+     site-packages disabled (`python3 -s -E -B -X utf8`).
+- A missing, incomplete, or untrusted dependency **stops the run** with the
+  install instructions in the table below. READJH never degrades silently.
 - **No name-similarity fallback.** A directory that merely contains the name —
   nested deeper, suffixed (`-main`), prefixed — does not resolve. That is the
   wrong-skill risk the contract exists to prevent.
@@ -39,13 +60,18 @@ Rules, inherited from ADR-0001:
 
 | canonical name | upstream URL | license | required files | search paths | observed location (2026-10-30) | state |
 |---|---|---|---|---|---|---|
-| `readme-crafter-skill` | https://github.com/linhai0872/readme-crafter-skill | MIT | `SKILL.md`, `references/`, `scripts/` (probe: `scripts/scan-project.py`; optional `scan-project.sh`) | contract list above | `C:\Users\Administrator\.agents\skills\git\readme\readme-crafter-skill-main\` | installed, **non-canonical** — nested two levels deep with a `-main` suffix, so the pointer contract does not find it; junction/rename needed (see Install actions) |
+| `readme-crafter-skill` | https://github.com/linhai0872/readme-crafter-skill | MIT | `SKILL.md`, `references/repo-integrity.md` (in `references/`), `scripts/scan-project.py`, `scripts/scan_project_readme.py`, `scripts/scan_project_support.py` | contract list above | `C:\Users\Administrator\.agents\skills\git\readme\readme-crafter-skill-main\` | installed, **non-canonical** — nested two levels deep with a `-main` suffix, so the pointer contract does not find it; junction/rename needed (see Install actions) |
 | `writing-humanize` | https://github.com/risadams/ink-and-agency (`skills/writing-humanize/`) | MIT (skill `license:` field; repo LICENSE MIT, fork notice credits mattpocock/skills) | `SKILL.md`, `references/patterns.md`, `agents/openai.yaml` | contract list above | — | **not installed locally**; clone required (see Install actions) |
 
 Upstream commits observed at authoring time: `readme-crafter-skill`
 `08db7782836c542d9b597860da33fcc159e36433`, `ink-and-agency`
-`e1f0a00e06d55c00502e0ccbea79ab453e7fb118`. Upstreams are not version-pinned;
-re-check the contract and this table when either repo moves.
+`e1f0a00e06d55c00502e0ccbea79ab453e7fb118`. **Revision policy:** the fresh-machine
+install commands below check out these recorded commits for reproducible setup,
+whereas runtime pointer-contract resolution checks canonical directory name,
+`SKILL.md` frontmatter `name:`, required files, and the project-local trust gate
+without enforcing a fixed Git commit hash on trusted user-level installations
+(roots #3–#5). Re-check the contract and update this table when intentionally
+advancing either upstream checkout.
 
 ### Distilled rule sources (read into context, never invoked)
 
@@ -60,12 +86,18 @@ re-check the contract and this table when either repo moves.
 
 What a fresh machine needs so the contract resolves:
 
-- **`readme-crafter-skill`** — on a fresh machine, acquire the upstream repo
+- **`readme-crafter-skill`** — on a fresh machine, acquire the upstream repo,
+  check out the recorded commit (`08db7782836c542d9b597860da33fcc159e36433`),
   and expose its root at the canonical name:
+  ```cmd
+  mkdir "%USERPROFILE%\.agents\repos" "%USERPROFILE%\.agents\skills" 2>nul
+  git clone https://github.com/linhai0872/readme-crafter-skill "%USERPROFILE%\.agents\repos\readme-crafter-skill" && git -C "%USERPROFILE%\.agents\repos\readme-crafter-skill" checkout 08db7782836c542d9b597860da33fcc159e36433 && mklink /J "%USERPROFILE%\.agents\skills\readme-crafter-skill" "%USERPROFILE%\.agents\repos\readme-crafter-skill"
   ```
-  mkdir "%USERPROFILE%\.agents\repos" 2>nul
-  git clone https://github.com/linhai0872/readme-crafter-skill "%USERPROFILE%\.agents\repos\readme-crafter-skill"
-  mklink /J "%USERPROFILE%\.agents\skills\readme-crafter-skill" "%USERPROFILE%\.agents\repos\readme-crafter-skill"
+  ```sh
+  mkdir -p "$HOME/.agents/repos" "$HOME/.agents/skills" && \
+  git clone https://github.com/linhai0872/readme-crafter-skill "$HOME/.agents/repos/readme-crafter-skill" && \
+  git -C "$HOME/.agents/repos/readme-crafter-skill" checkout 08db7782836c542d9b597860da33fcc159e36433 && \
+  ln -s "$HOME/.agents/repos/readme-crafter-skill" "$HOME/.agents/skills/readme-crafter-skill"
   ```
   On the authoring machine the tree already exists at a non-canonical path —
   make `<skills-root>\readme-crafter-skill` resolve to it instead of
@@ -75,19 +107,26 @@ What a fresh machine needs so the contract resolves:
   - or rename the directory in place to `readme-crafter-skill` at the skills
     root (loses the `git\readme` grouping).
 - **`writing-humanize`** — not installed. Clone the repo to a stable location
-  (junctions into temp dirs break on cleanup) and expose only the skill
+  (junctions into temp dirs break on cleanup), check out the recorded commit
+  (`e1f0a00e06d55c00502e0ccbea79ab453e7fb118`), and expose only the skill
   directory at the canonical name:
+  ```cmd
+  mkdir "%USERPROFILE%\.agents\repos" "%USERPROFILE%\.agents\skills" 2>nul
+  git clone https://github.com/risadams/ink-and-agency "%USERPROFILE%\.agents\repos\ink-and-agency" && git -C "%USERPROFILE%\.agents\repos\ink-and-agency" checkout e1f0a00e06d55c00502e0ccbea79ab453e7fb118 && mklink /J "%USERPROFILE%\.agents\skills\writing-humanize" "%USERPROFILE%\.agents\repos\ink-and-agency\skills\writing-humanize"
   ```
-  mkdir "%USERPROFILE%\.agents\repos" 2>nul
-  git clone https://github.com/risadams/ink-and-agency "%USERPROFILE%\.agents\repos\ink-and-agency"
-  mklink /J "%USERPROFILE%\.agents\skills\writing-humanize" "%USERPROFILE%\.agents\repos\ink-and-agency\skills\writing-humanize"
+  ```sh
+  mkdir -p "$HOME/.agents/repos" "$HOME/.agents/skills" && \
+  git clone https://github.com/risadams/ink-and-agency "$HOME/.agents/repos/ink-and-agency" && \
+  git -C "$HOME/.agents/repos/ink-and-agency" checkout e1f0a00e06d55c00502e0ccbea79ab453e7fb118 && \
+  ln -s "$HOME/.agents/repos/ink-and-agency/skills/writing-humanize" "$HOME/.agents/skills/writing-humanize"
   ```
   Any equivalent copy of `skills/writing-humanize/` to
-  `<skills-root>\writing-humanize\` satisfies the contract.
+  `<skills-root>/writing-humanize/` satisfies the contract.
 
 After either action, verify resolution: the file
-`<skills-root>\<canonical-name>\SKILL.md` must exist and its frontmatter `name:`
-must equal the canonical name.
+`<skills-root>/<canonical-name>/SKILL.md` must exist, its frontmatter `name:`
+must equal the canonical name, and all required files listed in the table above
+(`references/repo-integrity.md`, `scripts/scan-project.py`, etc.) must exist.
 
 ## Deviation table
 
