@@ -7,8 +7,8 @@ how this repo uses them.
 
 - **`ready-for-agent`** — spec stage complete, an agent may implement
   without further clarification. The spec-0001 ticket wave (#1–#7) was
-  created with this label. Remove it when implementation starts if the
-  ticket needs human input again.
+  created with this label. **Implementation removes it when work starts** —
+  an issue that keeps it looks grabbable and risks duplicate assignment.
 - **`question`** — blocked on a human decision; do not implement.
 
 ## GitHub defaults in use

@@ -16,11 +16,12 @@ search roots, non-recursively:
 
 Search order, first hit wins:
 
-1. `./.agents/skills/` — project-local, relative to the target repository
-2. `~/.agents/skills/` — user-level (`C:\Users\<user>\.agents\skills\` on Windows)
-3. `~/.claude/skills/` — Claude-style host root
-4. `~/.codex/skills/` — Codex-style host root
-5. `$AGENT_SKILLS_DIR` — environment override, when the host defines one
+1. `$AGENT_SKILLS_DIR` — environment override; when set it takes precedence
+   over every default root below
+2. `./.agents/skills/` — project-local, relative to the target repository
+3. `~/.agents/skills/` — user-level (`C:\Users\<user>\.agents\skills\` on Windows)
+4. `~/.claude/skills/` — Claude-style host root
+5. `~/.codex/skills/` — Codex-style host root
 
 Rules, inherited from ADR-0001:
 
@@ -63,15 +64,16 @@ What a fresh machine needs so the contract resolves:
   Make `<skills-root>\readme-crafter-skill` resolve to the existing tree; do not
   re-clone. Either of:
   - junction (Windows):
-    `mklink /J "C:\Users\Administrator\.agents\skills\readme-crafter-skill" "C:\Users\Administrator\.agents\skills\git\readme\readme-crafter-skill-main"`
+    `mklink /J "%USERPROFILE%\.agents\skills\readme-crafter-skill" "%USERPROFILE%\.agents\skills\git\readme\readme-crafter-skill-main"`
   - or rename the directory in place to `readme-crafter-skill` at the skills
     root (loses the `git\readme` grouping).
 - **`writing-humanize`** — not installed. Clone the repo to a stable location
   (junctions into temp dirs break on cleanup) and expose only the skill
   directory at the canonical name:
   ```
+  mkdir "%USERPROFILE%\.agents\repos" 2>nul
   git clone https://github.com/risadams/ink-and-agency "%USERPROFILE%\.agents\repos\ink-and-agency"
-  mklink /J "C:\Users\Administrator\.agents\skills\writing-humanize" "%USERPROFILE%\.agents\repos\ink-and-agency\skills\writing-humanize"
+  mklink /J "%USERPROFILE%\.agents\skills\writing-humanize" "%USERPROFILE%\.agents\repos\ink-and-agency\skills\writing-humanize"
   ```
   Any equivalent copy of `skills/writing-humanize/` to
   `<skills-root>\writing-humanize\` satisfies the contract.
