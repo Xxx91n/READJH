@@ -32,7 +32,7 @@ Rules, inherited from ADR-0001:
 - **Project-local executable trust gate (root #2 `./.agents/skills/` and any
   `$AGENT_SKILLS_DIR` inside the target repository):** Because `TRUTH` reads
   upstream instructions (`SKILL.md`, `references/repo-integrity.md`) and
-  executes `readme-crafter-skill/scripts/scan-project.py` (and optional `.sh`),
+  executes `readme-crafter-skill/scripts/scan-project.py`,
   a project-local skill directory inside the target repository is never trusted
   implicitly:
   1. Without explicit user authorization for that project-local tree, READJH
@@ -60,13 +60,18 @@ Rules, inherited from ADR-0001:
 
 | canonical name | upstream URL | license | required files | search paths | observed location (2026-10-30) | state |
 |---|---|---|---|---|---|---|
-| `readme-crafter-skill` | https://github.com/linhai0872/readme-crafter-skill | MIT | `SKILL.md`, `references/repo-integrity.md` (in `references/`), `scripts/scan-project.py`, `scripts/scan_project_readme.py`, `scripts/scan_project_support.py` (optional: `scripts/scan-project.sh`) | contract list above | `C:\Users\Administrator\.agents\skills\git\readme\readme-crafter-skill-main\` | installed, **non-canonical** — nested two levels deep with a `-main` suffix, so the pointer contract does not find it; junction/rename needed (see Install actions) |
+| `readme-crafter-skill` | https://github.com/linhai0872/readme-crafter-skill | MIT | `SKILL.md`, `references/repo-integrity.md` (in `references/`), `scripts/scan-project.py`, `scripts/scan_project_readme.py`, `scripts/scan_project_support.py` | contract list above | `C:\Users\Administrator\.agents\skills\git\readme\readme-crafter-skill-main\` | installed, **non-canonical** — nested two levels deep with a `-main` suffix, so the pointer contract does not find it; junction/rename needed (see Install actions) |
 | `writing-humanize` | https://github.com/risadams/ink-and-agency (`skills/writing-humanize/`) | MIT (skill `license:` field; repo LICENSE MIT, fork notice credits mattpocock/skills) | `SKILL.md`, `references/patterns.md`, `agents/openai.yaml` | contract list above | — | **not installed locally**; clone required (see Install actions) |
 
 Upstream commits observed at authoring time: `readme-crafter-skill`
 `08db7782836c542d9b597860da33fcc159e36433`, `ink-and-agency`
-`e1f0a00e06d55c00502e0ccbea79ab453e7fb118`. Upstreams are not version-pinned;
-re-check the contract and this table when either repo moves.
+`e1f0a00e06d55c00502e0ccbea79ab453e7fb118`. **Revision policy:** the fresh-machine
+install commands below check out these recorded commits for reproducible setup,
+whereas runtime pointer-contract resolution checks canonical directory name,
+`SKILL.md` frontmatter `name:`, required files, and the project-local trust gate
+without enforcing a fixed Git commit hash on trusted user-level installations
+(roots #3–#5). Re-check the contract and update this table when intentionally
+advancing either upstream checkout.
 
 ### Distilled rule sources (read into context, never invoked)
 

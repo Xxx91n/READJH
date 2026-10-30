@@ -78,8 +78,7 @@ at fixed search roots, non-recursively (`UPSTREAM.md`, ADR-0001):
   the active executor must exist inside `<skills-root>/<canonical-name>/` (for
   `readme-crafter-skill`: `SKILL.md`, `references/repo-integrity.md`,
   `scripts/scan-project.py`, `scripts/scan_project_readme.py`, and
-  `scripts/scan_project_support.py`; only `scripts/scan-project.sh` is
-  optional).
+  `scripts/scan_project_support.py`).
 - **Project-local executable trust gate (root #2 `./.agents/skills/` and any
   `$AGENT_SKILLS_DIR` inside `<repo-root>`):** A project-local skill directory
   inside the target repository is never trusted implicitly:
@@ -119,11 +118,15 @@ at fixed search roots, non-recursively (`UPSTREAM.md`, ADR-0001):
 ### Pointer-Contract Dependencies
 
 `UPSTREAM.md` is the single record for observed machine locations, upstream
-commit hashes, install actions, and deviations:
+commit hashes, install actions, and deviations (install commands below check out
+the recorded authoring-time commits for reproducible setup, while runtime
+resolution checks canonical name, `SKILL.md` frontmatter `name:`, required
+files, and the project-local trust gate without enforcing a fixed Git commit
+hash on trusted user-level installations at roots #3–#5):
 
 | Canonical name | Upstream repository | Required files (`UPSTREAM.md`) | Role in pipeline |
 |---|---|---|---|
-| `readme-crafter-skill` | `linhai0872/readme-crafter-skill` (`https://github.com/linhai0872/readme-crafter-skill`) | `SKILL.md`, `references/repo-integrity.md`, `scripts/scan-project.py`, `scripts/scan_project_readme.py`, `scripts/scan_project_support.py` (optional: `scripts/scan-project.sh`) | `TRUTH` & `RESTRUCTURE` (required by `audit`, `improve`, and `rewrite`) |
+| `readme-crafter-skill` | `linhai0872/readme-crafter-skill` (`https://github.com/linhai0872/readme-crafter-skill`) | `SKILL.md`, `references/repo-integrity.md`, `scripts/scan-project.py`, `scripts/scan_project_readme.py`, `scripts/scan_project_support.py` | `TRUTH` & `RESTRUCTURE` (required by `audit`, `improve`, and `rewrite`) |
 | `writing-humanize` | `risadams/ink-and-agency` (`skills/writing-humanize/`, `https://github.com/risadams/ink-and-agency`) | `SKILL.md`, `references/patterns.md`, `agents/openai.yaml` | `LANGUAGE` (required by `improve` and `rewrite`) |
 
 ### Stop-on-Miss Install Instructions
@@ -198,8 +201,8 @@ as a finding with its `file:line` **receipt**. `LANGUAGE` never mutates a
 
 | Intensity tier | Selection condition | Scope |
 |---|---|---|
-| `lite` | The repository shows a verified human author voice (in commits, issues, or existing docs) or the user supplies an author writing sample. | Preserve the author's sentence rhythm, punctuation, contractions, and register. Flag or strip only clustered AI vocabulary, chatbot turn wrappers, and repeated **self-attestation**. |
-| `standard` | Default when no verified author voice or writing sample is present. | Apply `writing-humanize` plus `references/de-ai-language.md`: replace abstract-noun chains with concrete nouns, split overloaded sentences, recast defensive caveats into `fact + link`, and vary uniform sentence rhythm by moving words without filler. |
+| `lite` | The repository shows a verified human author voice (in commits, issues, or existing docs) or the user supplies an author writing sample. | Preserve the author's sentence rhythm, punctuation, contractions, and register. In `audit` mode (diagnose-only), flag only clustered AI vocabulary, chatbot turn wrappers, and repeated **self-attestation**; in future write modes (#6), strip only those tells. |
+| `standard` | Default when no verified author voice or writing sample is present. | In `audit` mode (diagnose-only), diagnose all prose tells in `references/de-ai-language.md` without invoking `writing-humanize` or modifying text; in future write modes (#6), apply `writing-humanize` plus `references/de-ai-language.md` (replace abstract-noun chains with concrete nouns, split overloaded sentences, recast defensive caveats into `fact + link`, and vary uniform sentence rhythm by moving words without filler). |
 
 **Hard guardrails (both intensity tiers):**
 
@@ -207,9 +210,9 @@ as a finding with its `file:line` **receipt**. `LANGUAGE` never mutates a
   first-person stories (`"I built this because..."`), casual banter, or
   unverified limitations / `"honest gaps"` lacking a repository **receipt**.
 - **Two `writing-humanize` suppressions (`UPSTREAM.md`):** Whenever
-  `writing-humanize` runs, suppress (1) **cross-run learnings journaling**
-  (`UPSTREAM.md` deviation #1: never write to `~/.ink-and-agency/` or outside
-  the target repository) and (2) **personality injection** (ignore
+  `writing-humanize` runs in future write modes (#6), suppress (1) **upstream
+  learnings journaling** (`UPSTREAM.md` deviation #1: no files may be written
+  outside `<repo-root>`) and (2) **personality injection** (ignore
   `writing-humanize` Step 5 / `PERSONALITY AND SOUL`).
 - **Read-only skill files:** Treat `SKILL.md`, `references/`, `scripts/`, and
   all resolved upstream skill directories as strictly read-only at runtime;
@@ -236,7 +239,10 @@ modifying any files.
      tracked in Ticket #6, §5), stop immediately as `BLOCKED` with zero file
      writes rather than attempting edits or silently downgrading.
    - Target path: `<readme>` (defaults to `<repo-root>/README.md`) and
-     `<repo-root>` (defaults to the parent directory of `<readme>`).
+     `<repo-root>` (resolved via `git -C "<readme-dir>" rev-parse --show-toplevel`
+     when `<readme>` is inside a Git worktree, or the parent directory of
+     `<readme>` when not in a Git worktree, so nested READMEs such as
+     `docs/README.md` still bind `<repo-root>` to the repository root).
    - Optional **repo-set mode**: enabled only when `--repo-set <manifest>` is
      passed; off by default.
 2. **Select intensity tier:**
@@ -281,9 +287,7 @@ are locked.
      ```
      (On Windows hosts where Python 3 is installed without a `python3` alias,
      use `python -s -E -B -X utf8 "<skills-root>/readme-crafter-skill/scripts/scan-project.py" "<repo-root>"`
-     or `py -3 -s -E -B -X utf8 "<skills-root>/readme-crafter-skill/scripts/scan-project.py" "<repo-root>"`.
-     Optional: also run `bash "<skills-root>/readme-crafter-skill/scripts/scan-project.sh" "<repo-root>"`
-     from the same trusted `<skills-root>` when `bash` is available.)
+     or `py -3 -s -E -B -X utf8 "<skills-root>/readme-crafter-skill/scripts/scan-project.py" "<repo-root>"`.)
    - **Scanner exit contract:** Treat exit `0` (clean or completed scan — the
      upstream `scan-project.py` prints `README INTEGRITY SIGNALS` and `README
      RISK SUMMARY` and returns `0`) and exit `1` when the scan report completes
@@ -305,9 +309,15 @@ are locked.
      (Published Package, Source-first Repository, Hybrid, or Product/Monorepo
      Hub) per `readme-crafter-skill`.
 3. **Check every README claim against repository receipts:**
+   - Because `scan-project.py` scans `<repo-root>`'s default root README,
+     always perform direct claim-by-claim and **freeze zone** verification on
+     the requested `<readme>` path (including nested or localized READMEs and
+     any companion localized README detected in `ROUTE`) against repository
+     `file:line` anchors — never treat `scan-project.py`'s root-README summary
+     alone as sufficient for a non-default `<readme>`.
    - Match each install command, CLI flag, environment variable, code import,
-     version requirement, badge, metric, and **freeze zone** span against
-     repository `file:line` anchors.
+     version requirement, badge, metric, and **freeze zone** span in `<readme>`
+     against repository `file:line` anchors.
    - Rank every truth defect by severity:
      - **`HIGH` (Contradicted claim):** `<readme>` states a fact, command, flag,
        export, path, or registry publication contradicted by the repository.
@@ -387,16 +397,17 @@ are modified.
 2. **Walk the binary verification checklist (`references/checklist.md`):**
    - Evaluate `references/checklist.md` §§1–8 against the probe **receipt** and
      the `TRUTH` / `RESTRUCTURE` findings.
-   - Confirm across the entire workspace (`git status --porcelain --ignored` and
-     file tree snapshot) that zero files were written, modified, or left
-     untracked in the target repository (and no `.bak`, `__pycache__/*.pyc`, or
-     out-of-repo files were created).
+   - Confirm across `<repo-root>` (comparing pre/post
+     `git --no-optional-locks -C "<repo-root>" status --porcelain --ignored` and
+     the `<repo-root>` file-tree snapshot) that zero files were written,
+     modified, or left untracked in the target repository (and no `.bak` or
+     `__pycache__/*.pyc` files were created in `<repo-root>`).
 3. **Emit the three-line delivery report (§4).**
 
 **Completion criterion:** `scripts/check-readme.py` has run, its stdout
 **receipt** and exit code are recorded, `references/checklist.md` items are
-evaluated, zero target writes are confirmed, and the three-line report is
-emitted.
+evaluated, zero target-repository (`<repo-root>`) writes are confirmed, and the
+three-line report is emitted.
 
 ---
 

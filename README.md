@@ -13,20 +13,24 @@ adapter (ADR-0002).
 
 ## What it does
 
-Five phases: ROUTE → TRUTH → RESTRUCTURE → LANGUAGE → VERIFY.
+Phase sequence by run mode:
 
-- **ROUTE** picks a mode (`audit` diagnoses only; `improve` edits
-  surgically; `rewrite` rebuilds) and honors `--dry-run` on all of them.
-- **TRUTH** checks each README claim against repo-native evidence —
-  manifest, CI config, entry points, real `--help` output. Contradicted
+- `audit` (implemented): `ROUTE → TRUTH → RESTRUCTURE → VERIFY` (diagnose-only)
+- `improve` / `rewrite` (future, tracked in #6): `ROUTE → TRUTH → RESTRUCTURE → LANGUAGE → VERIFY`
+
+- **ROUTE** locks the run parameters (`audit` diagnoses only; `improve` and
+  `rewrite` are tracked in #6 and rejected as `BLOCKED` until #6 lands).
+- **TRUTH** checks each README claim against repo-native receipts —
+  manifest, CI config, entry points, and scanner output. Contradicted
   claims become findings, not silent fixes; unverifiable claims are
   omitted or marked.
-- **RESTRUCTURE** keeps the README a front page: deep material moves to
-  `docs/` under a migration ledger, self-attestation converges to one
-  statement, generation traces are removed.
-- **LANGUAGE** runs upstream `writing-humanize` plus distilled
-  README-scoped rules, inside freeze zones and intensity tiers that stop
-  cleanup from corrupting facts or flattening a real voice.
+- **RESTRUCTURE** keeps the README a front page: in `audit` mode it diagnoses
+  deep material that belongs in `docs/`, repeated self-attestation, generation
+  traces, and prose tells; in future write modes (#6) it moves deep material to
+  `docs/` under a migration ledger.
+- **LANGUAGE** (future write modes, #6) runs upstream `writing-humanize` plus
+  distilled README-scoped rules, inside freeze zones and intensity tiers that
+  stop cleanup from corrupting facts or flattening a real voice.
 - **VERIFY** emits machine-checkable receipts from the static probe and
   a human checklist, and caps the delivery report at three lines:
   conclusion, receipts, residual risk.
@@ -64,13 +68,14 @@ non-canonical path and `writing-humanize` is not yet installed.
 Once installed, invoke the skill by name on a repository:
 
 - `audit` (implemented) — findings and priorities, touches nothing; supports
-  optional `--repo-set <manifest>` for cross-repository skeleton isomorphism.
+  optional `--repo-set <manifest>` for cross-repository skeleton isomorphism
+  (`--dry-run` is satisfied by default in `audit` mode).
 - `improve` (future, tracked in #6; rejected as `BLOCKED` until #6 lands) —
   surgical upgrade; `.bak` kept when git cannot roll back.
 - `rewrite` (future, tracked in #6; rejected as `BLOCKED` until #6 lands) —
   full rebuild for a README beyond repair.
-- Add `--dry-run` to any mode to see the plan before anything lands (`audit`
-  is read-only by default).
+- `--dry-run` is supported for `audit` now (read-only by default); write-mode
+  `--dry-run` plan output lands with `improve` and `rewrite` in #6.
 
 ## Layout
 
