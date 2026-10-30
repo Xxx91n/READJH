@@ -91,14 +91,12 @@ What a fresh machine needs so the contract resolves:
   and expose its root at the canonical name:
   ```cmd
   mkdir "%USERPROFILE%\.agents\repos" "%USERPROFILE%\.agents\skills" 2>nul
-  git clone https://github.com/linhai0872/readme-crafter-skill "%USERPROFILE%\.agents\repos\readme-crafter-skill"
-  git -C "%USERPROFILE%\.agents\repos\readme-crafter-skill" checkout 08db7782836c542d9b597860da33fcc159e36433
-  mklink /J "%USERPROFILE%\.agents\skills\readme-crafter-skill" "%USERPROFILE%\.agents\repos\readme-crafter-skill"
+  git clone https://github.com/linhai0872/readme-crafter-skill "%USERPROFILE%\.agents\repos\readme-crafter-skill" && git -C "%USERPROFILE%\.agents\repos\readme-crafter-skill" checkout 08db7782836c542d9b597860da33fcc159e36433 && mklink /J "%USERPROFILE%\.agents\skills\readme-crafter-skill" "%USERPROFILE%\.agents\repos\readme-crafter-skill"
   ```
   ```sh
-  mkdir -p "$HOME/.agents/repos" "$HOME/.agents/skills"
-  git clone https://github.com/linhai0872/readme-crafter-skill "$HOME/.agents/repos/readme-crafter-skill"
-  git -C "$HOME/.agents/repos/readme-crafter-skill" checkout 08db7782836c542d9b597860da33fcc159e36433
+  mkdir -p "$HOME/.agents/repos" "$HOME/.agents/skills" && \
+  git clone https://github.com/linhai0872/readme-crafter-skill "$HOME/.agents/repos/readme-crafter-skill" && \
+  git -C "$HOME/.agents/repos/readme-crafter-skill" checkout 08db7782836c542d9b597860da33fcc159e36433 && \
   ln -s "$HOME/.agents/repos/readme-crafter-skill" "$HOME/.agents/skills/readme-crafter-skill"
   ```
   On the authoring machine the tree already exists at a non-canonical path —
@@ -114,14 +112,12 @@ What a fresh machine needs so the contract resolves:
   directory at the canonical name:
   ```cmd
   mkdir "%USERPROFILE%\.agents\repos" "%USERPROFILE%\.agents\skills" 2>nul
-  git clone https://github.com/risadams/ink-and-agency "%USERPROFILE%\.agents\repos\ink-and-agency"
-  git -C "%USERPROFILE%\.agents\repos\ink-and-agency" checkout e1f0a00e06d55c00502e0ccbea79ab453e7fb118
-  mklink /J "%USERPROFILE%\.agents\skills\writing-humanize" "%USERPROFILE%\.agents\repos\ink-and-agency\skills\writing-humanize"
+  git clone https://github.com/risadams/ink-and-agency "%USERPROFILE%\.agents\repos\ink-and-agency" && git -C "%USERPROFILE%\.agents\repos\ink-and-agency" checkout e1f0a00e06d55c00502e0ccbea79ab453e7fb118 && mklink /J "%USERPROFILE%\.agents\skills\writing-humanize" "%USERPROFILE%\.agents\repos\ink-and-agency\skills\writing-humanize"
   ```
   ```sh
-  mkdir -p "$HOME/.agents/repos" "$HOME/.agents/skills"
-  git clone https://github.com/risadams/ink-and-agency "$HOME/.agents/repos/ink-and-agency"
-  git -C "$HOME/.agents/repos/ink-and-agency" checkout e1f0a00e06d55c00502e0ccbea79ab453e7fb118
+  mkdir -p "$HOME/.agents/repos" "$HOME/.agents/skills" && \
+  git clone https://github.com/risadams/ink-and-agency "$HOME/.agents/repos/ink-and-agency" && \
+  git -C "$HOME/.agents/repos/ink-and-agency" checkout e1f0a00e06d55c00502e0ccbea79ab453e7fb118 && \
   ln -s "$HOME/.agents/repos/ink-and-agency/skills/writing-humanize" "$HOME/.agents/skills/writing-humanize"
   ```
   Any equivalent copy of `skills/writing-humanize/` to
