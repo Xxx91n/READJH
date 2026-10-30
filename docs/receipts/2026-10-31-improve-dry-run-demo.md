@@ -30,7 +30,7 @@ baseline sha256: 3246796f40215ebc2d2ab6884e2f96e5a3c9f410a048ffa139077b70e46b859
     `scripts/scan-project.py`, `scripts/scan_project_readme.py`,
     `scripts/scan_project_support.py` — all present (5/5 OK).
   - `writing-humanize`: `SKILL.md`, `references/patterns.md`,
-    `agents/openai.yaml` — all present (3/5→3/3 OK); frontmatter `name: writing-humanize`.
+    `agents/openai.yaml` — all present (3/3 OK); frontmatter `name: writing-humanize`.
     Installed 2026-10-31 per `UPSTREAM.md` install action (clone
     `risadams/ink-and-agency` @ `e1f0a00e06d55c00502e0ccbea79ab453e7fb118`,
     junction to canonical name).
@@ -130,4 +130,4 @@ Baseline re-compare: sha256 unchanged (3246796f…), directory listing = [README
 - Freeze-zone enforced text in the phase — §3 Phase 4 step 2 (inline list + fail-VERIFY rule).
 - Migration ledger required in delivery report for `docs/` moves — §4 Report Rules.
 - Both suppressions in the invocation contract — §3 Phase 4 step 1 (deviation #1 journaling, #2 personality).
-- Demo: this document — plan produced, zero writes proven by SHA-256 match.
+- Demo: this document — plan produced, zero writes shown by SHA-256 match.

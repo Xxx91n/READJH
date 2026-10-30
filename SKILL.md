@@ -250,10 +250,12 @@ states each phase's behavior per mode.
      a Git worktree, so a nested `docs/README.md` binds to the repository root;
      (3) the parent directory of `<readme>`.
    - Git state: record whether `<repo-root>` is inside a Git worktree
-     (`git -C "<repo-root>" rev-parse --is-inside-work-tree` prints `true`)
-     and whether `<readme>` is tracked (`git -C "<repo-root>" ls-files --error-unmatch -- "<readme-relative-path>"`). This decides the
-     `.bak` rule (§3, `RESTRUCTURE` step 2) in write modes and the `VERIFY`
-     zero-write check.
+     (`git -C "<repo-root>" rev-parse --is-inside-work-tree` prints `true`),
+     whether `<readme>` is tracked (`git -C "<repo-root>" ls-files
+     --error-unmatch -- "<readme-relative-path>"`), and whether it is clean
+     (`git -C "<repo-root>" status --porcelain -- "<readme-relative-path>"`
+     prints nothing). This decides the `.bak` rule (§3, `RESTRUCTURE`
+     step 6) in write modes and the `VERIFY` zero-write check.
    - Optional **repo-set mode**: enabled only when `--repo-set <manifest>` is
      passed; off by default.
 2. **Select intensity tier:**
@@ -350,9 +352,10 @@ are locked.
        export, path, or registry publication contradicted by the repository.
        Record `<readme>:<line>` and the contradicting `<repo-file>:<line>`
        **receipt**. Never silently rewrite contradicted facts. In write modes,
-       every finding is resolved by editing `<readme>` to match its
-       `<repo-file>:<line>` **receipt** or by deleting the unbacked claim —
-       never by rewording the claim into an unfalsifiable one.
+       every finding is resolved during `RESTRUCTURE` (step 7) by correcting
+       `<readme>` to match its `<repo-file>:<line>` **receipt** or by deleting
+       the unbacked claim — never by rewording the claim into an
+       unfalsifiable one.
      - **`MEDIUM` (Unbacked claim):** `<readme>` states an empirical,
        performance, or capability claim (`references/de-ai-language.md` §5)
        with no repository **receipt**. Flag for deletion or `TODO`.
@@ -408,12 +411,15 @@ a `HIGH` / `MEDIUM` / `LOW` finding with zero README commands executed.
 
 6. **Enforce the `.bak` rollback rule (write modes, before the first file
    write; skipped on clean git):**
-   - When `<repo-root>` is inside a Git worktree **and** `<readme>` is tracked
-     (locked in `ROUTE` step 1), Git is the rollback path: skip the `.bak`
-     and record `"rollback: git (<tracked file>)"` in `[Receipts]`.
-   - Otherwise (non-Git `<repo-root>`, or `<readme>` untracked or ignored),
-     copy `<readme>` to `<readme>.bak` in the same directory **before** any
-     write and record `"rollback: <readme>.bak (git cannot restore)"` in
+   - When `<repo-root>` is inside a Git worktree, `<readme>` is tracked, and
+     `<readme>` is clean — no uncommitted changes (`git -C "<repo-root>"
+     status --porcelain -- "<readme-relative-path>"` prints nothing; state
+     locked in `ROUTE` step 1) — Git is the rollback path: skip the `.bak`
+     and record `"rollback: git (<tracked file>, clean)"` in `[Receipts]`.
+   - Otherwise — non-Git `<repo-root>`; `<readme>` untracked or ignored; or
+     `<readme>` tracked with uncommitted changes Git cannot restore — copy
+     `<readme>` to `<readme>.bak` in the same directory **before** any write
+     and record `"rollback: <readme>.bak (git cannot restore)"` in
      `[Receipts]`.
    - In `--dry-run`, never create the `.bak` — record which rollback path
      *would* apply instead.
@@ -436,7 +442,8 @@ a `HIGH` / `MEDIUM` / `LOW` finding with zero README commands executed.
    - Edits in this phase are structural only (move, delete, merge, reorder,
      placeholder headings for later wording): sentence-level wording is
      `LANGUAGE`'s job. No content is invented: every retained or rebuilt
-     claim keeps its `TRUTH` **receipt**, and unbacked claims are deleted,
+     claim keeps its `TRUTH` **receipt** — contradicted (`HIGH`) claims are
+     corrected to their receipts or deleted, unbacked claims are deleted,
      not embellished.
 
 **Completion criterion:** All structural, **self-attestation**, **generation
@@ -547,7 +554,7 @@ migrations here), and the intensity tier's scope was respected.
    - Repeat the `ROUTE` step 4 capture and compare it with the baseline:
      - `audit` and every `--dry-run` run: the file-tree snapshots must match
        exactly (same paths, same SHA-256 values; no new `.bak` or
-       `__pycache__/*.pyc` files), proving zero writes.
+       `__pycache__/*.pyc` files), confirming zero writes.
      - Git `<repo-root>` in `audit` / `--dry-run`: the two
        `git --no-optional-locks -C "<repo-root>" status --porcelain --ignored -- .`
        outputs must also match.
@@ -623,7 +630,7 @@ reply locked to **at most three lines**
 | `audit` | `ROUTE → TRUTH → RESTRUCTURE → VERIFY` | none | not run |
 | `improve` | `ROUTE → TRUTH → RESTRUCTURE → LANGUAGE → VERIFY` | planned structural + wording edits only | `writing-humanize` + distilled supplement rules (Phase 4) |
 | `rewrite` | `ROUTE → TRUTH → RESTRUCTURE → LANGUAGE → VERIFY` | full `<readme>` rebuild | `writing-humanize` + distilled supplement rules (Phase 4) |
-| `--dry-run` (modifier on any mode) | unchanged | none — plan and receipts only; no `.bak` | plan output only (Phase 4 step 5) |
+| `--dry-run` (modifier on any mode) | unchanged | none — plan and receipts only; no `.bak` | plan output only (write modes: Phase 4 step 5) |
 
 Write modes additionally require `writing-humanize` to resolve through the
 pointer contract before the first edit (`ROUTE` step 5); a miss stops the run
