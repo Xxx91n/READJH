@@ -49,9 +49,6 @@ BOUNDARY_PHRASES = [
     "免责声明",
     "仅供参考",
     "风险自负",
-    "不支持",
-    "暂不支持",
-    "局限性",
     "不保证",
     "非安全边界",
     "合规说明",
@@ -210,7 +207,7 @@ def check_code_fences(content: str) -> List[Finding]:
 
 
 def _resolve_local_path(target: str, readme_dir: Path, repo_root: Path) -> Optional[Path]:
-    """Resolve and verify existence of a local target path against readme_dir or repo_root."""
+    """Resolve and verify existence of a local target path against readme_dir or repo_root, ensuring containment."""
     raw = target.strip()
     if not raw:
         return None
@@ -229,15 +226,20 @@ def _resolve_local_path(target: str, readme_dir: Path, repo_root: Path) -> Optio
 
     is_root_relative = clean.startswith("/")
     decoded = urllib.parse.unquote(clean.lstrip("/"))
-    if not decoded:
+    if not decoded and not is_root_relative:
         return None
 
-    if is_root_relative:
-        p_repo = (repo_root / decoded).resolve()
-        return p_repo if p_repo.exists() else None
-    else:
-        p_readme = (readme_dir / decoded).resolve()
-        return p_readme if p_readme.exists() else None
+    p_root = repo_root.resolve()
+    p_base = p_root if is_root_relative else readme_dir.resolve()
+    p_resolved = (p_base / decoded).resolve() if decoded else p_root
+
+    # Containment check: path must be strictly contained within repo_root
+    try:
+        p_resolved.relative_to(p_root)
+    except ValueError:
+        return None
+
+    return p_resolved if p_resolved.exists() else None
 
 
 def extract_all_link_targets(line: str) -> List[str]:
@@ -266,10 +268,12 @@ def check_dead_links(content: str, readme_path: Path, repo_root: Path) -> List[F
         for target in targets:
             if not target:
                 continue
+            clean_target = target.strip()
+            if clean_target.startswith("<") and clean_target.endswith(">"):
+                clean_target = clean_target[1:-1].strip()
+
             # Ignore external schemes or anchor-only links
-            if target.startswith(("#", "http://", "https://", "mailto:", "data:", "ftp:", "javascript:", "tel:")):
-                continue
-            if target.startswith("<") and any(target[1:].startswith(s) for s in ("http://", "https://", "mailto:", "ftp:")):
+            if clean_target.startswith(("#", "http://", "https://", "mailto:", "data:", "ftp:", "javascript:", "tel:")):
                 continue
 
             resolved = _resolve_local_path(target, readme_dir, repo_root)
@@ -313,9 +317,11 @@ def check_missing_images(content: str, readme_path: Path, repo_root: Path) -> Li
         for src in sources:
             if not src:
                 continue
-            if src.startswith(("http://", "https://", "data:")):
-                continue
-            if src.startswith("<") and any(src[1:].startswith(s) for s in ("http://", "https://", "data:")):
+            clean_src = src.strip()
+            if clean_src.startswith("<") and clean_src.endswith(">"):
+                clean_src = clean_src[1:-1].strip()
+
+            if clean_src.startswith(("http://", "https://", "data:")):
                 continue
 
             resolved = _resolve_local_path(src, readme_dir, repo_root)
@@ -354,7 +360,13 @@ def check_badge_domains(content: str) -> List[Finding]:
         for m in standalone_badge_md_re.finditer(line):
             badge_urls.append(m.group(2).strip())
 
-        for url in badge_urls:
+        for raw_url in badge_urls:
+            url = raw_url.strip()
+            if url.startswith("<") and url.endswith(">"):
+                url = url[1:-1].strip()
+            if not url:
+                continue
+
             # Check for placeholder patterns
             for pat in PLACEHOLDER_DOMAIN_PATTERNS:
                 if re.search(pat, url, re.IGNORECASE):
@@ -362,7 +374,7 @@ def check_badge_domains(content: str) -> List[Finding]:
                         Finding(
                             check_name="badge-domains",
                             line=line_idx,
-                            message=f"Badge URL '{url}' contains invalid or placeholder domain",
+                            message=f"Badge URL '{raw_url}' contains invalid or placeholder domain",
                         )
                     )
                     break
@@ -376,7 +388,7 @@ def check_badge_domains(content: str) -> List[Finding]:
                             Finding(
                                 check_name="badge-domains",
                                 line=line_idx,
-                                message=f"Badge URL '{url}' has malformed or unresolvable host '{host}'",
+                                message=f"Badge URL '{raw_url}' has malformed or unresolvable host '{host}'",
                             )
                         )
     return findings
@@ -533,12 +545,17 @@ def check_repo_set(
 
     # Resolve README skeletons
     resolved_readmes: List[RepoSkeleton] = []
+    seen_paths = set()
     for entry in entries:
         readme_candidate = entry if entry.is_file() else entry / "README.md"
         if readme_candidate.is_file():
+            res_path = readme_candidate.resolve()
+            if res_path in seen_paths:
+                continue
+            seen_paths.add(res_path)
             label = entry.parent.name if entry.is_file() else entry.name
-            headings = extract_headings(readme_candidate.read_text(encoding="utf-8", errors="ignore"))
-            resolved_readmes.append(RepoSkeleton(label=label, path=readme_candidate, headings=headings))
+            headings = extract_headings(res_path.read_text(encoding="utf-8", errors="ignore"))
+            resolved_readmes.append(RepoSkeleton(label=label, path=res_path, headings=headings))
         else:
             findings.append(
                 Finding(check_name="repo-set", message=f"Manifest entry has no README: {entry}")
@@ -547,7 +564,8 @@ def check_repo_set(
     # Include target CLI README if not already in manifest
     if current_readme and current_readme.is_file():
         cur_res = current_readme.resolve()
-        if cur_res not in [skeleton.path for skeleton in resolved_readmes]:
+        if cur_res not in seen_paths:
+            seen_paths.add(cur_res)
             cur_label = cur_res.parent.name
             headings = extract_headings(cur_res.read_text(encoding="utf-8", errors="ignore"))
             resolved_readmes.insert(0, RepoSkeleton(label=cur_label, path=cur_res, headings=headings))
@@ -652,6 +670,11 @@ def run_checks(readme_path: Path, repo_root: Path, repo_set_manifest: Optional[P
 
 
 def main() -> int:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+    if hasattr(sys.stderr, "reconfigure"):
+        sys.stderr.reconfigure(encoding="utf-8")
+
     parser = argparse.ArgumentParser(
         description="check-readme.py — stdlib-only python3 static probe for README governance."
     )

@@ -159,6 +159,30 @@ class TestCheck1DeadLinks(unittest.TestCase):
             self.assertIn("[dead-links]", out)
             self.assertIn("root_only.md", out)
 
+    def test_path_traversal_outside_repo_root_detected(self):
+        """Verify that a link attempting directory traversal outside the repo root is rejected."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text("# Test\n\n[Outside](..)\n\n## Limitations\nNone.\n", encoding="utf-8")
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertNotEqual(code, 0)
+            self.assertIn("dead-links", out)
+            self.assertIn("..", out)
+
+    def test_angle_bracket_anchor_link_not_flagged(self):
+        """Verify that angle-bracket anchor links <#section> are ignored and not flagged as dead links."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text("# Test\n\n[Section](<#limitations>)\n\n## Limitations\nNone.\n", encoding="utf-8")
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertEqual(code, 0)
+            self.assertNotIn("Dead local link", out)
+            self.assertIn("- dead-links: PASS", out)
+
 
 class TestCheck2MissingImages(unittest.TestCase):
     """Check 2: missing image paths."""
@@ -207,6 +231,21 @@ class TestCheck4BadgeDomainSanity(unittest.TestCase):
         self.assertNotEqual(code, 0, "Expected non-zero exit for badge placeholder domain")
         self.assertIn("badge-domains", out)
         self.assertTrue("todo" in out.lower() or "username" in out.lower() or "placeholder" in out.lower())
+
+    def test_angle_bracket_placeholder_badge_detected(self):
+        """Verify that placeholder badge URLs enclosed in angle brackets are properly detected."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# Test\n\n[![Status](<https://example.com/badge.svg>)](<https://example.com>)\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertNotEqual(code, 0)
+            self.assertIn("badge-domains", out)
+            self.assertIn("example.com", out)
 
 
 class TestCheck5BoundaryDuplicates(unittest.TestCase):
@@ -299,6 +338,23 @@ class TestCheck7RepoSetSkeletonDiff(unittest.TestCase):
             self.assertNotEqual(code, 0)
             self.assertIn("repo-set", out)
             self.assertIn("has no README", out)
+
+    def test_manifest_duplicate_entries_deduplicated(self):
+        """Verify that duplicate entries in manifest do not trigger self-comparison false positives."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            td_path = Path(td)
+            man = td_path / "dup_manifest.txt"
+            div_c = str(FIXTURES_DIR / "repo_set" / "repo_div_c" / "README.md")
+            iso_a = str(FIXTURES_DIR / "repo_set" / "repo_iso_a" / "README.md")
+            # Write duplicate paths
+            man.write_text(f"{div_c}\n{div_c}\n{iso_a}\n", encoding="utf-8")
+            target = FIXTURES_DIR / "clean" / "README.md"
+            code, out, err = run_probe(str(target), "--repo-set", str(man))
+            # Clean + div_c + iso_a are divergent, duplicates should be filtered out
+            self.assertEqual(code, 0)
+            self.assertNotIn("isomorphic", out.lower())
+            self.assertIn("analysis (3 repos)", out)
 
 
 class TestStdlibOnly(unittest.TestCase):
