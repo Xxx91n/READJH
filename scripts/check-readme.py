@@ -211,7 +211,18 @@ def check_code_fences(content: str) -> List[Finding]:
 
 def _resolve_local_path(target: str, readme_dir: Path, repo_root: Path) -> Optional[Path]:
     """Resolve and verify existence of a local target path against repo_root or readme_dir."""
-    clean = target.split("#", 1)[0].split("?", 1)[0].strip()
+    raw = target.strip()
+    if not raw:
+        return None
+    if raw.startswith("<") and ">" in raw:
+        clean = raw[1:raw.find(">")]
+    else:
+        title = re.match(
+            r"""^(\S+)\s+(?:"(?:\\.|[^"])*"|'(?:\\.|[^'])*'|\((?:\\.|[^)])*\))\s*$""",
+            raw,
+        )
+        clean = title.group(1) if title else raw
+    clean = urllib.parse.unquote(clean.split("#", 1)[0].split("?", 1)[0]).lstrip("/")
     if not clean:
         return None
     p_repo = (repo_root / clean).resolve()
@@ -227,7 +238,7 @@ def extract_all_link_targets(line: str) -> List[str]:
     """Extract link targets from markdown links (including nested badge links) and HTML <a> tags."""
     targets = []
     # Nested markdown link regex: matches [text](target), allowing nested [alt](img) in text
-    md_link_re = re.compile(r"\[((?:[^\[\]]|\[[^\[\]]*\])*)\]\(([^)]+)\)")
+    md_link_re = re.compile(r"(?<!!)\[((?:[^\[\]]|\[[^\[\]]*\])*)\]\(([^)]+)\)")
     html_link_re = re.compile(r"""<a\s+[^>]*?href=["']([^"']+)["']""", re.IGNORECASE)
 
     for m in md_link_re.finditer(line):
@@ -511,6 +522,10 @@ def check_repo_set(
             label = entry.parent.name if entry.is_file() else entry.name
             headings = extract_headings(readme_candidate.read_text(encoding="utf-8", errors="ignore"))
             resolved_readmes.append(RepoSkeleton(label=label, path=readme_candidate, headings=headings))
+        else:
+            findings.append(
+                Finding(check_name="repo-set", message=f"Manifest entry has no README: {entry}")
+            )
 
     # Include target CLI README if not already in manifest
     if current_readme and current_readme.is_file():
@@ -642,7 +657,14 @@ def main() -> int:
         print(f"Error: README file '{readme_path}' does not exist.", file=sys.stderr)
         return 2
 
+    if repo_set_manifest and not repo_set_manifest.is_file():
+        print(f"Error: Manifest file '{repo_set_manifest}' does not exist.", file=sys.stderr)
+        return 2
+
     report = run_checks(readme_path, repo_root, repo_set_manifest)
+
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
 
     print(f"[check-readme] Target: {report.readme_path.name} (repo root: {report.repo_root})")
     if report.skeleton_info:

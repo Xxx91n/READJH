@@ -54,6 +54,12 @@ class TestCheckReadmeCLI(unittest.TestCase):
         code, out, err = run_probe("nonexistent_readme_path_12345.md")
         self.assertNotEqual(code, 0)
 
+    def test_nonexistent_manifest_returns_exit_2(self):
+        clean_readme = FIXTURES_DIR / "clean" / "README.md"
+        code, out, err = run_probe(str(clean_readme), "--repo-set", "nonexistent_manifest_12345.txt")
+        self.assertEqual(code, 2)
+        self.assertIn("does not exist", err.lower())
+
 
 class TestCleanFixture(unittest.TestCase):
     """Test that clean fixtures pass with exit 0 and zero findings."""
@@ -85,6 +91,22 @@ class TestCheck1DeadLinks(unittest.TestCase):
         self.assertNotEqual(code, 0, "Expected non-zero exit for dead local link")
         self.assertIn("dead-links", out)
         self.assertIn("docs/nonexistent.md", out)
+
+    def test_link_with_title_and_standalone_image(self):
+        """Verify links with titles resolve, and standalone images do not trigger dead-links."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            td_path = Path(td)
+            (td_path / "doc.md").write_text("# Doc\n", encoding="utf-8")
+            rm = td_path / "README.md"
+            rm.write_text(
+                '# Title\n\n[Doc](doc.md "Document Title")\n\n![Image](missing.png)\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(td_path))
+            self.assertNotEqual(code, 0)
+            self.assertIn("[missing-images]", out)
+            self.assertNotIn("[dead-links]", out)
 
     def test_badge_dead_link_target_detected(self):
         """Verify that [![Badge](img)](dead_local.md) is detected as a dead link."""
@@ -213,6 +235,19 @@ class TestCheck7RepoSetSkeletonDiff(unittest.TestCase):
             self.assertNotEqual(code, 0)
             self.assertIn("isomorphic", out.lower())
             self.assertIn("analysis (2 repos)", out)
+
+    def test_unresolved_manifest_entry_reported(self):
+        """Verify that manifest entries without a README produce a finding."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            td_path = Path(td)
+            man = td_path / "bad_manifest.txt"
+            man.write_text("nonexistent_repo_dir\n" + str(FIXTURES_DIR / "repo_set" / "repo_iso_a" / "README.md") + "\n", encoding="utf-8")
+            target = FIXTURES_DIR / "repo_set" / "repo_iso_a" / "README.md"
+            code, out, err = run_probe(str(target), "--repo-set", str(man))
+            self.assertNotEqual(code, 0)
+            self.assertIn("repo-set", out)
+            self.assertIn("has no README", out)
 
 
 class TestStdlibOnly(unittest.TestCase):
