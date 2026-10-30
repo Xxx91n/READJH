@@ -1,11 +1,13 @@
 ---
 name: readjh
 description: >
-  Orchestrates diagnose-only repository README governance audits with truth
-  checks, front-page boundary and structure diagnosis, self-attestation and
-  generation-trace detection, and static probe verification. Use when asked to
-  audit, critique, review, or verify a README, or to check cross-repository
-  README skeleton isomorphism with --repo-set.
+  Orchestrates repository README governance in three modes — diagnose-only
+  audit, surgical improve, and full rewrite rebuild — with truth checks,
+  front-page boundary and structure diagnosis, self-attestation and
+  generation-trace detection, writing-humanize language passes with distilled
+  supplement rules, and static probe verification. Use when asked to audit,
+  critique, review, verify, improve, rewrite, de-AI, or humanize a README, or
+  to check cross-repository README skeleton isomorphism with --repo-set.
 license: MIT
 ---
 
@@ -22,8 +24,9 @@ closes every run with machine **receipts** from `scripts/check-readme.py` plus
 The phase sequence depends on the run mode:
 
 ```text
-audit:                      ROUTE → TRUTH → RESTRUCTURE → VERIFY
-improve / rewrite (future): ROUTE → TRUTH → RESTRUCTURE → LANGUAGE → VERIFY
+audit:            ROUTE → TRUTH → RESTRUCTURE → VERIFY
+improve:          ROUTE → TRUTH → RESTRUCTURE → LANGUAGE → VERIFY
+rewrite:          ROUTE → TRUTH → RESTRUCTURE → LANGUAGE → VERIFY
 ```
 
 Deletion and migration always precede wording changes.
@@ -197,8 +200,8 @@ as a finding with its `file:line` **receipt**. `LANGUAGE` never mutates a
 
 | Intensity tier | Selection condition | Scope |
 |---|---|---|
-| `lite` | The repository shows a verified human author voice (in commits, issues, or existing docs) or the user supplies an author writing sample. | Preserve the author's sentence rhythm, punctuation, contractions, and register. In `audit` mode (diagnose-only), flag only clustered AI vocabulary, chatbot turn wrappers, and repeated **self-attestation**; in future write modes (#6), strip only those tells. |
-| `standard` | Default when no verified author voice or writing sample is present. | In `audit` mode (diagnose-only), diagnose all prose tells in `references/de-ai-language.md` without invoking `writing-humanize` or modifying text; in future write modes (#6), apply `writing-humanize` plus `references/de-ai-language.md` (replace abstract-noun chains with concrete nouns, split overloaded sentences, recast defensive caveats into `fact + link`, and vary uniform sentence rhythm by moving words without filler). |
+| `lite` | The repository shows a verified human author voice (in commits, issues, or existing docs) or the user supplies an author writing sample. | Preserve the author's sentence rhythm, punctuation, contractions, and register. In `audit` mode (diagnose-only), flag only clustered AI vocabulary, chatbot turn wrappers, and repeated **self-attestation**; in `improve` and `rewrite`, strip only those tells at `LANGUAGE`. |
+| `standard` | Default when no verified author voice or writing sample is present. | In `audit` mode (diagnose-only), diagnose all prose tells in `references/de-ai-language.md` without invoking `writing-humanize` or modifying text; in `improve` and `rewrite`, apply `writing-humanize` plus `references/de-ai-language.md` at `LANGUAGE` (replace abstract-noun chains with concrete nouns, split overloaded sentences, recast defensive caveats into `fact + link`, and vary uniform sentence rhythm by moving words without filler). |
 
 **Hard guardrails (both intensity tiers):**
 
@@ -206,7 +209,7 @@ as a finding with its `file:line` **receipt**. `LANGUAGE` never mutates a
   first-person stories (`"I built this because..."`), casual banter, or
   unverified limitations / `"honest gaps"` lacking a repository **receipt**.
 - **Two `writing-humanize` suppressions (`UPSTREAM.md`):** Whenever
-  `writing-humanize` runs in future write modes (#6), suppress (1) **upstream
+  `writing-humanize` runs at `LANGUAGE` in `improve` or `rewrite`, suppress (1) **upstream
   learnings journaling** (`UPSTREAM.md` deviation #1: no files may be written
   outside `<repo-root>`) and (2) **personality injection** (ignore
   `writing-humanize` Step 5 / `PERSONALITY AND SOUL`).
@@ -222,26 +225,34 @@ as a finding with its `file:line` **receipt**. `LANGUAGE` never mutates a
 
 ---
 
-## 3. Audit-Mode Spine (`ROUTE → TRUTH → RESTRUCTURE → VERIFY`)
+## 3. Run Spine (All Modes: `ROUTE → TRUTH → RESTRUCTURE` [+ `LANGUAGE`] `→ VERIFY`)
 
-In `audit` mode, READJH diagnoses and ranks README defects without writing or
-modifying any files.
+In `audit` mode READJH diagnoses and ranks README defects without writing or
+modifying any files. In `improve` mode it surgically upgrades the existing
+README (structure and voice preserved where sound); in `rewrite` mode it
+rebuilds the README end to end. Both write modes pass through `LANGUAGE`
+(Phase 4) and land their edits between `RESTRUCTURE` and `VERIFY`. The spine below
+states each phase's behavior per mode.
 
 ### Phase 1: `ROUTE`
 
 1. **Lock run parameters:**
-   - Run mode: `audit` (zero writes; `--dry-run` is satisfied by default). If a
-     caller requests an unimplemented write mode (`improve` or `rewrite`,
-     tracked in Ticket #6, §5), stop immediately as `BLOCKED` with zero file
-     writes rather than attempting edits or silently downgrading.
+   - Run mode: `audit` (diagnose-only, zero writes), `improve` (surgical
+     upgrade of the existing README), or `rewrite` (full rebuild of
+     `<readme>` from repository receipts). `--dry-run` is a modifier valid on
+     every mode: produce the plan and receipts with zero file writes — no
+     edits, no `docs/` migration, no `.bak` (§3, `RESTRUCTURE` steps 6–7;
+     wording plan only, Phase 4 step 5). `audit` implies
+     zero writes, so `--dry-run` is satisfied by default there.
    - Target path: `<readme>` (defaults to `<repo-root>/README.md`). `<repo-root>`
      is resolved in this order: (1) the caller's explicit `--repo-root`; (2)
      `git -C "<readme-dir>" rev-parse --show-toplevel` when `<readme>` is inside
      a Git worktree, so a nested `docs/README.md` binds to the repository root;
      (3) the parent directory of `<readme>`.
    - Git state: record whether `<repo-root>` is inside a Git worktree
-     (`git -C "<repo-root>" rev-parse --is-inside-work-tree` prints `true`).
-     A non-Git `<repo-root>` is supported; it only changes the `VERIFY`
+     (`git -C "<repo-root>" rev-parse --is-inside-work-tree` prints `true`)
+     and whether `<readme>` is tracked (`git -C "<repo-root>" ls-files --error-unmatch -- "<readme-relative-path>"`). This decides the
+     `.bak` rule (§3, `RESTRUCTURE` step 2) in write modes and the `VERIFY`
      zero-write check.
    - Optional **repo-set mode**: enabled only when `--repo-set <manifest>` is
      passed; off by default.
@@ -271,11 +282,21 @@ modifying any files.
      and compare it with the baseline, then emit the §4 `BLOCKED` report with
      the missing or untrusted path and the snapshot comparison in `[Receipts]`
      and the §1 install commands in `[Residual risk]`.
+   - **Write modes (`improve`, `rewrite`) only:** in the same step, also
+     resolve `writing-humanize` by canonical name at a trusted root, with the
+     required-files check (`SKILL.md`, `references/patterns.md`,
+     `agents/openai.yaml`) and the same project-local trust gate (§1). A miss
+     stops the run as `BLOCKED` with zero file writes and the §1 install
+     commands — the run never reaches `RESTRUCTURE` or `LANGUAGE` with a
+     half-resolved `LANGUAGE` dependency.
 
-**Completion criterion:** Run mode (`audit`), `<readme>`, `<repo-root>`, Git
-state, **intensity tier** (`lite` | `standard`), **repo-set mode** state, the
-zero-write baseline, and trusted verified paths to
+**Completion criterion:** Run mode (`audit` | `improve` | `rewrite`, plus
+`--dry-run` state), `<readme>`, `<repo-root>`, Git state (worktree and
+`<readme>` tracking), **intensity tier** (`lite` | `standard`), **repo-set
+mode** state, the zero-write baseline, and trusted verified paths to
 `readme-crafter-skill/{SKILL.md,references/repo-integrity.md,scripts/scan-project.py,scripts/scan_project_readme.py,scripts/scan_project_support.py}`
+— and, in `improve` / `rewrite`,
+`writing-humanize/{SKILL.md,references/patterns.md,agents/openai.yaml}` —
 are locked.
 
 ### Phase 2: `TRUTH`
@@ -328,7 +349,10 @@ are locked.
      - **`HIGH` (Contradicted claim):** `<readme>` states a fact, command, flag,
        export, path, or registry publication contradicted by the repository.
        Record `<readme>:<line>` and the contradicting `<repo-file>:<line>`
-       **receipt**. Never silently rewrite contradicted facts.
+       **receipt**. Never silently rewrite contradicted facts. In write modes,
+       every finding is resolved by editing `<readme>` to match its
+       `<repo-file>:<line>` **receipt** or by deleting the unbacked claim —
+       never by rewording the claim into an unfalsifiable one.
      - **`MEDIUM` (Unbacked claim):** `<readme>` states an empirical,
        performance, or capability claim (`references/de-ai-language.md` §5)
        with no repository **receipt**. Flag for deletion or `TODO`.
@@ -340,7 +364,7 @@ findings recorded in `[Receipts]`), and every factual claim and **freeze zone**
 span in `<readme>` is matched to a `<repo-file>:<line>` **receipt** or logged as
 a `HIGH` / `MEDIUM` / `LOW` finding with zero README commands executed.
 
-### Phase 3: `RESTRUCTURE` (Diagnose-Only in `audit` Mode)
+### Phase 3: `RESTRUCTURE` (Diagnose-Only in `audit`; Structural Edits in `improve` / `rewrite`)
 
 1. **Load orchestration and distilled rule files:**
    - Read `references/readme-rules.md` (§§1–5) and
@@ -378,12 +402,126 @@ a `HIGH` / `MEDIUM` / `LOW` finding with zero README commands executed.
        `-ing` clauses, uniform sentence runs (3+ near-equal sentences), and
        Chinese (`zh`) calibration tells.
 
+   In `improve` and `rewrite`, steps 1–5 are the diagnosis that feeds the edit
+   plan: every finding becomes a planned edit, and the checks run identically
+   — only the write behavior below differs.
+
+6. **Enforce the `.bak` rollback rule (write modes, before the first file
+   write; skipped on clean git):**
+   - When `<repo-root>` is inside a Git worktree **and** `<readme>` is tracked
+     (locked in `ROUTE` step 1), Git is the rollback path: skip the `.bak`
+     and record `"rollback: git (<tracked file>)"` in `[Receipts]`.
+   - Otherwise (non-Git `<repo-root>`, or `<readme>` untracked or ignored),
+     copy `<readme>` to `<readme>.bak` in the same directory **before** any
+     write and record `"rollback: <readme>.bak (git cannot restore)"` in
+     `[Receipts]`.
+   - In `--dry-run`, never create the `.bak` — record which rollback path
+     *would* apply instead.
+7. **Execute structural edits (write modes; `--dry-run` lists them as the
+   plan instead of executing):**
+   - Migrate over-complete material to `docs/` per the `RESTRUCTURE`
+     diagnosis (`references/readme-rules.md` §4.1): `source heading
+     (lines X–Y) → docs/<file>.md`. Moved spans are relocated verbatim —
+     including their **freeze zone** spans — and every move is appended to
+     the migration ledger (§4) in the same step; a move without a ledger
+     entry fails `VERIFY`. Deletion and migration always precede wording
+     changes, so `LANGUAGE` (Phase 4) never performs migrations.
+   - Converge **self-attestation** repeats to one statement or a link and
+     remove **generation traces** (`references/readme-rules.md` §2, §3).
+   - `improve`: reorder and trim the existing skeleton to the repository's
+     Project Type and Distribution Posture, preserving sound structure and
+     voice. `rewrite`: produce the full replacement README from repository
+     receipts, following the same skeleton rules — the previous README is
+     replaced, not incrementally patched.
+   - Edits in this phase are structural only (move, delete, merge, reorder,
+     placeholder headings for later wording): sentence-level wording is
+     `LANGUAGE`'s job. No content is invented: every retained or rebuilt
+     claim keeps its `TRUTH` **receipt**, and unbacked claims are deleted,
+     not embellished.
+
 **Completion criterion:** All structural, **self-attestation**, **generation
 trace**, **skeleton isomorphism**, and language findings are logged with
-severity (`HIGH` / `MEDIUM` / `LOW`) and `<readme>:<line>` anchors; zero files
-are modified.
+severity (`HIGH` / `MEDIUM` / `LOW`) and `<readme>:<line>` anchors. In `audit`
+mode, zero files are modified. In write modes, only the planned structural
+edits have landed (or, in `--dry-run`, nothing has), every `docs/` move has a
+migration ledger entry, the `.bak` rule has fired or been recorded as skipped,
+and no sentence-level wording has been changed yet.
 
-### Phase 4: `VERIFY`
+### Phase 4: `LANGUAGE` (`improve` and `rewrite` Only)
+
+`LANGUAGE` performs sentence-level wording edits on the post-`RESTRUCTURE`
+README and its companion localized README (in lockstep). `audit` mode never
+reaches this phase; `--dry-run` runs it as plan output only (step 5).
+
+1. **Invocation contract (`writing-humanize` via the pointer contract):**
+   - **Trusted input only:** read `writing-humanize/SKILL.md` and
+     `writing-humanize/references/patterns.md` from the trusted
+     `<skills-root>` locked in `ROUTE` — never from an unauthorized
+     project-local directory (§1 trust gate; `agents/openai.yaml` was
+     verified there too). Apply `writing-humanize` to the README prose only;
+     it never gains write access beyond the planned edit set on `<readme>`
+     and its companion README.
+   - **Supplement rules, read into context and never invoked as skills:**
+     `references/de-ai-language.md` (§§1–6; §3 additionally when `<readme>`
+     contains Chinese text) and `references/readme-rules.md` (§§1–5). These
+     distilled rules supplement `writing-humanize` and, where stricter,
+     override its defaults. `humanize-readme` contributes distilled rules
+     only (`references/de-ai-language.md` §6) and is never executed.
+   - **Suppression 1 — self-evolve journaling (`UPSTREAM.md` deviation #1):**
+     ignore `writing-humanize`'s Self-Evolve Loop. A READJH run never writes
+     files outside `<repo-root>` — no `~/.ink-and-agency/learnings/` journal
+     and no `.ink-and-agency/` state directory, anywhere.
+   - **Suppression 2 — personality injection (`UPSTREAM.md` deviation #2):**
+     ignore `writing-humanize` Step 5 (`PERSONALITY AND SOUL`). Direct,
+     specific, plain language is the target voice; no personality, honest
+     gaps, or first-person stories are invented (§2 hard guardrails, both
+     intensity tiers).
+2. **Freeze-zone enforcement (in-phase rule text):** The following spans must
+   leave `LANGUAGE` **byte-for-byte identical** — no altering, rewording,
+   reformatting, or deleting by `writing-humanize` or the distilled rules
+   (full table with examples: `references/readme-rules.md` §1):
+   1. Fenced code blocks, inline commands, CLI flags, and environment
+      variable names.
+   2. URLs, file paths, markdown link targets, query strings, and anchors.
+   3. Version strings, commit hashes, benchmark numbers, and error or exit
+      codes.
+   4. Markdown and HTML badge rows and their target URLs.
+   5. Legal, license, `NOTICE`, security-boundary, and compliance text.
+   6. Direct quotations and command transcripts inside `"..."` or `「...」`.
+
+   Any edit that mutates a freeze-zone span fails `VERIFY` and must be
+   reverted before delivery. A freeze-zone span that *should* change is a
+   `TRUTH` finding (Phase 2), resolved as a receipt-backed edit — never as
+   free wording.
+3. **Wording pass by intensity tier (§2):**
+   - `lite`: strip only clustered AI vocabulary, chatbot turn wrappers, and
+     repeated **self-attestation**; preserve the author's sentence-length
+     habits, punctuation, contractions, and register
+     (`references/de-ai-language.md` §2.5 whitelist).
+   - `standard`: apply the full `writing-humanize` catalog plus
+     `references/de-ai-language.md` — collapse abstract-noun chains into
+     concrete referents, split clause-stacked sentences, recast defensive
+     caveats as `fact + link`, and vary uniform sentence rhythm by moving
+     words, never by adding filler; apply §3 zh calibration to Chinese prose.
+   - Bilingual lockstep: identical structural and wording decisions are
+     applied to the companion localized README with section structure kept
+     aligned; no second-language README is created unless requested.
+4. **No-additions rule:** `LANGUAGE` never adds sentences, sections, claims,
+   examples, or personality. Edits move, merge, split, replace, or delete
+   existing prose; any new sentence would need a `TRUTH` **receipt**, which
+   is a `RESTRUCTURE` decision, not a wording one.
+5. **`--dry-run`:** produce the wording plan instead of edits: per span, the
+   anchor (`<readme>:<line-range>`), the tier-allowed transform, and the
+   intended before → after shape, recorded in `[Receipts]`. No file is
+   touched, no `.bak` is created, and the `VERIFY` baseline comparison must
+   come back clean.
+
+**Completion criterion:** All applied edits (or, in `--dry-run`, all planned
+edits) are confined to non-freeze-zone prose, both `writing-humanize`
+suppressions were held, the migration ledger is unchanged by this phase (no
+migrations here), and the intensity tier's scope was respected.
+
+### Phase 5: `VERIFY`
 
 1. **Run the static probe (`scripts/check-readme.py`):**
    - Execute with `-B` (no bytecode writes) and quoted filesystem paths (using
@@ -407,28 +545,37 @@ are modified.
    - Evaluate `references/checklist.md` §§1–8 against the probe **receipt** and
      the `TRUTH` / `RESTRUCTURE` findings.
    - Repeat the `ROUTE` step 4 capture and compare it with the baseline:
-     - Every `<repo-root>`: the file-tree snapshots must match (same paths,
-       same SHA-256 values; no new `.bak` or `__pycache__/*.pyc` files).
-     - Git `<repo-root>` only: the two
+     - `audit` and every `--dry-run` run: the file-tree snapshots must match
+       exactly (same paths, same SHA-256 values; no new `.bak` or
+       `__pycache__/*.pyc` files), proving zero writes.
+     - Git `<repo-root>` in `audit` / `--dry-run`: the two
        `git --no-optional-locks -C "<repo-root>" status --porcelain --ignored -- .`
        outputs must also match.
      - Non-Git `<repo-root>`: the file-tree comparison is the whole receipt.
        Do not run `git status` there, and do not treat the missing Git
        repository as an audit failure.
+     - Write modes without `--dry-run`: every difference must belong to the
+       intended write set — the edited `<readme>` (and its companion
+       localized README), new `docs/` destination files each recorded in the
+       migration ledger, and the `<readme>.bak` when the `.bak` rule fired
+       (§3, `RESTRUCTURE` step 6). Any other new, modified, or deleted file
+       fails `VERIFY` and must be reverted before delivery.
 3. **Emit the three-line delivery report (§4).**
 
 **Completion criterion:** `scripts/check-readme.py` has run, its stdout
 **receipt** and exit code are recorded, `references/checklist.md` items are
-evaluated, zero target-repository (`<repo-root>`) writes are confirmed, and the
-three-line report is emitted.
+evaluated, the write-set check above is confirmed (exact zero-write match in
+`audit` / `--dry-run`; intended-write-set match in `improve` / `rewrite`), and
+the three-line report is emitted.
 
 ---
 
 ## 4. Three-Line Delivery Report Format
 
-Every READJH run — whether a completed `audit` (`PASS` / `FAIL`) or a run
-halted by a missing/untrusted dependency or execution error (`BLOCKED`) —
-closes with a reply locked to **at most three lines**
+Every READJH run — whether a completed `audit`, `improve`, or `rewrite` run
+(`PASS` / `FAIL`, with or without `--dry-run`) or a run halted by a
+missing/untrusted dependency or execution error (`BLOCKED`) — closes with a
+reply locked to **at most three lines**
 (`docs/spec/0001-readjh-orchestration-skill.md` US-27, `references/checklist.md`
 §8):
 
@@ -441,16 +588,27 @@ closes with a reply locked to **at most three lines**
 ### Report Rules
 
 - **Strict three-line cap:** Output only `[Conclusion]`, `[Receipts]`, and
-  `[Residual risk]` (in future `improve` / `rewrite` runs that move sections to
-  `docs/`, only the migration ledger table may follow).
+  `[Residual risk]`. In `improve` / `rewrite` runs that moved sections to
+  `docs/`, only the migration ledger table may follow the three lines.
+- **Migration ledger (`improve` / `rewrite` with `docs/` moves — required):**
+  Every span moved out of `<readme>` into `docs/` appears in a ledger table
+  appended after `[Residual risk]`; a move without a ledger entry fails
+  `VERIFY` (§3, `RESTRUCTURE` step 7). A write-mode run with no moves states
+  `Migration ledger: none` on the `[Conclusion]` line.
+  ```text
+  | Moved span (heading, `<readme>` lines) | Destination file |
+  |---|---|
+  | `## Threat model` (lines 210–248) | `docs/threat-model.md` |
+  ```
 - **Distinguish `FAIL` from `BLOCKED`:** When `ROUTE` resolves a trusted
   `readme-crafter-skill`, `scan-project.py` completes its scan (`exit 0`, or
   `exit 1` with scan findings), and `check-readme.py` completes (`exit 0` clean
   or `exit 1` with README findings), the audit itself succeeded: report `PASS`
   when zero defects exist, or `FAIL` when `TRUTH`, `RESTRUCTURE`, or
   `check-readme.py` (`exit 1`) uncovered README defects. Reserve `BLOCKED`
-  strictly for missing or untrusted **pointer contract** dependencies/files,
-  requests for unimplemented write modes, or tool execution failures (`exit 2`,
+  strictly for missing or untrusted **pointer contract** dependencies/files
+  (including `writing-humanize` in write modes, checked before any edit), or
+  tool execution failures (`exit 2`,
   invalid `<repo-root>` directory error, or runtime crash).
 - **Untested README commands:** Because READJH never executes commands inside a
   target README, `[Residual risk]` must list any README commands not verified
@@ -458,13 +616,15 @@ closes with a reply locked to **at most three lines**
 
 ---
 
-## 5. Future Phases Stub (`improve` and `rewrite` Modes — Ticket #6)
+## 5. Mode and Flag Summary
 
-`improve` mode (surgical README upgrade), `rewrite` mode (full README rebuild),
-and the `LANGUAGE` phase (`writing-humanize` invocation via the **pointer
-contract**, **distilled rules** handoff from `references/de-ai-language.md` and
-`references/readme-rules.md`, **freeze zone** enforcement during edits, `docs/`
-migration ledger, `.bak` rollback file creation when git cannot roll back, and
-`--dry-run` plan output for write modes) are tracked in Ticket #6
-(`Xxx91n/READJH#6`). Until Ticket #6 lands, requests for `improve` or `rewrite`
-are rejected in `ROUTE` as `BLOCKED` with zero file writes.
+| Mode / flag | Phase sequence | Writes to `<repo-root>` | `LANGUAGE` |
+|---|---|---|---|
+| `audit` | `ROUTE → TRUTH → RESTRUCTURE → VERIFY` | none | not run |
+| `improve` | `ROUTE → TRUTH → RESTRUCTURE → LANGUAGE → VERIFY` | planned structural + wording edits only | `writing-humanize` + distilled supplement rules (Phase 4) |
+| `rewrite` | `ROUTE → TRUTH → RESTRUCTURE → LANGUAGE → VERIFY` | full `<readme>` rebuild | `writing-humanize` + distilled supplement rules (Phase 4) |
+| `--dry-run` (modifier on any mode) | unchanged | none — plan and receipts only; no `.bak` | plan output only (Phase 4 step 5) |
+
+Write modes additionally require `writing-humanize` to resolve through the
+pointer contract before the first edit (`ROUTE` step 5); a miss stops the run
+as `BLOCKED` with the §1 install commands.
