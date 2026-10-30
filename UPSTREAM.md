@@ -60,9 +60,16 @@ re-check the contract and this table when either repo moves.
 
 What a fresh machine needs so the contract resolves:
 
-- **`readme-crafter-skill`** — already present but at a non-canonical path.
-  Make `<skills-root>\readme-crafter-skill` resolve to the existing tree; do not
-  re-clone. Either of:
+- **`readme-crafter-skill`** — on a fresh machine, acquire the upstream repo
+  and expose its root at the canonical name:
+  ```
+  mkdir "%USERPROFILE%\.agents\repos" 2>nul
+  git clone https://github.com/linhai0872/readme-crafter-skill "%USERPROFILE%\.agents\repos\readme-crafter-skill"
+  mklink /J "%USERPROFILE%\.agents\skills\readme-crafter-skill" "%USERPROFILE%\.agents\repos\readme-crafter-skill"
+  ```
+  On the authoring machine the tree already exists at a non-canonical path —
+  make `<skills-root>\readme-crafter-skill` resolve to it instead of
+  re-cloning. Either of:
   - junction (Windows):
     `mklink /J "%USERPROFILE%\.agents\skills\readme-crafter-skill" "%USERPROFILE%\.agents\skills\git\readme\readme-crafter-skill-main"`
   - or rename the directory in place to `readme-crafter-skill` at the skills
