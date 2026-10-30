@@ -252,11 +252,8 @@ def check_dead_links(content: str, readme_path: Path, repo_root: Path) -> List[F
             # Ignore external schemes or anchor-only links
             if target.startswith(("#", "http://", "https://", "mailto:", "data:", "ftp:", "javascript:", "tel:", "<")):
                 continue
-            clean = target.split("#", 1)[0].split("?", 1)[0].strip()
-            if not clean:
-                continue
 
-            resolved = _resolve_local_path(clean, readme_dir, repo_root)
+            resolved = _resolve_local_path(target, readme_dir, repo_root)
             if resolved is None:
                 findings.append(
                     Finding(
@@ -294,11 +291,8 @@ def check_missing_images(content: str, readme_path: Path, repo_root: Path) -> Li
                 continue
             if src.startswith(("http://", "https://", "data:", "<")):
                 continue
-            clean = src.split("#", 1)[0].split("?", 1)[0].strip()
-            if not clean:
-                continue
 
-            resolved = _resolve_local_path(clean, readme_dir, repo_root)
+            resolved = _resolve_local_path(src, readme_dir, repo_root)
             if resolved is None:
                 findings.append(
                     Finding(
@@ -459,7 +453,7 @@ def compute_skeleton_similarity(h1: List[Tuple[int, str]], h2: List[Tuple[int, s
     # High full similarity indicates verbatim skeleton isomorphism
     if ratio_full >= 0.85:
         return ratio_full
-    # Identical level structure with high topic overlap indicates template reuse
+    # Identical level structure with high topic overlap indicates skeleton isomorphism
     if ratio_lvl >= 0.95 and ratio_full >= 0.60:
         return max(ratio_full, 0.85)
 
@@ -515,16 +509,16 @@ def check_repo_set(
         readme_candidate = entry if entry.is_file() else entry / "README.md"
         if readme_candidate.is_file():
             label = entry.parent.name if entry.is_file() else entry.name
-            h = extract_headings(readme_candidate.read_text(encoding="utf-8", errors="ignore"))
-            resolved_readmes.append(RepoSkeleton(label=label, path=readme_candidate, headings=h))
+            headings = extract_headings(readme_candidate.read_text(encoding="utf-8", errors="ignore"))
+            resolved_readmes.append(RepoSkeleton(label=label, path=readme_candidate, headings=headings))
 
     # Include target CLI README if not already in manifest
     if current_readme and current_readme.is_file():
         cur_res = current_readme.resolve()
-        if cur_res not in [r.path for r in resolved_readmes]:
+        if cur_res not in [skeleton.path for skeleton in resolved_readmes]:
             cur_label = cur_res.parent.name
-            h = extract_headings(cur_res.read_text(encoding="utf-8", errors="ignore"))
-            resolved_readmes.insert(0, RepoSkeleton(label=cur_label, path=cur_res, headings=h))
+            headings = extract_headings(cur_res.read_text(encoding="utf-8", errors="ignore"))
+            resolved_readmes.insert(0, RepoSkeleton(label=cur_label, path=cur_res, headings=headings))
 
     if len(resolved_readmes) < 2:
         findings.append(
@@ -536,25 +530,25 @@ def check_repo_set(
         return findings, ""
 
     summary_lines.append(f"[check-readme] Repo-set skeleton analysis ({len(resolved_readmes)} repos):")
-    for r in resolved_readmes:
-        summary_lines.append(f"  - {r.label} ({r.path.name}): {len(r.headings)} headings")
+    for skeleton in resolved_readmes:
+        summary_lines.append(f"  - {skeleton.label} ({skeleton.path.name}): {len(skeleton.headings)} headings")
 
     summary_lines.append("  Pairwise skeleton isomorphism:")
 
     # Compare pairwise
     for i in range(len(resolved_readmes)):
         for j in range(i + 1, len(resolved_readmes)):
-            r_a = resolved_readmes[i]
-            r_b = resolved_readmes[j]
-            similarity = compute_skeleton_similarity(r_a.headings, r_b.headings)
+            skeleton_a = resolved_readmes[i]
+            skeleton_b = resolved_readmes[j]
+            similarity = compute_skeleton_similarity(skeleton_a.headings, skeleton_b.headings)
             status_str = "ISOMORPHIC" if similarity >= 0.85 else "DIVERGENT"
-            summary_lines.append(f"  - {r_a.label} vs {r_b.label}: {status_str} (similarity: {similarity:.2f})")
+            summary_lines.append(f"  - {skeleton_a.label} vs {skeleton_b.label}: {status_str} (similarity: {similarity:.2f})")
 
             if similarity >= 0.85:
                 findings.append(
                     Finding(
                         check_name="skeleton-isomorphism",
-                        message=f"Repositories '{r_a.label}' and '{r_b.label}' have isomorphic README skeletons (similarity: {similarity:.2f})",
+                        message=f"Repositories '{skeleton_a.label}' and '{skeleton_b.label}' have isomorphic README skeletons (similarity: {similarity:.2f})",
                     )
                 )
 

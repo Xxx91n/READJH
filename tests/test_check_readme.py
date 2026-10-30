@@ -240,6 +240,7 @@ class TestStdlibOnly(unittest.TestCase):
             "itertools", "functools", "copy", "string", "hashlib",
             "io", "math", "unicodedata"
         }
+        self.assertTrue(imported_modules, "Expected non-empty list of imports from check-readme.py")
         for mod in imported_modules:
             self.assertIn(mod, stdlib_names, f"Module '{mod}' is not in approved stdlib list")
 
