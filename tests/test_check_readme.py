@@ -138,6 +138,27 @@ class TestCheck1DeadLinks(unittest.TestCase):
             self.assertIn("dead-links", out)
             self.assertIn("docs/missing.md", out)
 
+    def test_nested_readme_relative_vs_root_relative_link(self):
+        """Verify relative destinations in nested READMEs resolve against readme_dir, and leading-slash against repo_root."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            docs = root / "docs"
+            docs.mkdir()
+            # Root file exists, but does not exist inside docs/
+            (root / "root_only.md").write_text("# Root\n", encoding="utf-8")
+            (docs / "nested_target.md").write_text("# Nested\n", encoding="utf-8")
+
+            nested_rm = docs / "README.md"
+            nested_rm.write_text(
+                "# Nested\n\n[Valid Relative](nested_target.md)\n\n[Valid Root](</root_only.md>)\n\n[Broken Relative](root_only.md)\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(nested_rm), "--repo-root", str(root))
+            self.assertNotEqual(code, 0)
+            self.assertIn("[dead-links]", out)
+            self.assertIn("root_only.md", out)
+
 
 class TestCheck2MissingImages(unittest.TestCase):
     """Check 2: missing image paths."""
@@ -149,6 +170,21 @@ class TestCheck2MissingImages(unittest.TestCase):
         self.assertNotEqual(code, 0, "Expected non-zero exit for missing image")
         self.assertIn("missing-images", out)
         self.assertIn("assets/readme/missing_hero.svg", out)
+
+    def test_mixed_remote_and_local_srcset_detected(self):
+        """Verify that a missing local candidate in a multi-candidate srcset is detected even if another candidate is remote."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            td_path = Path(td)
+            rm = td_path / "README.md"
+            rm.write_text(
+                '# Title\n\n<source srcset="https://example.com/logo.png 1x, missing_dark.png 2x">\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(td_path))
+            self.assertNotEqual(code, 0)
+            self.assertIn("[missing-images]", out)
+            self.assertIn("missing_dark.png", out)
 
 
 class TestCheck3CodeFenceBalance(unittest.TestCase):

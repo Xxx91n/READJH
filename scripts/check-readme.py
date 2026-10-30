@@ -223,16 +223,21 @@ def _resolve_local_path(target: str, readme_dir: Path, repo_root: Path) -> Optio
         raw,
     )
     clean = title.group(1) if title else raw
-    clean = urllib.parse.unquote(clean.split("#", 1)[0].split("?", 1)[0]).lstrip("/")
+    clean = clean.split("#", 1)[0].split("?", 1)[0].strip()
     if not clean:
         return None
-    p_readme = (readme_dir / clean).resolve()
-    if p_readme.exists():
-        return p_readme
-    p_repo = (repo_root / clean).resolve()
-    if p_repo.exists():
-        return p_repo
-    return None
+
+    is_root_relative = clean.startswith("/")
+    decoded = urllib.parse.unquote(clean.lstrip("/"))
+    if not decoded:
+        return None
+
+    if is_root_relative:
+        p_repo = (repo_root / decoded).resolve()
+        return p_repo if p_repo.exists() else None
+    else:
+        p_readme = (readme_dir / decoded).resolve()
+        return p_readme if p_readme.exists() else None
 
 
 def extract_all_link_targets(line: str) -> List[str]:
@@ -298,7 +303,12 @@ def check_missing_images(content: str, readme_path: Path, repo_root: Path) -> Li
         for m in html_img_re.finditer(line):
             sources.append(m.group(1).strip())
         for m in html_source_re.finditer(line):
-            sources.append(m.group(1).strip())
+            raw_srcset = m.group(1).strip()
+            # Split comma-separated srcset candidates: e.g. "hero-dark.svg 1x, hero-light.svg 2x"
+            for candidate in raw_srcset.split(","):
+                candidate_url = candidate.strip().split()[0] if candidate.strip() else ""
+                if candidate_url:
+                    sources.append(candidate_url)
 
         for src in sources:
             if not src:
