@@ -1,0 +1,54 @@
+READJH
+Orchestration-layer code and text: MIT License, Copyright (c) 2026 READJH
+contributors. See LICENSE.
+
+READJH orchestrates and distills rules from the following upstream works.
+It does not vendor their code; the executors are invoked from their own
+installs, and the distilled rules in references/ carry per-section attribution.
+
+Executable skills (pointer contract, invoked from the user's machine):
+
+  readme-crafter-skill
+    Repo:    https://github.com/linhai0872/readme-crafter-skill
+    Author:  linhai (linhai0872)
+    License: MIT, Copyright (c) 2026 linhai
+
+  writing-humanize (part of ink-and-agency)
+    Repo:    https://github.com/risadams/ink-and-agency (skills/writing-humanize/)
+    Author:  Ris Adams <ris@risadams.com>
+    License: MIT, Copyright (c) 2026 Ris Adams; repo LICENSE notes the repo is
+             a fork/adaptation of https://github.com/mattpocock/skills
+    READJH suppresses two upstream behaviors when invoking this skill —
+    self-evolve journaling and personality injection (see UPSTREAM.md).
+
+Distilled rule sources (subsets distilled into references/, never invoked):
+
+  sepia
+    Repo:    no canonical public upstream recorded; local mirror at
+             .agents/skills/sepia/ (authoring machine)
+    Author:  not recorded in the mirror (SKILL.md carries license: MIT,
+             no author field)
+    License: MIT (SKILL.md frontmatter)
+
+  anti-defensive-writing (English variant)
+    Repo:    https://github.com/Kiterlin/anti-defensive-writing
+    Author:  Kiterlin
+    License: MIT, Copyright (c) 2026 Kiterlin
+    Note:    a same-named source exists elsewhere; READJH distills only the
+             Kiterlin variant, referenced by path (ADR-0001, UPSTREAM.md).
+
+  academic-humanizer
+    Repo:    https://github.com/AIScientists-Dev/academic-humanizer
+    Author:  AIScientists-Dev
+    License: MIT, Copyright (c) 2026 AIScientists-Dev
+    Upstream's own NOTICE: builds on blader/humanizer (MIT,
+    https://github.com/blader/humanizer) and adopts standards from
+    koaeraser/ARMS (https://github.com/koaeraser/ARMS).
+
+  humanize-readme (part of agent-skills; rules reference only, never executed)
+    Repo:    https://github.com/b4r7x/agent-skills (humanize-readme/)
+    Author:  b4r7x
+    License: MIT, Copyright (c) 2026 b4r7x
+
+All upstream licenses are MIT. The full MIT text appears once in LICENSE and
+applies to each upstream work as shipped by its own repository.
