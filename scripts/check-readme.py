@@ -213,7 +213,7 @@ def _resolve_local_path(target: str, readme_dir: Path, repo_root: Path) -> Optio
         return None
     if raw.startswith("<") and ">" in raw:
         raw = raw[1:raw.find(">")].strip()
-    if raw.startswith(("#", "http://", "https://", "mailto:", "data:", "ftp:", "javascript:", "tel:")):
+    if raw.startswith(("#", "http://", "https://", "mailto:", "data:", "ftp:", "javascript:", "tel:", "//")):
         return None
     title = re.match(
         r"""^(\S+)\s+(?:"(?:\\.|[^"])*"|'(?:\\.|[^'])*'|\((?:\\.|[^)])*\))\s*$""",
@@ -221,7 +221,7 @@ def _resolve_local_path(target: str, readme_dir: Path, repo_root: Path) -> Optio
     )
     clean = title.group(1) if title else raw
     clean = clean.split("#", 1)[0].split("?", 1)[0].strip()
-    if not clean:
+    if not clean or clean.startswith("//"):
         return None
 
     is_root_relative = clean.startswith("/")
@@ -273,7 +273,7 @@ def check_dead_links(content: str, readme_path: Path, repo_root: Path) -> List[F
                 clean_target = clean_target[1:-1].strip()
 
             # Ignore external schemes or anchor-only links
-            if clean_target.startswith(("#", "http://", "https://", "mailto:", "data:", "ftp:", "javascript:", "tel:")):
+            if clean_target.startswith(("#", "http://", "https://", "mailto:", "data:", "ftp:", "javascript:", "tel:", "//")):
                 continue
 
             resolved = _resolve_local_path(target, readme_dir, repo_root)
@@ -286,6 +286,48 @@ def check_dead_links(content: str, readme_path: Path, repo_root: Path) -> List[F
                     )
                 )
     return findings
+
+
+def parse_srcset_urls(raw_srcset: str) -> List[str]:
+    """Parse candidate image URLs from a srcset attribute following WHATWG HTML rules."""
+    urls = []
+    i = 0
+    n = len(raw_srcset)
+
+    while i < n:
+        # Skip leading whitespace
+        while i < n and raw_srcset[i].isspace():
+            i += 1
+        if i >= n:
+            break
+
+        # Collect URL characters until whitespace
+        url_start = i
+        while i < n and not raw_srcset[i].isspace():
+            i += 1
+        url = raw_srcset[url_start:i]
+
+        # If URL ends with comma, it was comma-delimited without descriptors
+        if url.endswith(","):
+            urls.append(url[:-1])
+            continue
+
+        urls.append(url)
+
+        # Skip descriptor(s) until next unparenthesized comma or EOF
+        in_paren = False
+        while i < n:
+            ch = raw_srcset[i]
+            if ch == "(":
+                in_paren = True
+            elif ch == ")":
+                in_paren = False
+            elif ch == "," and not in_paren:
+                i += 1
+                break
+            i += 1
+
+    return urls
 
 
 def check_missing_images(content: str, readme_path: Path, repo_root: Path) -> List[Finding]:
@@ -308,9 +350,7 @@ def check_missing_images(content: str, readme_path: Path, repo_root: Path) -> Li
             sources.append(m.group(1).strip())
         for m in html_source_re.finditer(line):
             raw_srcset = m.group(1).strip()
-            # Split comma-separated srcset candidates: e.g. "hero-dark.svg 1x, hero-light.svg 2x"
-            for candidate in raw_srcset.split(","):
-                candidate_url = candidate.strip().split()[0] if candidate.strip() else ""
+            for candidate_url in parse_srcset_urls(raw_srcset):
                 if candidate_url:
                     sources.append(candidate_url)
 
@@ -321,7 +361,7 @@ def check_missing_images(content: str, readme_path: Path, repo_root: Path) -> Li
             if clean_src.startswith("<") and clean_src.endswith(">"):
                 clean_src = clean_src[1:-1].strip()
 
-            if clean_src.startswith(("http://", "https://", "data:")):
+            if clean_src.startswith(("http://", "https://", "data:", "//")):
                 continue
 
             resolved = _resolve_local_path(src, readme_dir, repo_root)
@@ -367,9 +407,10 @@ def check_badge_domains(content: str) -> List[Finding]:
             if not url:
                 continue
 
+            test_url = f"https:{url}" if url.startswith("//") else url
             # Check for placeholder patterns
             for pat in PLACEHOLDER_DOMAIN_PATTERNS:
-                if re.search(pat, url, re.IGNORECASE):
+                if re.search(pat, test_url, re.IGNORECASE):
                     findings.append(
                         Finding(
                             check_name="badge-domains",
@@ -379,9 +420,9 @@ def check_badge_domains(content: str) -> List[Finding]:
                     )
                     break
             else:
-                # Validate URL syntax and host if it is an http(s) URL
-                if url.startswith(("http://", "https://")):
-                    parsed = urllib.parse.urlparse(url)
+                # Validate URL syntax and host if it is an http(s) URL or scheme-relative // URL
+                if test_url.startswith(("http://", "https://")):
+                    parsed = urllib.parse.urlparse(test_url)
                     host = parsed.netloc or ""
                     if not host or "." not in host or host.lower() == "localhost":
                         findings.append(

@@ -183,6 +183,19 @@ class TestCheck1DeadLinks(unittest.TestCase):
             self.assertNotIn("Dead local link", out)
             self.assertIn("- dead-links: PASS", out)
 
+    def test_scheme_relative_urls_ignored(self):
+        """Verify that scheme-relative URLs starting with // are treated as external and not dead links."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            (root / "doc.md").write_text("# Doc\n", encoding="utf-8")
+            rm = root / "README.md"
+            rm.write_text("# Test\n\n[External](//github.com/foo/bar)\n[Valid Local](/doc.md)\n\n## Limitations\nNone.\n", encoding="utf-8")
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertEqual(code, 0)
+            self.assertNotIn("Dead local link", out)
+            self.assertIn("- dead-links: PASS", out)
+
 
 class TestCheck2MissingImages(unittest.TestCase):
     """Check 2: missing image paths."""
@@ -209,6 +222,38 @@ class TestCheck2MissingImages(unittest.TestCase):
             self.assertNotEqual(code, 0)
             self.assertIn("[missing-images]", out)
             self.assertIn("missing_dark.png", out)
+
+    def test_srcset_url_with_comma_parsed_correctly(self):
+        """Verify that commas inside srcset URLs do not split into false local image candidates."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            td_path = Path(td)
+            rm = td_path / "README.md"
+            rm.write_text(
+                '# Title\n\n<source srcset="https://cdn.example.org/logo,large.png 1x, missing_dark.png 2x">\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(td_path))
+            self.assertNotEqual(code, 0)
+            self.assertIn("[missing-images]", out)
+            self.assertIn("missing_dark.png", out)
+            self.assertNotIn("large.png", out)
+
+    def test_scheme_relative_image_ignored(self):
+        """Verify that scheme-relative image sources starting with // are ignored as external."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            td_path = Path(td)
+            (td_path / "local.png").write_text("", encoding="utf-8")
+            rm = td_path / "README.md"
+            rm.write_text(
+                '# Title\n\n<img src="//cdn.example.org/img.png">\n![Local](local.png)\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(td_path))
+            self.assertEqual(code, 0)
+            self.assertNotIn("Missing local image", out)
+            self.assertIn("- missing-images: PASS", out)
 
 
 class TestCheck3CodeFenceBalance(unittest.TestCase):
