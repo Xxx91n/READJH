@@ -2,7 +2,7 @@
 
 > **Attribution:** `READJH` orchestration layer (`docs/spec/0001-readjh-orchestration-skill.md` US-25–28, US-34, Seam C; `GLOSSARY.md`; `references/readme-rules.md`; `references/de-ai-language.md`); `jiahao` (`D:\Aworker\jiahao\src\SKILL.md` Verification Ladder Rungs 1–4 & Action Ladder Rungs 4–5); `readme-crafter-skill` (`references/quality-checklist.md` & `references/repo-integrity.md`); `writing-humanize` (`skills/writing-humanize/references/patterns.md`). Canonical upstream URLs, observed machine paths, and commit hashes live in `UPSTREAM.md`.
 
-Run this binary assertion checklist during `VERIFY` (and as the diagnostic rubric in `audit` mode). Every item requires a concrete **receipt** (`scripts/check-readme.py` output, repository `file:line`, or migration ledger entry). Vibe scores and AI-detector percentages carry zero weight and are rejected.
+Run this binary assertion checklist during `VERIFY` (and as the diagnostic rubric in `audit` mode). Every item requires a concrete **receipt** matched to its check type: executable checks require `scripts/check-readme.py` probe output (or verified test output); static and structural checks require repository `file:line` anchors or migration ledger entries; visual and process checks (first-screen scan, voice preservation, deletion/reversion tests) require a manual-review **receipt** naming the inspected artifact/span, reviewer, and binary result. Vibe scores and AI-detector percentages carry zero weight and are rejected.
 
 ---
 
@@ -25,7 +25,7 @@ Run this binary assertion checklist during `VERIFY` (and as the diagnostic rubri
 - [ ] **Command and manifest parity (`readme-crafter-skill` Check #2):** install, build, test, and run commands match the repository's manifests and CI workflows.
 - [ ] **Distribution posture (`readme-crafter-skill` Check #8, `repo-integrity.md` §1):** registry install commands appear only when publication is verified in the repo; source-first and hybrid repos match their actual consumption paths.
 - [ ] **Public surface and config parity (`readme-crafter-skill` Checks #6–7, `repo-integrity.md` §2–3):** code examples import only root-exported symbols, and documented env vars/defaults match `.env.example` or config schemas.
-- [ ] **Claim↔evidence discipline (`references/de-ai-language.md` §5):** empirical and performance claims cite their repo anchor and use calibrated verbs; contradicted claims were reported as findings; unbacked claims were deleted or marked `TODO`.
+- [ ] **Claim↔[receipt] discipline (`references/de-ai-language.md` §5):** empirical and performance claims cite their repo anchor and use calibrated verbs; contradicted claims were reported as findings; unbacked claims were deleted or marked `TODO`.
 
 ---
 
@@ -53,7 +53,7 @@ Run this binary assertion checklist during `VERIFY` (and as the diagnostic rubri
 > **Attribution:** `READJH` orchestration layer (`docs/spec/0001-readjh-orchestration-skill.md` US-20, US-21, US-34; `references/readme-rules.md` §4.2); `readme-crafter-skill` (`SKILL.md` §Core Philosophy #3 & `references/style-guide.md`); `sepia` (`.agents/skills/sepia/references/professional-pass.md` `SLOPSHAPE-2026` & Check #8).
 
 - [ ] **Project-specific section sequence (`references/readme-rules.md` §4.2):** headings follow this repository's project type and distribution posture rather than a generic boilerplate outline.
-- [ ] **Repo-set mode (when `--repo-set <manifest>` is enabled):** `scripts/check-readme.py --repo-set <manifest>` receipt confirms no **skeleton isomorphism** across distinct project types (`N/A` on default single-repo runs).
+- [ ] **Repo-set mode (when `--repo-set <manifest>` is enabled):** `python3 scripts/check-readme.py <readme> --repo-set <manifest>` receipt confirms no **skeleton isomorphism** across distinct project types (`N/A` on default single-repo runs).
 
 ---
 
@@ -61,7 +61,7 @@ Run this binary assertion checklist during `VERIFY` (and as the diagnostic rubri
 
 > **Attribution:** `READJH` orchestration layer (`docs/spec/0001-readjh-orchestration-skill.md` US-11, US-34; `references/readme-rules.md` §3); `writing-humanize` (`skills/writing-humanize/references/patterns.md` Patterns #20–22); `sepia` (`.agents/skills/sepia/references/professional-pass.md` Check #1).
 
-- [ ] **No skill or placeholder HTML comments (`references/readme-rules.md` §3):** zero `<!-- PLACEHOLDER ... -->`, `<!-- SLOT ... -->`, `<!-- Drop-in ... -->`, or `<!-- self-evolve:start -->` comments remain; any surviving HTML comment is verified against an existing script or companion file in the repository.
+- [ ] **No skill or placeholder HTML comments (`references/readme-rules.md` §3):** zero `<!-- PLACEHOLDER ... -->`, `<!-- SLOT ... -->`, `<!-- Drop-in ... -->`, or `<!-- self-evolve:start -->` comments remain; any surviving HTML comment is verified as actively read/written or owned by an existing script or companion file in the repository.
 - [ ] **No chatbot or cutoff phrasing:** zero conversational openers/closers or knowledge-cutoff disclaimers remain.
 
 ---

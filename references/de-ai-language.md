@@ -5,6 +5,7 @@
 > 2. English Kiterlin variant at `D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md` (**referenced by path** — the same-named Chinese variant at `D:\Aworker\research\ALL\vendor\anti-defensive-skill\` is never used)
 > 3. `academic-humanizer` v0.3.3 (`D:\Aworker\research\ALL\vendor\academic-humanizer\SKILL.md`)
 > 4. `humanize-readme` v1.1.0 (`b4r7x/agent-skills`, `humanize-readme/SKILL.md` & `humanize-readme/references/slop-patterns.md` — rules reference only, never executed)
+> Where verbatim upstream text uses a term listed in `GLOSSARY.md`'s `_Avoid_` column, the replacement appears in square brackets (`[Uniformity]`, `[receipt]`/`[receipts]`, `[a signal]`).
 
 Read these **distilled rules** into context during the `LANGUAGE` phase as supplements to `writing-humanize`. All rules operate strictly outside the **freeze zone** (`references/readme-rules.md` §1) and obey the active **intensity tier** (`lite` or `standard`, `references/readme-rules.md` §5). Fiction-only rules from `sepia` and grant-proposal / paper-citation rules from `academic-humanizer` are omitted as out of README scope.
 
@@ -54,7 +55,7 @@ AI-generated technical prose gives itself away through predictable section struc
 | 3 | Relevance | Does every paragraph serve *the reader's task* — the thing they came to find out? Background the reader already has, restated questions, and scope tours are filler. |
 | 4 | Stance | Where a judgment is required, commit to one. Absent subjectivity is a measured slop dimension (S): a review without a verdict, a comparison without a recommendation, a postmortem without an admitted mistake. Hedge once per genuinely fragile claim, not per sentence. |
 | 5 | Specificity | Versions, numbers, file:line, commands, error text verbatim, names — present and **real**. Never pad with invented specifics; a wrong fact stated confidently is itself a top-tier tell (R). Missing info → ask or leave an explicit TODO. |
-| 6 | Formatting tells | Bold-mini-heading bullet lists where prose would do; emoji as decoration; Title Case headings; every section the same length; lists of exactly three, everywhere; a heading restated by its first sentence; fractal summaries (announce → say → recap at every level) (W). The absence of these is not evidence of a human: which formatting a model over- or under-uses changes with its release (see the prose layers in `model-fingerprints.md`). |
+| 6 | Formatting tells | Bold-mini-heading bullet lists where prose would do; emoji as decoration; Title Case headings; every section the same length; lists of exactly three, everywhere; a heading restated by its first sentence; fractal summaries (announce → say → recap at every level) (W). The absence of these is not [a signal] of a human: which formatting a model over- or under-uses changes with its release (see the prose layers in `model-fingerprints.md`). |
 | 7 | Conclusion residue | "In conclusion/summary" sections, restating what was said, generic future outlook ("we will continue to improve…"). End when the content ends. |
 | 8 | Templatedness | The same sentence frame recycled ("X, a Y at Z, said that…" three times); every item phrased identically. Vary or tabulate. |
 | 9 | [Uniformity] of rhythm | Uniform paragraph and sentence lengths throughout. Human professional prose is uneven — depth where it matters, one-liners where it doesn't. Measure sentence rhythm with the check in `style-pass.md` §5. |
@@ -94,7 +95,7 @@ AI-generated technical prose gives itself away through predictable section struc
 
 ### 2.5 False-positive whitelist (verbatim from `sepia` `references/style-pass.md` §7)
 
-| Not evidence of AI | Why |
+| Not [a signal] of AI | Why |
 |---|---|
 | Correct grammar and clean punctuation | Plenty of humans write cleanly; imperfection-injection is a detectable gimmick |
 | A single em-dash, semicolon, or "delve" | One hit means nothing; only clusters count |
@@ -148,7 +149,7 @@ Load this section whenever the target README is written in Chinese (Simplified o
 
 ### Rationale (rewritten)
 
-AI-generated READMEs frequently negotiate with an imagined critic by listing what the tool does not claim, does not attempt, or cannot guarantee before stating what it actually does. Apply a three-step transform during `RESTRUCTURE` and `LANGUAGE`:
+AI-generated READMEs frequently negotiate with an imagined critic by listing what the tool does not claim, does not attempt, or cannot guarantee before stating what it actually does. Apply a three-step transform during `LANGUAGE`:
 
 1. **Delete unnecessary disclaimers:** cut any sentence added only to ward off hypothetical misunderstanding.
 2. **Convert defensive caveats into positive scope (`fact + link`):** state the exact operating scope, supported inputs, or verified environment once, and link to deeper docs if needed.
@@ -174,7 +175,7 @@ AI-generated READMEs frequently negotiate with an imagined critic by listing wha
 - "This paper examines..."
 - "This study shows..."
 - "The analysis focuses on..."
-- "The evidence indicates..."
+- "The [receipts] indicate..."
 - "This design allows..."
 - "The results suggest..."
 - "The central contribution is..."
@@ -197,13 +198,13 @@ Avoid:
 **Replace hedging with precision:**
 
 Prefer:
-> The evidence indicates that X influences Y in these cases.
+> The [receipts] indicate that X influences Y in these cases.
 
 Avoid:
 > This may suggest that X could potentially influence Y.
 
 If uncertainty is real, specify its source:
-> The available evidence supports this interpretation, although the design does not estimate population-level effects.
+> The available [receipts] support this interpretation, although the design does not estimate population-level effects.
 
 **Examples:**
 
@@ -233,7 +234,7 @@ Stronger:
 
 ---
 
-## 5. `academic-humanizer` — Claim↔Evidence Discipline Subset
+## 5. `academic-humanizer` — Claim↔[Receipt] Discipline Subset
 
 > **Attribution:** `academic-humanizer` v0.3.3 by AIScientists-Dev (`D:\Aworker\research\ALL\vendor\academic-humanizer\SKILL.md`; see `UPSTREAM.md`). Non-overlapping watch lists and before/after pairs below are verbatim from Layer 2 (2.1–2.5) and Layer 4 of `D:\Aworker\research\ALL\vendor\academic-humanizer\SKILL.md` (overlapping items Layer 1, 2.6, 2.7, 2.9, 2.10, and 2.11 are merged into §1 above); rationale is rewritten in READJH's words.
 
@@ -272,11 +273,11 @@ In technical READMEs, neutral and precise prose is the human voice. Do not casua
 - **Before:** *In recent years, tabular deep learning has attracted increasing attention.*
 - **After:** *Tabular deep learning has a structural limitation: most models discard feature-type metadata and must relearn it from data.*
 
-**Layer 4 — Claim-evidence discipline:**
-- **Unbacked claim -> add the evidence pointer or soften.**
+**Layer 4 — Claim-[receipt] discipline:**
+- **Unbacked claim -> add the [receipt] pointer or soften.**
   - *Before:* *Our method is more robust.*
   - *After:* *Our method's accuracy drops by 2 points under distribution shift, versus 11 points for the baseline (Figure 3).*
-- **Verb stronger than evidence -> downgrade.**
+- **Verb stronger than [receipt] -> downgrade.**
   - *Before:* *This demonstrates that our method is universally superior.*
   - *After:* *On these three datasets, our method matches or exceeds the strongest baseline (Table 2).*
 - **Vague magnitude -> a number or RANGE, attributed.**
@@ -394,8 +395,8 @@ ensures           → say what it actually does (not "ensures correctness" → "
 ❌ **AI slop:**
 > FastCache is a comprehensive, high-performance caching solution designed to seamlessly integrate with your existing Node.js infrastructure. By leveraging cutting-edge in-memory storage techniques, FastCache empowers developers to build scalable applications with minimal configuration.
 
-✅ **Human** *(READJH guard: keep the first two concrete sentences; the final `"I wrote it..."` sentence is forbidden unless present in the repo or supplied by the user)*:
-> FastCache is a Node.js in-memory cache. It's a thin wrapper around a Map with TTL support and a dead-simple API. I wrote it because node-cache's API annoyed me.
+✅ **Human** *(`[READJH SUPPRESSION]`: keep the first two concrete sentences; the final `"I wrote it..."` sentence is forbidden unless present in the repo or supplied by the user)*:
+> FastCache is a Node.js in-memory cache. It's a thin wrapper around a Map with TTL support and a dead-simple API. I wrote it because node-cache's API annoyed me. `[READJH SUPPRESSION]`
 
 **Example 2 — Feature section:**
 
@@ -419,17 +420,17 @@ ensures           → say what it actually does (not "ensures correctness" → "
 > ### Prerequisites
 > Before you begin, ensure you have met the following requirements...
 
-✅ **Human** *(READJH guard: keep `"Needs Node 18+"` when `engines` in `package.json` proves it; omit `"If you're on an older version, it'll probably explode"` unless the repo documents that exact failure)*:
+✅ **Human** *(`[READJH SUPPRESSION]`: keep `"Needs Node 18+"` when `engines` in `package.json` proves it; omit `"If you're on an older version, it'll probably explode"` unless the repo documents that exact failure)*:
 > ## Install
 > ```bash
 > npm install fastcache
 > ```
-> Needs Node 18+. If you're on an older version, it'll probably explode.
+> Needs Node 18+. If you're on an older version, it'll probably explode. `[READJH SUPPRESSION]`
 
 **Burstiness — Vary Sentence Rhythm:**
 
 ❌ **AI rhythm (all sentences roughly equal length):**
 > FastCache provides an in-memory caching solution for Node.js applications. It supports TTL-based expiry and automatic eviction policies. The library includes a simple get/set/del API that developers can integrate quickly.
 
-✅ **Human rhythm (short and long mixed)** *(READJH guard: apply the short-then-long sentence rhythm; do not invent the `"I wrote it because..."` backstory)*:
-> FastCache is a Node.js in-memory cache. Thin wrapper around a Map. Supports TTL and auto-eviction. I wrote it because every other cache library I tried had an API that felt like it was designed by committee — seven methods when you need three.
+✅ **Human rhythm (short and long mixed)** *(`[READJH SUPPRESSION]`: apply the short-then-long sentence rhythm; do not invent the `"I wrote it because..."` backstory)*:
+> FastCache is a Node.js in-memory cache. Thin wrapper around a Map. Supports TTL and auto-eviction. I wrote it because every other cache library I tried had an API that felt like it was designed by committee — seven methods when you need three. `[READJH SUPPRESSION]`
