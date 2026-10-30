@@ -1,7 +1,7 @@
 # Spec 0001 — READJH orchestration skill
 
-Issue: `docs/tickets/0001-build-readjh-orchestration-skill.md`
-Status: ready-for-agent (spec stage, implementation tickets to be cut by /to-tickets)
+Issue: tickets are GitHub issues at `Xxx91n/READJH` (#1–#7); spec-level plan is this file
+Status: ready-for-agent (spec stage, implementation tickets cut by /to-tickets)
 Vocabulary: `GLOSSARY.md` at repo root. Decisions respected: ADR-0001, ADR-0002.
 
 ## Problem Statement
