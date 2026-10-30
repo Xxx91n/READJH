@@ -1,10 +1,10 @@
 # Distilled De-AI Language Rules for READMEs
 
-> **Attribution:** Distilled for `READJH` (`docs/spec/0001-readjh-orchestration-skill.md`, `UPSTREAM.md`, `docs/adr/0001-pointer-contract-and-distilled-rules.md`) from four upstream rule sources:
-> 1. `sepia` v0.11.0 (`D:\Aworker\research\ALL\.agents\skills\sepia\references\professional-pass.md`, `D:\Aworker\research\ALL\.agents\skills\sepia\references\style-pass.md`, `D:\Aworker\research\ALL\.agents\skills\sepia\references\languages\zh.md` @ `365185bec8c5eae8711ebd56b4f4556759f685b2`, MIT)
-> 2. `anti-defensive-writing` (`https://github.com/Kiterlin/anti-defensive-writing`, English Kiterlin variant at `D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md` @ `365185bec8c5eae8711ebd56b4f4556759f685b2`, MIT — **disambiguated by path** from the unused same-named Chinese variant at `D:\Aworker\research\ALL\vendor\anti-defensive-skill\`)
-> 3. `academic-humanizer` v0.3.3 (`https://github.com/AIScientists-Dev/academic-humanizer`, `D:\Aworker\research\ALL\vendor\academic-humanizer\SKILL.md` @ `365185bec8c5eae8711ebd56b4f4556759f685b2`, MIT)
-> 4. `humanize-readme` v1.1.0 (`https://github.com/b4r7x/agent-skills`, `humanize-readme/SKILL.md` & `humanize-readme/references/slop-patterns.md` @ `292bad1458a30384e9e6eb3d46ba24428d7c5618`, MIT — rules reference only, never executed)
+> **Attribution:** Distilled for `READJH` (`docs/spec/0001-readjh-orchestration-skill.md`, `UPSTREAM.md`, `docs/adr/0001-pointer-contract-and-distilled-rules.md`) from four upstream rule sources (canonical URLs, observed machine paths, licenses, and commit hashes live in `UPSTREAM.md`):
+> 1. `sepia` v0.11.0 (`D:\Aworker\research\ALL\.agents\skills\sepia\references\{professional-pass,style-pass}.md` and `references\languages\zh.md`)
+> 2. English Kiterlin variant at `D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md` (**referenced by path** — the same-named Chinese variant at `D:\Aworker\research\ALL\vendor\anti-defensive-skill\` is never used)
+> 3. `academic-humanizer` v0.3.3 (`D:\Aworker\research\ALL\vendor\academic-humanizer\SKILL.md`)
+> 4. `humanize-readme` v1.1.0 (`b4r7x/agent-skills`, `humanize-readme/SKILL.md` & `humanize-readme/references/slop-patterns.md` — rules reference only, never executed)
 
 Read these **distilled rules** into context during the `LANGUAGE` phase as supplements to `writing-humanize`. All rules operate strictly outside the **freeze zone** (`references/readme-rules.md` §1) and obey the active **intensity tier** (`lite` or `standard`, `references/readme-rules.md` §5). Fiction-only rules from `sepia` and grant-proposal / paper-citation rules from `academic-humanizer` are omitted as out of README scope.
 
@@ -12,31 +12,31 @@ Read these **distilled rules** into context during the `LANGUAGE` phase as suppl
 
 ## 1. Merged Cross-Source Patterns (Overlapping Rules)
 
-> **Attribution:** Merged across `sepia` (`professional-pass.md`, `style-pass.md`, `languages/zh.md` @ `365185bec8c5eae8711ebd56b4f4556759f685b2`), `anti-defensive-writing` (`D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md` @ `365185bec8c5eae8711ebd56b4f4556759f685b2`, EN Kiterlin only), `academic-humanizer` (`D:\Aworker\research\ALL\vendor\academic-humanizer\SKILL.md` @ `365185bec8c5eae8711ebd56b4f4556759f685b2`), and `humanize-readme` (`humanize-readme/SKILL.md`, `humanize-readme/references/slop-patterns.md` @ `292bad1458a30384e9e6eb3d46ba24428d7c5618`).
+> **Attribution:** Merged across `sepia` (`.agents/skills/sepia/references/{professional-pass,style-pass}.md`, `references/languages/zh.md`), English Kiterlin variant at `D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md`, `academic-humanizer` (`vendor/academic-humanizer/SKILL.md`), and `humanize-readme` (`humanize-readme/SKILL.md`, `humanize-readme/references/slop-patterns.md`).
 
-Where multiple upstreams target the same linguistic pattern, apply the single merged rule below:
+Where multiple upstreams target the same linguistic pattern, apply the single merged rule below (along with one verbatim before/after pair from the contributing upstream):
 
-| Pattern | Merged detection & fix rule | Upstream attributions |
-|---|---|---|
-| Negative parallelism (`not X, but Y` / `not only X, but also Y` / `rather than X` / `不是…而是…`) | State directly what the project does; drop the negated foil unless the contrast itself is a technical boundary. In Chinese, a single `「不是…而是」` is normal, while repeated instances across paragraphs trigger a rewrite. | `sepia` (`style-pass.md` §2; `languages/zh.md` §1c, §4) · `anti-defensive-writing` EN (`D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md` §Detection Checklist, §Discouraged Patterns) · `academic-humanizer` (`SKILL.md` Layer 1) |
-| Throat-clearing & boilerplate emphasis (`it is worth noting that` / `it's important to note` / `to be clear` / `let's explore` / `let's dive in` / `值得一提的是` / `值得注意的是`) | Delete the introductory wrapper and start with the subject and finite verb. | `sepia` (`professional-pass.md` #1–2; `style-pass.md` §3; `languages/zh.md` §1b) · `anti-defensive-writing` EN (`D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md` §Discouraged Patterns) · `academic-humanizer` (`SKILL.md` Layer 2.10) · `humanize-readme` (`SKILL.md` Step 2; `slop-patterns.md` §Banned Buzzwords) |
-| Inflation & grandeur vocabulary (`delve`, `underscore`, `pivotal`, `crucial`, `seamless`/`seamlessly`, `robust`, `tapestry`, `testament`, `landscape`, `realm`, `foster`, `groundbreaking`, `comprehensive`, `leverage`, `paves the way`) | Delete the adjective/adverb or replace the verb/noun with the concrete operation (`use`, `validates input`, `handles N requests/s`). | `sepia` (`style-pass.md` §3) · `academic-humanizer` (`SKILL.md` Layer 1, Layer 2.2–2.3) · `humanize-readme` (`slop-patterns.md` §Banned Buzzwords) |
-| Trailing `-ing` participle tails & clause-stacked run-ons (`..., highlighting/ensuring/underscoring...`; 3+ subordinate clauses) | Cut the trailing participle if it restates the main clause, or split it into a separate short sentence with a finite verb. | `sepia` (`style-pass.md` §1 #2–3, §2) · `academic-humanizer` (`SKILL.md` Layer 1, Layer 2.11) |
-| Rule-of-three padding & templated feature bullets (`🚀 **Fast** — Optimized...`, identical three-part lists everywhere) | Replace adjective-led triples and emoji bullet headers with plain statements naming actual formats, numbers, or API calls. | `sepia` (`professional-pass.md` #6, #8; `style-pass.md` §2; `languages/zh.md` §4) · `academic-humanizer` (`SKILL.md` Layer 1, Layer 2.7) · `humanize-readme` (`slop-patterns.md` §Fake Bullet Enthusiasm, §Feature List Without Specifics) |
-| Uniform sentence length (flat rhythm / low burstiness) | Flag runs of three or more adjacent sentences of near-equal length in running prose. Break the run by moving words (split one long sentence, merge two short ones, or cut a clause) — never by adding filler. | `sepia` (`professional-pass.md` #9; `style-pass.md` §5; `languages/zh.md` §1, §2) · `humanize-readme` (`SKILL.md` Step 2; `slop-patterns.md` §Burstiness) |
-| Conclusion residue & closing philosophizing (`In conclusion`, `represents a significant step forward`, `綜上所述`, `總而言之`) | Delete summary outros and future-outlook paragraphs; end the README when the last technical section ends. | `sepia` (`professional-pass.md` #7; `languages/zh.md` §1b) · `humanize-readme` (`slop-patterns.md` §The LinkedIn Conclusion) · `anti-defensive-writing` EN (`D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md` §Final Pass) |
-| Connective stacking (`Moreover` / `Furthermore` / `Additionally` / `However` / `和／以及／並且／同時／此外／因此／然而`) | Drop stacked sentence-initial transitions and clause-chaining conjunctions; let clause order carry the relation. | `sepia` (`languages/zh.md` §1, §2) · `academic-humanizer` (`SKILL.md` Layer 2.6) · `anti-defensive-writing` EN (`D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md` §Detection Checklist) |
-| Vague hedging vs. calibrated precision (`somewhat`, `relatively`, `might potentially` vs. named scope or range) | Delete empty qualifiers (`somewhat`, `fairly`) or replace them with a measured range or concrete scope source; keep calibrated verbs (`suggests`, `is consistent with`) when uncertainty is real. | `anti-defensive-writing` EN (`D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md` §Rewrite Procedure #4) · `academic-humanizer` (`SKILL.md` Layer 2.9, Layer 3, Layer 4) · `sepia` (`professional-pass.md` #4) |
+| Pattern | Merged detection & fix rule | Verbatim before → after example | Upstream attributions |
+|---|---|---|---|
+| Negative parallelism (`not X, but Y` / `not only X, but also Y` / `rather than X` / `不是…而是…`) | State directly what the project does; drop the negated foil unless the contrast itself is a technical boundary. In Chinese, a single `「不是…而是」` is normal, while repeated instances across paragraphs trigger a rewrite. | *Before:* "This paper is not intended to provide a comprehensive theory of platform governance, but rather to examine one specific mechanism." → *After:* "This paper identifies a mechanism through which platform governance reshapes participation." (`D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md`) | `sepia` (`style-pass.md` §2; `languages/zh.md` §1c, §4) · `D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md` (§Detection Checklist, §Discouraged Patterns) · `academic-humanizer` (`SKILL.md` Layer 1) |
+| Throat-clearing & boilerplate emphasis (`it is worth noting that` / `it's important to note` / `Notably,` / `Importantly,` / `to be clear` / `let's explore` / `let's dive in` / `值得一提的是` / `值得注意的是`) | Delete the introductory wrapper and start with the subject and finite verb. | *Before:* "It is worth noting that, importantly, the gain holds across scenarios." → *After:* "The gain holds across all three scenarios (Table 4)." (`academic-humanizer` Layer 2.10) | `sepia` (`professional-pass.md` #1–2; `style-pass.md` §3; `languages/zh.md` §1b) · `D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md` (§Discouraged Patterns) · `academic-humanizer` (`SKILL.md` Layer 2.10) · `humanize-readme` (`SKILL.md` Step 2; `slop-patterns.md` §Banned Buzzwords) |
+| Inflation & grandeur vocabulary (`delve`, `underscore`, `pivotal`, `crucial`, `seamless`/`seamlessly`, `robust`, `tapestry`, `testament`, `landscape`, `realm`, `foster`, `groundbreaking`, `comprehensive`, `leverage`, `paves the way`) | Delete the adjective/adverb or replace the verb/noun with the concrete operation (`use`, `validates input`, `handles N requests/s`). | *Before:* "Additionally, an enduring testament to the method's value is its ability to delve into intricate dependencies, showcasing a seamless integration that underscores its pivotal role." → *After:* "The method also captures higher-order dependencies, which the baselines miss (Table 2)." (`academic-humanizer` Layer 1) | `sepia` (`style-pass.md` §3) · `academic-humanizer` (`SKILL.md` Layer 1, Layer 2.2–2.3) · `humanize-readme` (`slop-patterns.md` §Banned Buzzwords) |
+| Trailing `-ing` participle tails & clause-stacked run-ons (`..., highlighting/ensuring/underscoring...`; sentences past ~30 words or with 3+ subordinate clauses `which`/`that`/`while`/`with`) | Cut the trailing participle if it restates the main clause, or split clause-stacked sentences into separate short sentences with finite verbs. | *Before:* "Existing methods, though promising, are largely empirical, with unclear principles underpinning their behavior, which limits their reliability and further progress." → *After:* "Existing methods stay empirical. Their principles are unclear, which limits reliability and progress." (`academic-humanizer` Layer 2.11) | `sepia` (`style-pass.md` §1 #2–3, §2) · `academic-humanizer` (`SKILL.md` Layer 1, Layer 2.11) |
+| Rule-of-three padding & templated feature bullets (`🚀 **Fast** — Optimized...`, identical three-part lists everywhere) | Replace adjective-led triples and emoji bullet headers with plain statements naming actual formats, numbers, or API calls. | *Before:* "(1) a novel method; (2) extensive experiments; (3) strong results." → *After:* "We (1) introduce a metadata-aware encoder that reaches 0.91 AUROC vs 0.86 for the strongest baseline; (2) show it stays within 2 points under 20% label noise where the baseline drops 9; (3) release the benchmark." (`academic-humanizer` Layer 2.7) | `sepia` (`professional-pass.md` #6, #8; `style-pass.md` §2; `languages/zh.md` §4) · `academic-humanizer` (`SKILL.md` Layer 1, Layer 2.7) · `humanize-readme` (`slop-patterns.md` §Fake Bullet Enthusiasm, §Feature List Without Specifics) |
+| Uniform sentence length (flat rhythm / low burstiness) | Flag runs of three or more adjacent sentences of near-equal length in running prose. Break the run by moving words (split one long sentence, merge two short ones, or cut a clause) — never by adding filler. | See §6.3 Burstiness pair below. | `sepia` (`professional-pass.md` #9; `style-pass.md` §5; `languages/zh.md` §1, §2) · `humanize-readme` (`SKILL.md` Step 2; `slop-patterns.md` §Burstiness) |
+| Conclusion residue & closing philosophizing (`In conclusion`, `represents a significant step forward`, `綜上所述`, `總而言之`) | Delete summary outros and future-outlook paragraphs; end the README when the last technical section ends. | See §6.3 The LinkedIn Conclusion below. | `sepia` (`professional-pass.md` #7; `languages/zh.md` §1b) · `humanize-readme` (`slop-patterns.md` §The LinkedIn Conclusion) · `D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md` (§Final Pass) |
+| Connective stacking (`Moreover` / `Furthermore` / `Additionally` / `However` / `和／以及／並且／同時／此外／因此／然而`) | Drop stacked sentence-initial transitions and clause-chaining conjunctions; let clause order carry the relation. | *Before:* "Moreover, the method is fast. Furthermore, it is simple. Additionally, it scales." → *After:* "The method is fast and simple, and it scales to one million rows (Section 5)." (`academic-humanizer` Layer 2.6) | `sepia` (`languages/zh.md` §1, §2) · `academic-humanizer` (`SKILL.md` Layer 2.6) · `D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md` (§Detection Checklist) |
+| Vague hedging vs. calibrated precision (`somewhat`, `relatively`, `fairly`, `to some extent`, `quite`, `might potentially` vs. named scope or range) | Delete empty qualifiers or replace them with a measured range or concrete scope source; keep calibrated verbs (`suggests`, `is consistent with`) when uncertainty is real. | *Before:* "Performance is somewhat better and relatively robust." → *After:* "Accuracy is 3 points higher and varies by less than 1 point across five seeds." (`academic-humanizer` Layer 2.9) | `D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md` (§Rewrite Procedure #4) · `academic-humanizer` (`SKILL.md` Layer 2.9, Layer 3, Layer 4) · `sepia` (`professional-pass.md` #4) |
 
 ---
 
 ## 2. `sepia` — Professional Pass and Surface Style Subsets
 
-> **Attribution:** `sepia` v0.11.0 (`D:\Aworker\research\ALL\.agents\skills\sepia\references\professional-pass.md` and `D:\Aworker\research\ALL\.agents\skills\sepia\references\style-pass.md`, local mirror @ `365185bec8c5eae8711ebd56b4f4556759f685b2`, MIT). Ban tables and check tables below are verbatim from `sepia` (fiction-only rows omitted; `[Uniformity]` bracketed in Check #9 to respect `GLOSSARY.md`); rationale is rewritten in READJH's words.
+> **Attribution:** `sepia` v0.11.0 (`D:\Aworker\research\ALL\.agents\skills\sepia\references\professional-pass.md` and `D:\Aworker\research\ALL\.agents\skills\sepia\references\style-pass.md`; see `UPSTREAM.md`). Ban tables and check tables below are verbatim from `sepia` (fiction-only rows omitted; Check #9 label edited from upstream's forbidden synonym to `[Uniformity]` per `GLOSSARY.md`); rationale is rewritten in READJH's words.
 
 ### Rationale (rewritten)
 
-AI-generated technical prose gives itself away through structural predictability and low information density before individual word choice. When editing a README:
+AI-generated technical prose gives itself away through predictable section structure and low information density before individual word choice. When editing a README:
 
 1. **Sample the repository's existing human artifacts first** (commit messages, issue replies, earlier human-written docs) to match the maintainer's register (`lite` **intensity tier**).
 2. **Treat tells as cumulative:** a single listed word or em-dash is not a defect; rewrite when tells cluster in a paragraph.
@@ -110,14 +110,14 @@ AI-generated technical prose gives itself away through structural predictability
 
 ## 3. `sepia` — Chinese (`zh`) Calibration Subset
 
-> **Attribution:** `sepia` v0.11.0 (`D:\Aworker\research\ALL\.agents\skills\sepia\references\languages\zh.md`, local mirror @ `365185bec8c5eae8711ebd56b4f4556759f685b2`, MIT). Tables below are verbatim from `zh.md` §2 and §4 (journalism-only speech-tag row omitted); rationale is rewritten in READJH's words.
+> **Attribution:** `sepia` v0.11.0 (`D:\Aworker\research\ALL\.agents\skills\sepia\references\languages\zh.md`; see `UPSTREAM.md`). Tables below are verbatim from `zh.md` §2 and §4 (journalism-only speech-tag row omitted); rationale is rewritten in READJH's words.
 
 ### Rationale (rewritten)
 
 Load this section whenever the target README is written in Chinese (Simplified or Traditional) or when processing the Chinese half of a bilingual README pair in lockstep:
 
-1. **Clause juxtaposition beats conjunction chains:** Chinese human prose links clauses through parataxis and commas; LLM Chinese overuses conjunctions (`和`, `以及`, `並且`, `同時`, `此外`, `因此`, `然而`) at nearly three times the human rate (`0.036` vs. `0.013`).
-2. **Use bare monosyllabic/base verbs:** strip dummy verb wrappers (`進行討論 → 討論`, `加以說明 → 說明`, `予以處理 → 處理`, `做出決定 → 決定`).
+1. **Link clauses with commas and word order instead of conjunction chains:** Chinese human prose places clauses side by side with commas; LLM Chinese overuses conjunctions (`和`, `以及`, `並且`, `同時`, `此外`, `因此`, `然而`) at nearly three times the human rate (`0.036` vs. `0.013`).
+2. **Use bare base verbs:** strip dummy verb wrappers (`進行討論 → 討論`, `加以說明 → 說明`, `予以處理 → 處理`, `做出決定 → 決定`).
 3. **Cut formulaic summary openers:** delete `「綜上所述」`, `「總而言之」`, `「值得一提的是」`, and `「值得注意的是」`.
 4. **Do not over-correct normal Chinese forms:** a single `「不是…而是」`, a three-item `頓號` list (`A、B、C`), a single `「──」` or `「——」`, and standalone `「此外」` or `「然而」` are normal in Chinese prose; rewrite only when they stack across adjacent clauses or paragraphs.
 5. **Respect freeze zones in Chinese prose:** code spans, commands, CLI flags, Markdown syntax, URLs, file names, version strings, and text inside quotation marks are never touched (`zh.md` §0).
@@ -142,9 +142,9 @@ Load this section whenever the target README is written in Chinese (Simplified o
 
 ---
 
-## 4. `anti-defensive-writing` (English Kiterlin Variant Only) — Defensive-to-Positive-Scope Transform
+## 4. `D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md` (English Kiterlin Variant Only) — Defensive-to-Positive-Scope Transform
 
-> **Attribution:** `anti-defensive-writing` by Kiterlin (`https://github.com/Kiterlin/anti-defensive-writing`, local mirror at `D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md` @ `365185bec8c5eae8711ebd56b4f4556759f685b2`, MIT). **Path disambiguation (ADR-0001, `UPSTREAM.md`):** READJH distills **only** the English Kiterlin file at `D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md`; the same-named Chinese variant at `D:\Aworker\research\ALL\vendor\anti-defensive-skill\` is **never** used. Pattern lists and before/after examples below are verbatim from `D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md`; rationale is rewritten in READJH's words.
+> **Attribution:** English Kiterlin variant at `D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md` (see `UPSTREAM.md`). **Path disambiguation (Spec 0001, ADR-0001):** referenced strictly by path (`D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md`); the same-named Chinese variant at `D:\Aworker\research\ALL\vendor\anti-defensive-skill\` is **never** used. Pattern lists and before/after examples below are verbatim from `D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md`; rationale is rewritten in READJH's words.
 
 ### Rationale (rewritten)
 
@@ -184,6 +184,8 @@ AI-generated READMEs frequently negotiate with an imagined critic by listing wha
 
 ### 4.2 Before / After pairs (verbatim from `D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md` §Rewrite Procedure & §Examples)
 
+*(Note: the `"Rather than arguing X..."` negative-parallelism pair is merged into §1 above.)*
+
 **Convert defensive limitation into positive scope:**
 
 Prefer:
@@ -212,12 +214,6 @@ Stronger:
 > The cases show how the mechanism operates across three institutional settings.
 
 Defensive:
-> This paper is not intended to provide a comprehensive theory of platform governance, but rather to examine one specific mechanism.
-
-Stronger:
-> This paper identifies a mechanism through which platform governance reshapes participation.
-
-Defensive:
 > This does not mean that policy design alone determines implementation outcomes.
 
 Stronger:
@@ -239,7 +235,7 @@ Stronger:
 
 ## 5. `academic-humanizer` — Claim↔Evidence Discipline Subset
 
-> **Attribution:** `academic-humanizer` v0.3.3 by AIScientists-Dev (`https://github.com/AIScientists-Dev/academic-humanizer`, local mirror at `D:\Aworker\research\ALL\vendor\academic-humanizer\SKILL.md` @ `365185bec8c5eae8711ebd56b4f4556759f685b2`, MIT). Watch lists and before/after pairs below are verbatim from Layer 1, Layer 2 (2.1–2.6, 2.9–2.11), and Layer 4 of `D:\Aworker\research\ALL\vendor\academic-humanizer\SKILL.md`; rationale is rewritten in READJH's words.
+> **Attribution:** `academic-humanizer` v0.3.3 by AIScientists-Dev (`D:\Aworker\research\ALL\vendor\academic-humanizer\SKILL.md`; see `UPSTREAM.md`). Non-overlapping watch lists and before/after pairs below are verbatim from Layer 2 (2.1–2.5) and Layer 4 of `D:\Aworker\research\ALL\vendor\academic-humanizer\SKILL.md` (overlapping items Layer 1, 2.6, 2.7, 2.9, 2.10, and 2.11 are merged into §1 above); rationale is rewritten in READJH's words.
 
 ### Rationale (rewritten)
 
@@ -249,11 +245,7 @@ In technical READMEs, neutral and precise prose is the human voice. Do not casua
 2. **Replace empty intensifiers with counts or names:** replace `"extensive tests"`, `"a wide range of formats"`, or `"significantly faster"` with the exact count, format list, or measured range (`"three formats: JSON, CSV, Parquet"`).
 3. **Preserve calibrated hedging and technical terms (Layer 3):** keep `"suggests"`, `"is consistent with"`, passive voice where the actor is irrelevant, and exact metric/method names. Never alter a number, command, or identifier.
 
-### 5.1 Watch lists and Before / After pairs (verbatim from `D:\Aworker\research\ALL\vendor\academic-humanizer\SKILL.md`)
-
-**Layer 1 — General AI-tell catalog:**
-- **Before:** *Additionally, an enduring testament to the method's value is its ability to delve into intricate dependencies, showcasing a seamless integration that underscores its pivotal role.*
-- **After:** *The method also captures higher-order dependencies, which the baselines miss (Table 2).*
+### 5.1 Non-overlapping watch lists and Before / After pairs (verbatim from `D:\Aworker\research\ALL\vendor\academic-humanizer\SKILL.md`)
 
 **2.1 Over-claiming verbs:**
 - **Watch:** demonstrate, prove, establish, confirm, guarantee; "significantly" with no test/number.
@@ -280,25 +272,6 @@ In technical READMEs, neutral and precise prose is the human voice. Do not casua
 - **Before:** *In recent years, tabular deep learning has attracted increasing attention.*
 - **After:** *Tabular deep learning has a structural limitation: most models discard feature-type metadata and must relearn it from data.*
 
-**2.6 Connective overuse:**
-- **Before:** *Moreover, the method is fast. Furthermore, it is simple. Additionally, it scales.*
-- **After:** *The method is fast and simple, and it scales to one million rows (Section 5).*
-
-**2.9 Hedging-by-vagueness:**
-- **Watch:** somewhat, relatively, fairly, to some extent, quite. Quantify or cut.
-- **Before:** *Performance is somewhat better and relatively robust.*
-- **After:** *Accuracy is 3 points higher and varies by less than 1 point across five seeds.*
-
-**2.10 Boilerplate emphasis:**
-- **Watch:** "It is worth noting that", "It should be emphasized that", "Notably,", "Importantly,".
-- **Before:** *It is worth noting that, importantly, the gain holds across scenarios.*
-- **After:** *The gain holds across all three scenarios (Table 4).*
-
-**2.11 Overlong, clause-stacked sentences:**
-- **Watch:** sentences past ~30 words, or with 3+ subordinate clauses (`which`, `that`, `while`, `with`).
-- **Before:** *Existing methods, though promising, are largely empirical, with unclear principles underpinning their behavior, which limits their reliability and further progress.*
-- **After:** *Existing methods stay empirical. Their principles are unclear, which limits reliability and progress.*
-
 **Layer 4 — Claim-evidence discipline:**
 - **Unbacked claim -> add the evidence pointer or soften.**
   - *Before:* *Our method is more robust.*
@@ -314,7 +287,7 @@ In technical READMEs, neutral and precise prose is the human voice. Do not casua
 
 ## 6. `humanize-readme` — Salvageable README Rules (Burstiness, Suspicious Completeness, Real-Gap Signals)
 
-> **Attribution:** `humanize-readme` v1.1.0 by b4r7x (`https://github.com/b4r7x/agent-skills`, `humanize-readme/SKILL.md` and `humanize-readme/references/slop-patterns.md` @ `292bad1458a30384e9e6eb3d46ba24428d7c5618`, MIT). **Execution boundary (`UPSTREAM.md`):** `humanize-readme` is a distilled rules source only and is **never** executed. Ban tables and before/after examples below are verbatim from `humanize-readme/references/slop-patterns.md`; rationale and the orchestration guard on real-gap signals are written in READJH's words.
+> **Attribution:** `humanize-readme` v1.1.0 by b4r7x (`https://github.com/b4r7x/agent-skills`, `humanize-readme/SKILL.md` and `humanize-readme/references/slop-patterns.md`; see `UPSTREAM.md`). **Execution boundary (`UPSTREAM.md`):** `humanize-readme` is a distilled rules source only and is **never** executed. Ban tables and before/after examples below are verbatim from `humanize-readme/references/slop-patterns.md` (with inline `[READJH SUPPRESSION]` tags where an upstream example models a first-person story or unverified gap); rationale is rewritten in READJH's words.
 
 ### Rationale and READJH Guard (rewritten)
 
@@ -323,7 +296,7 @@ In technical READMEs, neutral and precise prose is the human voice. Do not casua
 1. **Burstiness (sentence-length variation):** AI READMEs write every sentence at ~15–20 words with identical subject-verb-object cadence. Mix short fragments or 5-word sentences with longer explanatory sentences by splitting or merging existing clauses — never by adding filler (`sepia` `style-pass.md` §5).
 2. **Suspicious completeness:** a README that tries to cover every hypothetical edge case in polished marketing prose reads as machine-generated (`SLOPSHAPE-2026`). Keep only front-page essentials and move deep reference material to `docs/` under a migration ledger (`references/readme-rules.md` §4.1).
 3. **Real-gap signals (strictly repo-grounded):** real human READMEs state concrete platform boundaries, runtime floors, or known tradeoffs (`"Needs Node 18+"`, `"Windows only"`, `"Single-node SQLite store"`).
-   - **Orchestration guard (overrides `humanize-readme` runner):** surface a gap, limitation, or design reason **only** when a receipt exists in the repository (for example, `engines` in `package.json`, OS matrix in `.github/workflows/`, platform guards in source code, or user-provided notes). **Never** invent first-person stories (`"I wrote it because node-cache's API annoyed me"`) or unverified failure modes (`"it'll probably explode"`). In the verbatim upstream examples below, the structural compression and specificity fixes apply; any first-person motivation or platform warning is valid **only** when backed by the repository.
+   - **Orchestration guard (overrides `humanize-readme` runner):** surface a gap, limitation, or design reason **only** when a **receipt** exists in the repository (for example, `engines` in `package.json`, OS matrix in `.github/workflows/`, platform guards in source code, or user-provided notes). **Never** invent first-person stories (`"I wrote it because node-cache's API annoyed me"`) or unverified failure modes (`"it'll probably explode"`).
 
 ### 6.1 Banned Buzzwords (verbatim from `humanize-readme/references/slop-patterns.md`)
 
@@ -384,8 +357,6 @@ ensures           → say what it actually does (not "ensures correctness" → "
 
 ### 6.3 Banned Structural Patterns and Before / After Pairs (verbatim from `humanize-readme/references/slop-patterns.md`)
 
-*(READJH guard: keep the concrete metric/API replacements below; include first-person `"I built this..."` or runtime warnings only when proven by repository files or user input.)*
-
 **Fake Bullet Enthusiasm:**
 
 ```text
@@ -423,7 +394,7 @@ ensures           → say what it actually does (not "ensures correctness" → "
 ❌ **AI slop:**
 > FastCache is a comprehensive, high-performance caching solution designed to seamlessly integrate with your existing Node.js infrastructure. By leveraging cutting-edge in-memory storage techniques, FastCache empowers developers to build scalable applications with minimal configuration.
 
-✅ **Human:**
+✅ **Human** *(READJH guard: keep the first two concrete sentences; the final `"I wrote it..."` sentence is forbidden unless present in the repo or supplied by the user)*:
 > FastCache is a Node.js in-memory cache. It's a thin wrapper around a Map with TTL support and a dead-simple API. I wrote it because node-cache's API annoyed me.
 
 **Example 2 — Feature section:**
@@ -448,7 +419,7 @@ ensures           → say what it actually does (not "ensures correctness" → "
 > ### Prerequisites
 > Before you begin, ensure you have met the following requirements...
 
-✅ **Human:**
+✅ **Human** *(READJH guard: keep `"Needs Node 18+"` when `engines` in `package.json` proves it; omit `"If you're on an older version, it'll probably explode"` unless the repo documents that exact failure)*:
 > ## Install
 > ```bash
 > npm install fastcache
@@ -460,5 +431,5 @@ ensures           → say what it actually does (not "ensures correctness" → "
 ❌ **AI rhythm (all sentences roughly equal length):**
 > FastCache provides an in-memory caching solution for Node.js applications. It supports TTL-based expiry and automatic eviction policies. The library includes a simple get/set/del API that developers can integrate quickly.
 
-✅ **Human rhythm (short and long mixed):**
+✅ **Human rhythm (short and long mixed)** *(READJH guard: apply the short-then-long sentence rhythm; do not invent the `"I wrote it because..."` backstory)*:
 > FastCache is a Node.js in-memory cache. Thin wrapper around a Map. Supports TTL and auto-eviction. I wrote it because every other cache library I tried had an API that felt like it was designed by committee — seven methods when you need three.

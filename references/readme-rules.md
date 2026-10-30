@@ -1,16 +1,16 @@
 # Orchestration-Layer README Rules
 
-> **Attribution:** `READJH` orchestration layer (`docs/spec/0001-readjh-orchestration-skill.md`, `GLOSSARY.md`, `UPSTREAM.md`, `docs/adr/0001-pointer-contract-and-distilled-rules.md`); `jiahao` (`D:\Aworker\jiahao\src\SKILL.md`, `D:\Aworker\jiahao\GLOSSARY.md` — Delivery Engineer / No receipt, no claim).
+> **Attribution:** `READJH` orchestration layer (`docs/spec/0001-readjh-orchestration-skill.md`, `GLOSSARY.md`, `UPSTREAM.md`, `docs/adr/0001-pointer-contract-and-distilled-rules.md`); `jiahao` (`D:\Aworker\jiahao\src\SKILL.md`, `D:\Aworker\jiahao\GLOSSARY.md` — Delivery Engineer / No receipt, no claim). Canonical upstream URLs, observed machine paths, and commit hashes are recorded in `UPSTREAM.md`.
 
-This file defines the **orchestration layer** rules that READJH owns and enforces across its five phases (`ROUTE → TRUTH → RESTRUCTURE → LANGUAGE → VERIFY`). Read this file into context alongside `references/de-ai-language.md` before running `RESTRUCTURE`, `LANGUAGE`, or `VERIFY`.
+This file defines the five **orchestration layer** rules that READJH owns and enforces across its pipeline (`ROUTE → TRUTH → RESTRUCTURE → LANGUAGE → VERIFY`). Read this file into context alongside `references/de-ai-language.md` before running `RESTRUCTURE`, `LANGUAGE`, or `VERIFY`.
 
 ---
 
 ## 1. Freeze Zone
 
-> **Attribution:** `READJH` orchestration layer (`docs/spec/0001-readjh-orchestration-skill.md` US-12, `GLOSSARY.md`); `humanize-readme` (`https://github.com/b4r7x/agent-skills`, `humanize-readme/SKILL.md` Step 3 @ `292bad1458a30384e9e6eb3d46ba24428d7c5618`); `academic-humanizer` (`https://github.com/AIScientists-Dev/academic-humanizer`, `D:\Aworker\research\ALL\vendor\academic-humanizer\SKILL.md` Layer 3 @ `365185bec8c5eae8711ebd56b4f4556759f685b2`); `sepia` (`D:\Aworker\research\ALL\.agents\skills\sepia\references\languages\zh.md` §0 @ `365185bec8c5eae8711ebd56b4f4556759f685b2`); `anti-defensive-writing` (`https://github.com/Kiterlin/anti-defensive-writing`, English Kiterlin variant at `D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md` §Preserve Necessary Precision @ `365185bec8c5eae8711ebd56b4f4556759f685b2` — disambiguated by path from the unused Chinese variant at `D:\Aworker\research\ALL\vendor\anti-defensive-skill\`).
+> **Attribution:** `READJH` orchestration layer (`docs/spec/0001-readjh-orchestration-skill.md` US-12, `GLOSSARY.md`); `humanize-readme` (`humanize-readme/SKILL.md` Step 3); `academic-humanizer` (`vendor/academic-humanizer/SKILL.md` Layer 3); `sepia` (`.agents/skills/sepia/references/languages/zh.md` §0); English Kiterlin variant at `D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md` (§Preserve Necessary Precision — referenced by path; `D:\Aworker\research\ALL\vendor\anti-defensive-skill\` is not used).
 
-A **freeze zone** is any README region that no language pass (`writing-humanize` or distilled rules) may alter, reword, reformat, or delete.
+A **freeze zone** is any README region that no language pass (`writing-humanize` or **distilled rules**) may alter, reword, reformat, or delete.
 
 ### Covered spans
 
@@ -25,30 +25,30 @@ A **freeze zone** is any README region that no language pass (`writing-humanize`
 
 ### Phase boundary (`TRUTH` vs. `LANGUAGE`)
 
-1. If a freeze-zone span contradicts the repository (for example, a command flag that does not exist in the CLI entry point, a version mismatch against `package.json`, or a dead local link), `TRUTH` reports it as a finding with its `file:line` receipt.
-2. `LANGUAGE` operates strictly outside freeze zones. A language pass that mutates a freeze-zone span fails `VERIFY` and must be reverted before delivery.
+1. If a freeze-zone span contradicts the repository (for example, a command flag missing from the CLI entry point, a version mismatch against `package.json`, or a dead local link), `TRUTH` reports it as a finding with its `file:line` **receipt**.
+2. `LANGUAGE` operates strictly outside freeze zones. Any language edit that mutates a freeze-zone span fails `VERIFY` and must be reverted before delivery.
 
 ---
 
 ## 2. Self-Attestation Convergence
 
-> **Attribution:** `READJH` orchestration layer (`docs/spec/0001-readjh-orchestration-skill.md` US-10, US-17, `GLOSSARY.md`; six-repo audit study on `6F` and `EgressAPIKEY`); `anti-defensive-writing` (`https://github.com/Kiterlin/anti-defensive-writing`, English Kiterlin variant at `D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md` §Core Rule, §Preserve Necessary Precision, §Rewrite Procedure @ `365185bec8c5eae8711ebd56b4f4556759f685b2` — disambiguated by path from `D:\Aworker\research\ALL\vendor\anti-defensive-skill\`); `jiahao` (`D:\Aworker\jiahao\src\SKILL.md`, `D:\Aworker\jiahao\GLOSSARY.md` — Delivery Engineer / No receipt, no claim).
+> **Attribution:** `READJH` orchestration layer (`docs/spec/0001-readjh-orchestration-skill.md` US-10, US-17, `GLOSSARY.md`; six-repo audit study on `6F` and `EgressAPIKEY`); English Kiterlin variant at `D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md` (§Core Rule, §Preserve Necessary Precision, §Rewrite Procedure — referenced by path, not `vendor/anti-defensive-skill/`); `jiahao` (`D:\Aworker\jiahao\src\SKILL.md` — Delivery Engineer / No receipt, no claim).
 
 **Self-attestation** is text that repeatedly asserts its own honesty, preview status, verification rigor, or scope limits across multiple sections of the same README (for example, restating `"preview means preview"`, `"synthetic fixtures never impersonate real audits"`, or `"badges show only what is true today"` in the hero note, capability matrix, demo section, and a closing `"Honesty notes"` section).
 
 ### Rules
 
 1. **State each boundary once.** Every real limitation, preview status, or operational boundary belongs in **one** designated place in the README. Any second statement of the same boundary is a defect: delete the duplicate or replace it with a link to the single authoritative statement.
-2. **Recast defensive sentences as `fact + link`.** Replace multi-clause negative disclaimers (`"Do not read this page as a finished product; upstreams marked planned are not wired yet..."`) with a single positive scope sentence plus a link to the contract file (`"Four of five audit scales run in preview; see engine/upstream-lock.yaml for active adapters."`).
-3. **Delete dedicated self-congratulation sections.** Sections that exist only to proclaim the README's own honesty (such as a standalone `"Honesty notes"` section restating earlier caveats) are removed during `RESTRUCTURE`; any unique fact inside them merges into the relevant section once.
+2. **Recast defensive sentences as `fact + link`.** Replace multi-clause negative disclaimers (`"Do not read this page as a finished product; upstreams marked planned are not wired yet..."`) with one positive scope sentence plus a link to the contract file (`"Four of five audit scales run in preview; see engine/upstream-lock.yaml for active adapters."`).
+3. **Delete standalone honesty-proclaiming sections.** Sections that exist only to proclaim the README's own truthfulness (such as a closing `"Honesty notes"` section restating earlier caveats) are removed during `RESTRUCTURE`; any unique fact inside them merges into the relevant section once.
 4. **Strip internal tracker noise from the front page.** Issue numbers, round markers, and internal decision IDs (`#85②`, `D-204③④`, `D-037③`, `A-044`) belong in `docs/`, `CHANGELOG.md`, or commit messages, not in front-page README sentences.
-5. **Check with the static probe.** `scripts/check-readme.py` counts repeated boundary phrases across the file; a duplicate boundary count above the probe threshold blocks `VERIFY`.
+5. **Verify with the static probe.** `scripts/check-readme.py` counts repeated boundary phrases across the file; a duplicate count above the probe threshold blocks `VERIFY`.
 
 ---
 
 ## 3. Generation-Trace Detection
 
-> **Attribution:** `READJH` orchestration layer (`docs/spec/0001-readjh-orchestration-skill.md` US-11, `GLOSSARY.md`; six-repo audit study on `EgressAPIKEY/README.md`); `writing-humanize` (`https://github.com/risadams/ink-and-agency`, `skills/writing-humanize/references/patterns.md` Patterns #20–22 @ `e1f0a00e06d55c00502e0ccbea79ab453e7fb118`); `sepia` (`D:\Aworker\research\ALL\.agents\skills\sepia\references\professional-pass.md` Check #1 @ `365185bec8c5eae8711ebd56b4f4556759f685b2`).
+> **Attribution:** `READJH` orchestration layer (`docs/spec/0001-readjh-orchestration-skill.md` US-11, `GLOSSARY.md`; six-repo audit study on `EgressAPIKEY/README.md`); `writing-humanize` (`skills/writing-humanize/references/patterns.md` Patterns #20–22); `sepia` (`.agents/skills/sepia/references/professional-pass.md` Check #1).
 
 A **generation trace** is a marker left inside the README by the skill, prompt, or chatbot session that drafted or edited it.
 
@@ -56,23 +56,23 @@ A **generation trace** is a marker left inside the README by the skill, prompt, 
 
 | Trace category | Examples observed in repositories | Action |
 |---|---|---|
-| Skill or rule comments | `<!-- PLACEHOLDER: ... deliberately NOT fabricated (readme-crafter rule). -->`, `<!-- SLOT topology: assets/readme/topology.png ... -->`, `<!-- Drop-in: replace each comment block ... -->` | Remove the HTML comment scaffolding. If screenshots or assets are not yet present in the repo, state the absence in one plain sentence or omit the empty section. |
+| Skill or rule comments | `<!-- PLACEHOLDER: ... deliberately NOT fabricated (readme-crafter rule). -->`, `<!-- SLOT topology: assets/readme/topology.png ... -->`, `<!-- Drop-in: replace each comment block ... -->` | Remove the HTML comment scaffolding. If screenshots or assets are missing from the repo, state the absence in one plain sentence or omit the empty section. |
 | Pipeline or self-evolve tags | `<!-- self-evolve:start -->`, `[ROUTE]`, `[TRUTH]`, `[LANGUAGE]` | Delete completely. |
 | Chatbot turn wrappers | `"Great question!"`, `"Here is the updated README:"`, `"I hope this helps!"`, `"Let me know if you'd like me to expand on any section!"` | Delete completely (`sepia` `professional-pass.md` #1; `writing-humanize` #20, #22). |
 | Knowledge-cutoff disclaimers | `"As of my last update..."`, `"While specific details are scarce in available sources..."` | Delete and replace with the fact verified from the repository (`writing-humanize` #21). |
 
 ### Whitelist (legitimate repo markers)
 
-HTML comments that are actively read or written by a script or workflow present in the repository are **not** generation traces:
+HTML comments actively read or written by a script or workflow in the repository are **not** generation traces:
 
-- Generator boundaries such as `<!-- acknowledgments:start — GENERATED by engine/scripts/gen-acknowledgments.mjs ... -->` are kept **if and only if** the referenced script (`engine/scripts/gen-acknowledgments.mjs`) exists in the repository.
-- Sync anchors such as `<!-- README-I18N:START -->` or `<!-- synced-with: ... -->` are kept **if and only if** the referenced companion file or sync tool exists in the repository. If no script or companion file backs the comment, flag and remove it.
+- Generator boundaries such as `<!-- acknowledgments:start — GENERATED by engine/scripts/gen-acknowledgments.mjs ... -->` stay **if and only if** the referenced script (`engine/scripts/gen-acknowledgments.mjs`) exists in the repository.
+- Sync anchors such as `<!-- README-I18N:START -->` or `<!-- synced-with: ... -->` stay **if and only if** the referenced companion file or sync tool exists in the repository. If no script or companion file backs the comment, flag and remove it.
 
 ---
 
-## 4. Skeleton Isomorphism and Front-Page Scope
+## 4. Skeleton Isomorphism
 
-> **Attribution:** `READJH` orchestration layer (`docs/spec/0001-readjh-orchestration-skill.md` US-9, US-20, US-21, `GLOSSARY.md`); `readme-crafter-skill` (`https://github.com/linhai0872/readme-crafter-skill`, `SKILL.md` §Core Philosophy & `references/repo-integrity.md` §1, §5 @ `08db7782836c542d9b597860da33fcc159e36433`); `humanize-readme` (`https://github.com/b4r7x/agent-skills`, `humanize-readme/references/slop-patterns.md` §README Type Conventions & §What Good Human READMEs Don't Need @ `292bad1458a30384e9e6eb3d46ba24428d7c5618`); `sepia` (`D:\Aworker\research\ALL\.agents\skills\sepia\references\professional-pass.md` `SLOPSHAPE-2026` & Check #8 @ `365185bec8c5eae8711ebd56b4f4556759f685b2`).
+> **Attribution:** `READJH` orchestration layer (`docs/spec/0001-readjh-orchestration-skill.md` US-9, US-20, US-21, `GLOSSARY.md`); `readme-crafter-skill` (`SKILL.md` §Core Philosophy & `references/repo-integrity.md` §1, §5); `humanize-readme` (`humanize-readme/references/slop-patterns.md` §README Type Conventions & §What Good Human READMEs Don't Need); `sepia` (`.agents/skills/sepia/references/professional-pass.md` `SLOPSHAPE-2026` & Check #8).
 
 ### 4.1 Single-repo front-page boundary (`RESTRUCTURE`)
 
@@ -80,7 +80,7 @@ A README is the front page of a repository, not its complete manual. Over-comple
 
 1. **Keep on the front page:** project name and plain one-liner, why it exists (when grounded in the repo), install/setup matching the real distribution posture, a minimal working usage example, a brief capability summary, and links to deeper docs.
 2. **Migrate to `docs/`:** full CLI/API reference tables, threat models and security boundary matrices, versioning and lockfile policies, contributor runbooks, and architecture deep-dives when the architecture is not itself the product.
-3. **Emit a migration ledger:** whenever `improve` or `rewrite` moves material out of `README.md` into `docs/`, the delivery report must include a migration ledger table (`Moved span (heading + line range) → Destination file path`) so zero content is silently dropped.
+3. **Record every move in the migration ledger:** whenever `improve` or `rewrite` moves material out of `README.md` into `docs/`, record `Moved span (heading + line range) → Destination file path` in the delivery report's migration ledger so nothing is silently dropped.
 
 ### 4.2 Cross-repo skeleton isomorphism (`repo-set mode`)
 
@@ -93,13 +93,13 @@ A README is the front page of a repository, not its complete manual. Over-comple
    - **Library / SDK:** lead with package/source install and a minimal import + input/output snippet; link out for full API.
    - **Desktop / web application / plugin:** lead with what it does, a real screenshot or explicit asset-pending note, and the download or local-run path.
    - **Research or benchmark repo:** lead with the problem, paper/spec link, and reproduction commands.
-4. When two repositories of different project types share the same section skeleton in `repo-set mode`, reorder and trim each README in `RESTRUCTURE` to match its own project type and distribution posture.
+4. When two repositories of different project types share the same section skeleton in **repo-set mode**, reorder and trim each README in `RESTRUCTURE` to match its own project type and distribution posture.
 
 ---
 
-## 5. Intensity Tiers and No-Invented-Personality Rule
+## 5. No-Invented-Personality Rule and Intensity Tiers
 
-> **Attribution:** `READJH` orchestration layer (`docs/spec/0001-readjh-orchestration-skill.md` US-14, US-15, US-16, US-33, `UPSTREAM.md` §Deviation table, `GLOSSARY.md`); `academic-humanizer` (`https://github.com/AIScientists-Dev/academic-humanizer`, `D:\Aworker\research\ALL\vendor\academic-humanizer\SKILL.md` §When to use & §Core principle @ `365185bec8c5eae8711ebd56b4f4556759f685b2`); `sepia` (`D:\Aworker\research\ALL\.agents\skills\sepia\references\professional-pass.md` §Read the venue first, Check #5 & `references\style-pass.md` §7 @ `365185bec8c5eae8711ebd56b4f4556759f685b2`); `jiahao` (`D:\Aworker\jiahao\src\SKILL.md` R2 Probing Over Guessing & R4 Plain Language Discipline).
+> **Attribution:** `READJH` orchestration layer (`docs/spec/0001-readjh-orchestration-skill.md` US-14, US-15, US-16, US-33, `UPSTREAM.md` §Deviation table, `GLOSSARY.md`); `academic-humanizer` (`vendor/academic-humanizer/SKILL.md` §When to use & §Core principle); `sepia` (`.agents/skills/sepia/references/professional-pass.md` §Read the venue first, Check #5 & `references/style-pass.md` §7); `jiahao` (`D:\Aworker\jiahao\src\SKILL.md` R2 Probing Over Guessing & R4 Plain Language Discipline).
 
 ### 5.1 Intensity tiers (`lite` vs. `standard`)
 
@@ -113,21 +113,8 @@ A README is the front page of a repository, not its complete manual. Over-comple
 Neither **intensity tier** may fabricate authenticity:
 
 1. **No invented first-person stories or opinions.** Never insert `"I built this because X annoyed me"`, `"over coffee"`, `"I genuinely don't know how to feel"`, or casual banter not already present in the repository or supplied by the user (`academic-humanizer` §When to use).
-2. **No invented limitations or `"honest gaps"`.** Never add `"Not tested on Windows"`, `"Alpha, expect breakage"`, or `"Probably explodes on older Node"` unless a repository receipt proves that exact boundary (for example, an OS check in `.github/workflows/`, `engines` in `package.json`, or a documented constraint in source code).
+2. **No invented limitations or `"honest gaps"`.** Never add `"Not tested on Windows"`, `"Alpha, expect breakage"`, or `"Probably explodes on older Node"` unless a repository **receipt** proves that exact boundary (for example, an OS check in `.github/workflows/`, `engines` in `package.json`, or a documented constraint in source code).
 3. **Upstream suppressions enforced whenever `writing-humanize` is invoked (`UPSTREAM.md`):**
    - **Suppress personality injection:** ignore `writing-humanize/SKILL.md` Step 5 (`"Add soul — Don't just remove bad patterns; inject actual personality"`) and the `PERSONALITY AND SOUL` section. For technical READMEs, direct, specific, plain language is the target voice.
    - **Suppress self-evolve journaling:** ignore `writing-humanize/SKILL.md` `Self-Evolve Loop` (`~/.ink-and-agency/learnings/writing-humanize.md` or `.ink-and-agency/`). A READJH run must never write files outside the target repository.
-4. **`humanize-readme` runner is never executed:** `humanize-readme` contributes distilled detection patterns only (`references/de-ai-language.md` §6); its executable workflow is rejected because it simultaneously demands adding honest gaps and forbids adding content (`UPSTREAM.md`).
-
----
-
-## 6. Truth Discipline, Bilingual Lockstep, and Delivery Receipts
-
-> **Attribution:** `READJH` orchestration layer (`docs/spec/0001-readjh-orchestration-skill.md` US-6–8, US-22–28, US-34, `GLOSSARY.md`); `readme-crafter-skill` (`https://github.com/linhai0872/readme-crafter-skill`, `SKILL.md` §Language Handling, §Evidence Model & `references/repo-integrity.md` §6 @ `08db7782836c542d9b597860da33fcc159e36433`); `jiahao` (`D:\Aworker\jiahao\src\SKILL.md` Action Ladder Rungs 2–5).
-
-1. **Contradicted claims stop as findings (`TRUTH`).** Compare every README claim against repository manifests (`package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`), CI workflows, public exports, `.env.example`, and real CLI `--help` definitions. When the repository contradicts a claim, report the contradiction as a finding with its `file:line` location; never silently invent a replacement fact (`jiahao` R5 Zero Rationalization on Red).
-2. **Unbacked claims are cut or marked `TODO`.** When a marketing or performance claim has no backing in the repository or user-supplied material, delete it or mark it as an explicit `TODO` / assumption (`readme-crafter-skill` §Evidence Model).
-3. **Never execute commands documented inside a README.** The static probe (`scripts/check-readme.py`) inspects files without running README shell snippets. Any README command that was not independently verified against repository scripts must be listed in the delivery report's residual-risk line as `"needs manual verification"` (Spec 0001 US-25, US-26).
-4. **Bilingual lockstep.** When a repository contains paired language READMEs (`README.md` + `README.zh-CN.md`, `README_CN.md`, or `README-ZH.md`), audit or edit both files in lockstep so their section structure, freeze zones, and factual claims stay aligned. Apply the Chinese calibration in `references/de-ai-language.md` §3 to the Chinese file. Never create a second-language README unless the user explicitly requests one (Spec 0001 US-22–24).
-5. **Rollback safety (`.bak`).** Before writing to disk in `improve` or `rewrite` mode (when `--dry-run` is not set), check whether `git` can cleanly restore the target file. If the repository is not a git checkout or the target README has uncommitted changes, write `<readme>.bak` before modifying `<readme>` (Spec 0001 US-28).
-6. **Three-line delivery report backed by receipts.** Every run closes with at most three report lines (`[Conclusion]`, `[Receipts]`, `[Residual risk]`), plus the migration ledger table when `RESTRUCTURE` moved content to `docs/`. AI-detector scores are never accepted as a **receipt** (`jiahao` R1 & R5; Spec 0001 US-27, US-34).
+4. **`humanize-readme` runner is never executed:** `humanize-readme` contributes **distilled rules** only (`references/de-ai-language.md` §6); its executable workflow is rejected because it simultaneously demands adding honest gaps and forbids adding content (`UPSTREAM.md`).
