@@ -60,7 +60,7 @@ Rules, inherited from ADR-0001:
 
 | canonical name | upstream URL | license | required files | search paths | observed location (2026-10-30) | state |
 |---|---|---|---|---|---|---|
-| `readme-crafter-skill` | https://github.com/linhai0872/readme-crafter-skill | MIT | `SKILL.md`, `references/repo-integrity.md` (in `references/`), `scripts/scan-project.py`, `scripts/scan_project_readme.py`, `scripts/scan_project_support.py` | contract list above | `C:\Users\Administrator\.agents\skills\git\readme\readme-crafter-skill-main\` | installed, **non-canonical** — nested two levels deep with a `-main` suffix, so the pointer contract does not find it; junction/rename needed (see Install actions) |
+| `readme-crafter-skill` | https://github.com/linhai0872/readme-crafter-skill | MIT | `SKILL.md`, `references/repo-integrity.md` (in `references/`), `scripts/scan-project.py`, `scripts/scan_project_readme.py`, `scripts/scan_project_support.py` | contract list above | `C:\Users\Administrator\.agents\skills\git\readme\readme-crafter-skill-main\`, resolved at canonical `C:\Users\Administrator\.agents\skills\readme-crafter-skill` via junction (created 2026-10-31 for Ticket #5) | installed — canonical junction in place; target is a captured copy (not a Git checkout), so no live revision hash; contract resolution verified 2026-10-31 |
 | `writing-humanize` | https://github.com/risadams/ink-and-agency (`skills/writing-humanize/`) | MIT (skill `license:` field; repo LICENSE MIT, fork notice credits mattpocock/skills) | `SKILL.md`, `references/patterns.md`, `agents/openai.yaml` | contract list above | — | **not installed locally**; clone required (see Install actions) |
 
 Upstream commits observed at authoring time: `readme-crafter-skill`
@@ -99,11 +99,12 @@ What a fresh machine needs so the contract resolves:
   git -C "$HOME/.agents/repos/readme-crafter-skill" checkout 08db7782836c542d9b597860da33fcc159e36433 && \
   ln -s "$HOME/.agents/repos/readme-crafter-skill" "$HOME/.agents/skills/readme-crafter-skill"
   ```
-  On the authoring machine the tree already exists at a non-canonical path —
-  make `<skills-root>\readme-crafter-skill` resolve to it instead of
-  re-cloning. Either of:
+  On the authoring machine the tree already exists at a non-canonical path and
+  the junction below was applied on 2026-10-31 (Ticket #5) — recorded here as
+  already done; the options remain documented for a fresh machine:
   - junction (Windows):
     `mklink /J "%USERPROFILE%\.agents\skills\readme-crafter-skill" "%USERPROFILE%\.agents\skills\git\readme\readme-crafter-skill-main"`
+    *(already created — `Get-Item` reports LinkType Junction → `…\git\readme\readme-crafter-skill-main`)*
   - or rename the directory in place to `readme-crafter-skill` at the skills
     root (loses the `git\readme` grouping).
 - **`writing-humanize`** — not installed. Clone the repo to a stable location
