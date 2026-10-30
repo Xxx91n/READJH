@@ -30,14 +30,24 @@ Rules, inherited from ADR-0001:
 - Every file listed under **required files** in the table below must exist inside
   `<skills-root>/<canonical-name>/` before the skill is accepted.
 - **Project-local executable trust gate (root #2 `./.agents/skills/` and any
-  `$AGENT_SKILLS_DIR` inside the target repository):** Because `TRUTH` executes
-  `readme-crafter-skill/scripts/scan-project.py` (and optional `.sh`), a
-  project-local skill directory inside the target repository is never executed
-  implicitly. It resolves for script execution only when its executable files
-  match the SHA-256 digests of a trusted user-level installation at roots #3–#5
-  (`~/.agents/skills/`, `~/.claude/skills/`, `~/.codex/skills/`) or when the
-  user explicitly authorizes executing the target repository's local skill for
-  that run; otherwise resolution stops as `BLOCKED`.
+  `$AGENT_SKILLS_DIR` inside the target repository):** Because `TRUTH` reads
+  upstream instructions (`SKILL.md`, `references/repo-integrity.md`) and
+  executes `readme-crafter-skill/scripts/scan-project.py` (and optional `.sh`),
+  a project-local skill directory inside the target repository is never trusted
+  implicitly:
+  1. Without explicit user authorization for that project-local tree, READJH
+     **never executes code or loads `SKILL.md` / `references/` from the
+     project-local directory**. If a verified user-level installation exists at
+     roots #3–#5 (`~/.agents/skills/`, `~/.claude/skills/`, `~/.codex/skills/`),
+     READJH reads and executes (`python3 -s -E -B -X utf8`) directly from that
+     trusted user-level installation instead; if no trusted user-level
+     installation resolves, the run stops immediately as `BLOCKED`.
+  2. Even when the user explicitly authorizes a project-local skill for the
+     current run, READJH verifies `SKILL.md`, `references/repo-integrity.md`,
+     and every file in `scripts/` (confirming no extra `.py` or `.pth` modules
+     exist in `scripts/` beyond `scan-project.py`, `scan_project_readme.py`,
+     and `scan_project_support.py`) and runs Python with environment and user
+     site-packages disabled (`python3 -s -E -B -X utf8`).
 - A missing, incomplete, or untrusted dependency **stops the run** with the
   install instructions in the table below. READJH never degrades silently.
 - **No name-similarity fallback.** A directory that merely contains the name —
@@ -71,16 +81,19 @@ re-check the contract and this table when either repo moves.
 
 What a fresh machine needs so the contract resolves:
 
-- **`readme-crafter-skill`** — on a fresh machine, acquire the upstream repo
+- **`readme-crafter-skill`** — on a fresh machine, acquire the upstream repo,
+  check out the recorded commit (`08db7782836c542d9b597860da33fcc159e36433`),
   and expose its root at the canonical name:
   ```cmd
   mkdir "%USERPROFILE%\.agents\repos" "%USERPROFILE%\.agents\skills" 2>nul
   git clone https://github.com/linhai0872/readme-crafter-skill "%USERPROFILE%\.agents\repos\readme-crafter-skill"
+  git -C "%USERPROFILE%\.agents\repos\readme-crafter-skill" checkout 08db7782836c542d9b597860da33fcc159e36433
   mklink /J "%USERPROFILE%\.agents\skills\readme-crafter-skill" "%USERPROFILE%\.agents\repos\readme-crafter-skill"
   ```
   ```sh
   mkdir -p "$HOME/.agents/repos" "$HOME/.agents/skills"
   git clone https://github.com/linhai0872/readme-crafter-skill "$HOME/.agents/repos/readme-crafter-skill"
+  git -C "$HOME/.agents/repos/readme-crafter-skill" checkout 08db7782836c542d9b597860da33fcc159e36433
   ln -s "$HOME/.agents/repos/readme-crafter-skill" "$HOME/.agents/skills/readme-crafter-skill"
   ```
   On the authoring machine the tree already exists at a non-canonical path —
@@ -91,16 +104,19 @@ What a fresh machine needs so the contract resolves:
   - or rename the directory in place to `readme-crafter-skill` at the skills
     root (loses the `git\readme` grouping).
 - **`writing-humanize`** — not installed. Clone the repo to a stable location
-  (junctions into temp dirs break on cleanup) and expose only the skill
+  (junctions into temp dirs break on cleanup), check out the recorded commit
+  (`e1f0a00e06d55c00502e0ccbea79ab453e7fb118`), and expose only the skill
   directory at the canonical name:
   ```cmd
   mkdir "%USERPROFILE%\.agents\repos" "%USERPROFILE%\.agents\skills" 2>nul
   git clone https://github.com/risadams/ink-and-agency "%USERPROFILE%\.agents\repos\ink-and-agency"
+  git -C "%USERPROFILE%\.agents\repos\ink-and-agency" checkout e1f0a00e06d55c00502e0ccbea79ab453e7fb118
   mklink /J "%USERPROFILE%\.agents\skills\writing-humanize" "%USERPROFILE%\.agents\repos\ink-and-agency\skills\writing-humanize"
   ```
   ```sh
   mkdir -p "$HOME/.agents/repos" "$HOME/.agents/skills"
   git clone https://github.com/risadams/ink-and-agency "$HOME/.agents/repos/ink-and-agency"
+  git -C "$HOME/.agents/repos/ink-and-agency" checkout e1f0a00e06d55c00502e0ccbea79ab453e7fb118
   ln -s "$HOME/.agents/repos/ink-and-agency/skills/writing-humanize" "$HOME/.agents/skills/writing-humanize"
   ```
   Any equivalent copy of `skills/writing-humanize/` to

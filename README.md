@@ -1,9 +1,9 @@
 # READJH
 
-An orchestration skill for README governance. One entry point runs
-`audit`, `improve`, or `rewrite` on a README by sequencing upstream skills
-under an evidence-first contract — every claim in the result is checked
-against what the repository can actually prove.
+An orchestration skill for README governance. One entry point sequences
+upstream skills across `audit` (implemented now) and `improve` / `rewrite`
+(tracked in #6) — every claim in the result is checked against what the
+repository can actually verify with a receipt.
 
 The repository root is the skill itself: `SKILL.md` plus `references/`
 (rules), `scripts/` (a stdlib-only python3 probe), and this skeleton
@@ -63,10 +63,14 @@ non-canonical path and `writing-humanize` is not yet installed.
 
 Once installed, invoke the skill by name on a repository:
 
-- `audit` — findings and priorities, touches nothing.
-- `improve` — surgical upgrade; `.bak` kept when git cannot roll back.
-- `rewrite` — full rebuild for a README beyond repair.
-- Add `--dry-run` to any mode to see the plan before anything lands.
+- `audit` (implemented) — findings and priorities, touches nothing; supports
+  optional `--repo-set <manifest>` for cross-repository skeleton isomorphism.
+- `improve` (future, tracked in #6; rejected as `BLOCKED` until #6 lands) —
+  surgical upgrade; `.bak` kept when git cannot roll back.
+- `rewrite` (future, tracked in #6; rejected as `BLOCKED` until #6 lands) —
+  full rebuild for a README beyond repair.
+- Add `--dry-run` to any mode to see the plan before anything lands (`audit`
+  is read-only by default).
 
 ## Layout
 
