@@ -2,7 +2,7 @@
 """scripts/check-readme.py — stdlib-only python3 static probe for README governance.
 
 Seven static checks:
-1. dead local links (markdown links & <a> tags pointing to missing local files)
+1. dead local links (markdown links & <a> tags pointing to missing local files, including badge link targets)
 2. missing image paths (markdown images, <img> tags, and <source> srcset)
 3. code-fence imbalance (unclosed or mismatched backtick/tilde code fences)
 4. badge URL domain sanity (valid hosts, flags placeholders e.g. TODO, example.com, username/repo)
@@ -11,7 +11,7 @@ Seven static checks:
 7. --repo-set cross-repo README skeleton diff (detects cross-repo skeleton isomorphism)
 
 CLI contract:
-    python3 scripts/check-readme.py <readme> [--repo-root <dir>] [--repo-set <manifest>] [--json]
+    python3 scripts/check-readme.py <readme> [--repo-root <dir>] [--repo-set <manifest>]
 Exit codes:
     0: All checks passed (no blocking findings)
     1: One or more blocking findings detected
@@ -122,6 +122,13 @@ class Finding:
 
 
 @dataclass
+class RepoSkeleton:
+    label: str
+    path: Path
+    headings: List[Tuple[int, str]]
+
+
+@dataclass
 class ProbeReport:
     readme_path: Path
     repo_root: Path
@@ -134,6 +141,20 @@ class ProbeReport:
         return any(f.blocking for f in self.findings)
 
 
+def _match_fence_open(line: str) -> Optional[Tuple[str, int]]:
+    """Match opening of a code fence (``` or ~~~)."""
+    m = re.match(r"^(`{3,}|~{3,})", line.strip())
+    if m:
+        return m.group(1)[0], len(m.group(1))
+    return None
+
+
+def _match_fence_close(line: str, fence_char: str, fence_len: int) -> bool:
+    """Check if line closes current code fence."""
+    m = re.match(r"^(`{3,}|~{3,})\s*$", line.strip())
+    return bool(m and m.group(1)[0] == fence_char and len(m.group(1)) >= fence_len)
+
+
 def strip_code_fences(content: str) -> str:
     """Return content with all fenced code blocks replaced by blank lines (preserving line count)."""
     lines = content.splitlines(keepends=True)
@@ -142,19 +163,16 @@ def strip_code_fences(content: str) -> str:
     fence_char = ""
     fence_len = 0
     for line in lines:
-        stripped = line.strip()
         if not in_fence:
-            m = re.match(r"^(`{3,}|~{3,})", stripped)
-            if m:
+            fence = _match_fence_open(line)
+            if fence:
                 in_fence = True
-                fence_char = m.group(1)[0]
-                fence_len = len(m.group(1))
+                fence_char, fence_len = fence
                 out.append("\n")
                 continue
             out.append(line)
         else:
-            m = re.match(r"^(`{3,}|~{3,})\s*$", stripped)
-            if m and m.group(1)[0] == fence_char and len(m.group(1)) >= fence_len:
+            if _match_fence_close(line, fence_char, fence_len):
                 in_fence = False
             out.append("\n")
     return "".join(out)
@@ -170,17 +188,14 @@ def check_code_fences(content: str) -> List[Finding]:
     start_line = 0
 
     for i, line in enumerate(lines, start=1):
-        stripped = line.strip()
         if not in_fence:
-            m = re.match(r"^(`{3,}|~{3,})", stripped)
-            if m:
+            fence = _match_fence_open(line)
+            if fence:
                 in_fence = True
-                fence_char = m.group(1)[0]
-                fence_len = len(m.group(1))
+                fence_char, fence_len = fence
                 start_line = i
         else:
-            m = re.match(r"^(`{3,}|~{3,})\s*$", stripped)
-            if m and m.group(1)[0] == fence_char and len(m.group(1)) >= fence_len:
+            if _match_fence_close(line, fence_char, fence_len):
                 in_fence = False
 
     if in_fence:
@@ -194,40 +209,55 @@ def check_code_fences(content: str) -> List[Finding]:
     return findings
 
 
+def _resolve_local_path(target: str, readme_dir: Path, repo_root: Path) -> Optional[Path]:
+    """Resolve and verify existence of a local target path against repo_root or readme_dir."""
+    clean = target.split("#", 1)[0].split("?", 1)[0].strip()
+    if not clean:
+        return None
+    p_repo = (repo_root / clean).resolve()
+    if p_repo.exists():
+        return p_repo
+    p_readme = (readme_dir / clean).resolve()
+    if p_readme.exists():
+        return p_readme
+    return None
+
+
+def extract_all_link_targets(line: str) -> List[str]:
+    """Extract link targets from markdown links (including nested badge links) and HTML <a> tags."""
+    targets = []
+    # Nested markdown link regex: matches [text](target), allowing nested [alt](img) in text
+    md_link_re = re.compile(r"\[((?:[^\[\]]|\[[^\[\]]*\])*)\]\(([^)]+)\)")
+    html_link_re = re.compile(r"""<a\s+[^>]*?href=["']([^"']+)["']""", re.IGNORECASE)
+
+    for m in md_link_re.finditer(line):
+        targets.append(m.group(2).strip())
+    for m in html_link_re.finditer(line):
+        targets.append(m.group(1).strip())
+    return targets
+
+
 def check_dead_links(content: str, readme_path: Path, repo_root: Path) -> List[Finding]:
     """Check 1: Dead local links."""
     findings = []
     text_no_fences = strip_code_fences(content)
     lines = text_no_fences.splitlines()
-
-    # Markdown links [text](target) and <a href="target">
-    md_link_re = re.compile(r"(?<!!)\[([^\]]*)\]\(([^)]+)\)")
-    html_link_re = re.compile(r"""<a\s+[^>]*?href=["']([^"']+)["']""", re.IGNORECASE)
-
     readme_dir = readme_path.parent.resolve()
 
     for line_idx, line in enumerate(lines, start=1):
-        targets = []
-        for m in md_link_re.finditer(line):
-            targets.append(m.group(2).strip())
-        for m in html_link_re.finditer(line):
-            targets.append(m.group(1).strip())
-
+        targets = extract_all_link_targets(line)
         for target in targets:
             if not target:
                 continue
             # Ignore external schemes or anchor-only links
             if target.startswith(("#", "http://", "https://", "mailto:", "data:", "ftp:", "javascript:", "tel:", "<")):
                 continue
-            # Strip anchor and query parameters
             clean = target.split("#", 1)[0].split("?", 1)[0].strip()
             if not clean:
                 continue
-            # Normalize path
-            # Test resolution relative to repo_root, and also relative to readme_dir
-            path_repo = (repo_root / clean).resolve()
-            path_readme = (readme_dir / clean).resolve()
-            if not path_repo.exists() and not path_readme.exists():
+
+            resolved = _resolve_local_path(clean, readme_dir, repo_root)
+            if resolved is None:
                 findings.append(
                     Finding(
                         check_name="dead-links",
@@ -267,9 +297,9 @@ def check_missing_images(content: str, readme_path: Path, repo_root: Path) -> Li
             clean = src.split("#", 1)[0].split("?", 1)[0].strip()
             if not clean:
                 continue
-            path_repo = (repo_root / clean).resolve()
-            path_readme = (readme_dir / clean).resolve()
-            if not path_repo.exists() and not path_readme.exists():
+
+            resolved = _resolve_local_path(clean, readme_dir, repo_root)
+            if resolved is None:
                 findings.append(
                     Finding(
                         check_name="missing-images",
@@ -286,13 +316,11 @@ def check_badge_domains(content: str) -> List[Finding]:
     text_no_fences = strip_code_fences(content)
     lines = text_no_fences.splitlines()
 
-    # Matches [![alt](img_url)](target_url) or <a href="target"><img src="img"></a>
     badge_md_re = re.compile(r"\[!\[([^\]]*)\]\(([^)]+)\)\]\(([^)]+)\)")
     badge_html_re = re.compile(
         r"""<a\s+[^>]*?href=["']([^"']+)["'][^>]*?>\s*<img\s+[^>]*?src=["']([^"']+)["']""",
         re.IGNORECASE,
     )
-    # Also standalone badge images (shields.io, badgen.net, etc.)
     standalone_badge_md_re = re.compile(r"!\[([^\]]*)\]\((https?://[^)]*(?:shields\.io|badgen\.net|badge\.svg)[^)]*)\)")
 
     for line_idx, line in enumerate(lines, start=1):
@@ -350,12 +378,12 @@ def check_boundary_duplicates(content: str) -> List[Finding]:
                 pattern = rf"\b{re.escape(phrase)}\b"
             else:
                 pattern = re.escape(phrase)
-            if re.search(pattern, line_lower):
+            for _ in re.finditer(pattern, line_lower):
                 phrase_matches[phrase].append(line_idx)
 
     for phrase, matched_lines in phrase_matches.items():
         if len(matched_lines) > 1:
-            line_list = ", ".join(str(l) for l in matched_lines)
+            line_list = ", ".join(str(line_no) for line_no in matched_lines)
             findings.append(
                 Finding(
                     check_name="boundary-duplicates",
@@ -399,7 +427,7 @@ def extract_headings(content: str) -> List[Tuple[int, str]]:
             raw_title = m.group(2).strip()
             # Clean title: strip markdown links, formatting, punctuation
             clean_title = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", raw_title)
-            clean_title = re.sub(r"[`*_{}[\]()#+-.!]~", "", clean_title)
+            clean_title = re.sub(r"[`*_{}[\]()#+\-.!~]", "", clean_title)
             clean_title = re.sub(r"\s+", " ", clean_title).strip().lower()
             if clean_title:
                 headings.append((level, clean_title))
@@ -407,20 +435,40 @@ def extract_headings(content: str) -> List[Tuple[int, str]]:
 
 
 def compute_skeleton_similarity(h1: List[Tuple[int, str]], h2: List[Tuple[int, str]]) -> float:
-    """Compute structural similarity between two heading skeletons."""
+    """Compute structural similarity between two heading skeletons.
+
+    Considers both hierarchy structure (levels) and normalized section topics,
+    catching skeleton isomorphism even when exact titles are lightly varied.
+    """
     if not h1 and not h2:
         return 1.0
     if not h1 or not h2:
         return 0.0
 
-    seq1 = [f"H{lvl}:{title}" for lvl, title in h1]
-    seq2 = [f"H{lvl}:{title}" for lvl, title in h2]
+    seq1_full = [f"H{lvl}:{title}" for lvl, title in h1]
+    seq2_full = [f"H{lvl}:{title}" for lvl, title in h2]
+    matcher_full = difflib.SequenceMatcher(None, seq1_full, seq2_full)
+    ratio_full = matcher_full.ratio()
 
-    matcher = difflib.SequenceMatcher(None, seq1, seq2)
-    return matcher.ratio()
+    # Also compare structural level skeleton
+    seq1_lvl = [f"H{lvl}" for lvl, _ in h1]
+    seq2_lvl = [f"H{lvl}" for lvl, _ in h2]
+    matcher_lvl = difflib.SequenceMatcher(None, seq1_lvl, seq2_lvl)
+    ratio_lvl = matcher_lvl.ratio()
+
+    # High full similarity indicates verbatim skeleton isomorphism
+    if ratio_full >= 0.85:
+        return ratio_full
+    # Identical level structure with high topic overlap indicates template reuse
+    if ratio_lvl >= 0.95 and ratio_full >= 0.60:
+        return max(ratio_full, 0.85)
+
+    return ratio_full
 
 
-def check_repo_set(manifest_path: Path, current_readme: Optional[Path] = None, repo_root: Optional[Path] = None) -> Tuple[List[Finding], str]:
+def check_repo_set(
+    manifest_path: Path, current_readme: Optional[Path] = None, repo_root: Optional[Path] = None
+) -> Tuple[List[Finding], str]:
     """Check 7: --repo-set cross-repo README skeleton diff."""
     findings = []
     summary_lines = []
@@ -428,14 +476,12 @@ def check_repo_set(manifest_path: Path, current_readme: Optional[Path] = None, r
     if not manifest_path.is_file():
         return [Finding(check_name="repo-set", message=f"Manifest file not found: {manifest_path}")], ""
 
-    # Parse manifest
     entries: List[Path] = []
     manifest_dir = manifest_path.parent.resolve()
     with manifest_path.open("r", encoding="utf-8", errors="replace") as f:
         content = f.read()
 
     raw_items: List[str] = []
-    # Try JSON format first, then line-by-line
     try:
         data = json.loads(content)
         if isinstance(data, list):
@@ -463,14 +509,22 @@ def check_repo_set(manifest_path: Path, current_readme: Optional[Path] = None, r
         else:
             entries.append((manifest_dir / item).resolve())
 
-    # Resolve README paths
-    resolved_readmes: List[Tuple[str, Path, List[Tuple[int, str]]]] = []
+    # Resolve README skeletons
+    resolved_readmes: List[RepoSkeleton] = []
     for entry in entries:
         readme_candidate = entry if entry.is_file() else entry / "README.md"
         if readme_candidate.is_file():
             label = entry.parent.name if entry.is_file() else entry.name
             h = extract_headings(readme_candidate.read_text(encoding="utf-8", errors="ignore"))
-            resolved_readmes.append((label, readme_candidate, h))
+            resolved_readmes.append(RepoSkeleton(label=label, path=readme_candidate, headings=h))
+
+    # Include target CLI README if not already in manifest
+    if current_readme and current_readme.is_file():
+        cur_res = current_readme.resolve()
+        if cur_res not in [r.path for r in resolved_readmes]:
+            cur_label = cur_res.parent.name
+            h = extract_headings(cur_res.read_text(encoding="utf-8", errors="ignore"))
+            resolved_readmes.insert(0, RepoSkeleton(label=cur_label, path=cur_res, headings=h))
 
     if len(resolved_readmes) < 2:
         findings.append(
@@ -482,27 +536,25 @@ def check_repo_set(manifest_path: Path, current_readme: Optional[Path] = None, r
         return findings, ""
 
     summary_lines.append(f"[check-readme] Repo-set skeleton analysis ({len(resolved_readmes)} repos):")
-    for label, r_path, headings in resolved_readmes:
-        summary_lines.append(f"  - {label} ({r_path.name}): {len(headings)} headings")
+    for r in resolved_readmes:
+        summary_lines.append(f"  - {r.label} ({r.path.name}): {len(r.headings)} headings")
 
     summary_lines.append("  Pairwise skeleton isomorphism:")
 
     # Compare pairwise
-    isomorphic_pairs = []
     for i in range(len(resolved_readmes)):
         for j in range(i + 1, len(resolved_readmes)):
-            label_a, path_a, h_a = resolved_readmes[i]
-            label_b, path_b, h_b = resolved_readmes[j]
-            similarity = compute_skeleton_similarity(h_a, h_b)
+            r_a = resolved_readmes[i]
+            r_b = resolved_readmes[j]
+            similarity = compute_skeleton_similarity(r_a.headings, r_b.headings)
             status_str = "ISOMORPHIC" if similarity >= 0.85 else "DIVERGENT"
-            summary_lines.append(f"  - {label_a} vs {label_b}: {status_str} (similarity: {similarity:.2f})")
+            summary_lines.append(f"  - {r_a.label} vs {r_b.label}: {status_str} (similarity: {similarity:.2f})")
 
             if similarity >= 0.85:
-                isomorphic_pairs.append((label_a, label_b, similarity))
                 findings.append(
                     Finding(
                         check_name="skeleton-isomorphism",
-                        message=f"Repositories '{label_a}' and '{label_b}' have isomorphic README skeletons (similarity: {similarity:.2f})",
+                        message=f"Repositories '{r_a.label}' and '{r_b.label}' have isomorphic README skeletons (similarity: {similarity:.2f})",
                     )
                 )
 
@@ -580,7 +632,6 @@ def main() -> int:
     parser.add_argument("readme", nargs="?", default=None, help="Path to README file to verify")
     parser.add_argument("--repo-root", default=None, help="Root directory of repository (default: README parent dir)")
     parser.add_argument("--repo-set", default=None, help="Manifest file for cross-repo skeleton diff")
-    parser.add_argument("--json", action="store_true", help="Output findings as JSON")
 
     args = parser.parse_args()
 
@@ -599,40 +650,22 @@ def main() -> int:
 
     report = run_checks(readme_path, repo_root, repo_set_manifest)
 
-    if args.json:
-        data = {
-            "target": str(report.readme_path),
-            "repo_root": str(report.repo_root),
-            "passed": not report.has_blocking_findings,
-            "passed_checks": report.passed_checks,
-            "findings": [
-                {
-                    "check": f.check_name,
-                    "line": f.line,
-                    "message": f.message,
-                    "blocking": f.blocking,
-                }
-                for f in report.findings
-            ],
-        }
-        print(json.dumps(data, indent=2))
+    print(f"[check-readme] Target: {report.readme_path.name} (repo root: {report.repo_root})")
+    if report.skeleton_info:
+        print(report.skeleton_info)
+
+    if report.passed_checks:
+        print("[check-readme] Checks evaluated:")
+        for chk in report.passed_checks:
+            print(f"  - {chk}: PASS")
+
+    if report.findings:
+        print(f"[check-readme] Findings ({len(report.findings)}):")
+        for f in report.findings:
+            print(f.formatted())
+        print(f"[check-readme] Result: FAIL ({len(report.findings)} blocking findings)")
     else:
-        print(f"[check-readme] Target: {report.readme_path.name} (repo root: {report.repo_root})")
-        if report.skeleton_info:
-            print(report.skeleton_info)
-
-        if report.passed_checks:
-            print("[check-readme] Checks evaluated:")
-            for chk in report.passed_checks:
-                print(f"  - {chk}: PASS")
-
-        if report.findings:
-            print(f"[check-readme] Findings ({len(report.findings)}):")
-            for f in report.findings:
-                print(f.formatted())
-            print(f"[check-readme] Result: FAIL ({len(report.findings)} blocking findings)")
-        else:
-            print("[check-readme] Result: PASS (0 findings)")
+        print("[check-readme] Result: PASS (0 findings)")
 
     return 1 if report.has_blocking_findings else 0
 

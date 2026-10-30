@@ -74,16 +74,6 @@ class TestCleanFixture(unittest.TestCase):
         self.assertIn("PASS", out)
         self.assertNotIn("FAIL", out)
 
-    def test_json_output_format(self):
-        clean_readme = FIXTURES_DIR / "clean" / "README.md"
-        clean_root = FIXTURES_DIR / "clean"
-        code, out, err = run_probe(str(clean_readme), "--repo-root", str(clean_root), "--json")
-        self.assertEqual(code, 0)
-        import json
-        data = json.loads(out)
-        self.assertTrue(data["passed"])
-        self.assertEqual(data["findings"], [])
-
 
 class TestCheck1DeadLinks(unittest.TestCase):
     """Check 1: dead local links."""
@@ -96,6 +86,21 @@ class TestCheck1DeadLinks(unittest.TestCase):
         self.assertIn("dead-links", out)
         self.assertIn("docs/nonexistent.md", out)
 
+    def test_badge_dead_link_target_detected(self):
+        """Verify that [![Badge](img)](dead_local.md) is detected as a dead link."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            td_path = Path(td)
+            rm = td_path / "README.md"
+            rm.write_text(
+                "# Title\n\n[![Badge](https://img.shields.io/badge/ci-pass-green)](docs/missing.md)\n\n## Limitations\nOut of scope.\n",
+                encoding="utf-8"
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(td_path))
+            self.assertNotEqual(code, 0)
+            self.assertIn("dead-links", out)
+            self.assertIn("docs/missing.md", out)
+
 
 class TestCheck2MissingImages(unittest.TestCase):
     """Check 2: missing image paths."""
@@ -106,7 +111,7 @@ class TestCheck2MissingImages(unittest.TestCase):
         code, out, err = run_probe(str(dirty_readme), "--repo-root", str(dirty_root))
         self.assertNotEqual(code, 0, "Expected non-zero exit for missing image")
         self.assertIn("missing-images", out)
-        self.assertIn("assets/missing_hero.svg", out)
+        self.assertIn("assets/readme/missing_hero.svg", out)
 
 
 class TestCheck3CodeFenceBalance(unittest.TestCase):
@@ -140,6 +145,20 @@ class TestCheck5BoundaryDuplicates(unittest.TestCase):
         self.assertNotEqual(code, 0, "Expected non-zero exit for boundary phrase duplicates")
         self.assertIn("boundary-duplicates", out)
         self.assertIn("out of scope", out.lower())
+
+    def test_same_line_repeated_boundary_phrase_detected(self):
+        """Verify that multiple boundary occurrences on the same line are detected."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            rm = Path(td) / "README.md"
+            rm.write_text(
+                "# Title\n\nFeature A is out of scope and feature B is out of scope.\n\n## Limitations\nSome limits.\n",
+                encoding="utf-8"
+            )
+            code, out, err = run_probe(str(rm))
+            self.assertNotEqual(code, 0)
+            self.assertIn("boundary-duplicates", out)
+            self.assertIn("appears 2 times", out)
 
     def test_repeated_chinese_boundary_phrase_detected(self):
         dirty_readme = FIXTURES_DIR / "dirty_zh" / "README.md"
@@ -178,6 +197,22 @@ class TestCheck7RepoSetSkeletonDiff(unittest.TestCase):
         self.assertEqual(code, 0, f"Expected 0 exit for divergent repo set. Out:\n{out}\nErr:\n{err}")
         self.assertIn("PASS", out)
         self.assertIn("skeleton", out.lower())
+
+    def test_repo_set_includes_target_readme(self):
+        """Verify that the target CLI README is included in the skeleton comparison if not in manifest."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            td_path = Path(td)
+            # Manifest has only 1 repo
+            man = td_path / "single_manifest.txt"
+            man.write_text(str(FIXTURES_DIR / "repo_set" / "repo_iso_a" / "README.md") + "\n", encoding="utf-8")
+            # Target is repo_iso_b (not in manifest)
+            target = FIXTURES_DIR / "repo_set" / "repo_iso_b" / "README.md"
+            code, out, err = run_probe(str(target), "--repo-set", str(man))
+            # With target included, we have 2 repos that are isomorphic -> should detect isomorphism!
+            self.assertNotEqual(code, 0)
+            self.assertIn("isomorphic", out.lower())
+            self.assertIn("analysis (2 repos)", out)
 
 
 class TestStdlibOnly(unittest.TestCase):
