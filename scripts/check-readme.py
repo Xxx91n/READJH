@@ -210,27 +210,28 @@ def check_code_fences(content: str) -> List[Finding]:
 
 
 def _resolve_local_path(target: str, readme_dir: Path, repo_root: Path) -> Optional[Path]:
-    """Resolve and verify existence of a local target path against repo_root or readme_dir."""
+    """Resolve and verify existence of a local target path against readme_dir or repo_root."""
     raw = target.strip()
     if not raw:
         return None
     if raw.startswith("<") and ">" in raw:
-        clean = raw[1:raw.find(">")]
-    else:
-        title = re.match(
-            r"""^(\S+)\s+(?:"(?:\\.|[^"])*"|'(?:\\.|[^'])*'|\((?:\\.|[^)])*\))\s*$""",
-            raw,
-        )
-        clean = title.group(1) if title else raw
+        raw = raw[1:raw.find(">")].strip()
+    if raw.startswith(("#", "http://", "https://", "mailto:", "data:", "ftp:", "javascript:", "tel:")):
+        return None
+    title = re.match(
+        r"""^(\S+)\s+(?:"(?:\\.|[^"])*"|'(?:\\.|[^'])*'|\((?:\\.|[^)])*\))\s*$""",
+        raw,
+    )
+    clean = title.group(1) if title else raw
     clean = urllib.parse.unquote(clean.split("#", 1)[0].split("?", 1)[0]).lstrip("/")
     if not clean:
         return None
-    p_repo = (repo_root / clean).resolve()
-    if p_repo.exists():
-        return p_repo
     p_readme = (readme_dir / clean).resolve()
     if p_readme.exists():
         return p_readme
+    p_repo = (repo_root / clean).resolve()
+    if p_repo.exists():
+        return p_repo
     return None
 
 
@@ -261,7 +262,9 @@ def check_dead_links(content: str, readme_path: Path, repo_root: Path) -> List[F
             if not target:
                 continue
             # Ignore external schemes or anchor-only links
-            if target.startswith(("#", "http://", "https://", "mailto:", "data:", "ftp:", "javascript:", "tel:", "<")):
+            if target.startswith(("#", "http://", "https://", "mailto:", "data:", "ftp:", "javascript:", "tel:")):
+                continue
+            if target.startswith("<") and any(target[1:].startswith(s) for s in ("http://", "https://", "mailto:", "ftp:")):
                 continue
 
             resolved = _resolve_local_path(target, readme_dir, repo_root)
@@ -300,7 +303,9 @@ def check_missing_images(content: str, readme_path: Path, repo_root: Path) -> Li
         for src in sources:
             if not src:
                 continue
-            if src.startswith(("http://", "https://", "data:", "<")):
+            if src.startswith(("http://", "https://", "data:")):
+                continue
+            if src.startswith("<") and any(src[1:].startswith(s) for s in ("http://", "https://", "data:")):
                 continue
 
             resolved = _resolve_local_path(src, readme_dir, repo_root)
@@ -439,25 +444,27 @@ def extract_headings(content: str) -> List[Tuple[int, str]]:
     return headings
 
 
-def compute_skeleton_similarity(h1: List[Tuple[int, str]], h2: List[Tuple[int, str]]) -> float:
+def compute_skeleton_similarity(
+    headings_a: List[Tuple[int, str]], headings_b: List[Tuple[int, str]]
+) -> float:
     """Compute structural similarity between two heading skeletons.
 
     Considers both hierarchy structure (levels) and normalized section topics,
     catching skeleton isomorphism even when exact titles are lightly varied.
     """
-    if not h1 and not h2:
+    if not headings_a and not headings_b:
         return 1.0
-    if not h1 or not h2:
+    if not headings_a or not headings_b:
         return 0.0
 
-    seq1_full = [f"H{lvl}:{title}" for lvl, title in h1]
-    seq2_full = [f"H{lvl}:{title}" for lvl, title in h2]
+    seq1_full = [f"H{lvl}:{title}" for lvl, title in headings_a]
+    seq2_full = [f"H{lvl}:{title}" for lvl, title in headings_b]
     matcher_full = difflib.SequenceMatcher(None, seq1_full, seq2_full)
     ratio_full = matcher_full.ratio()
 
     # Also compare structural level skeleton
-    seq1_lvl = [f"H{lvl}" for lvl, _ in h1]
-    seq2_lvl = [f"H{lvl}" for lvl, _ in h2]
+    seq1_lvl = [f"H{lvl}" for lvl, _ in headings_a]
+    seq2_lvl = [f"H{lvl}" for lvl, _ in headings_b]
     matcher_lvl = difflib.SequenceMatcher(None, seq1_lvl, seq2_lvl)
     ratio_lvl = matcher_lvl.ratio()
 

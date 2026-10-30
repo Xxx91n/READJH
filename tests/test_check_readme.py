@@ -100,13 +100,28 @@ class TestCheck1DeadLinks(unittest.TestCase):
             (td_path / "doc.md").write_text("# Doc\n", encoding="utf-8")
             rm = td_path / "README.md"
             rm.write_text(
-                '# Title\n\n[Doc](doc.md "Document Title")\n\n![Image](missing.png)\n\n## Limitations\nNone.\n',
+                '# Title\n\n[Doc](doc.md "Document Title")\n\n[Angle](<doc.md>)\n\n![Image](missing.png)\n\n## Limitations\nNone.\n',
                 encoding="utf-8",
             )
             code, out, err = run_probe(str(rm), "--repo-root", str(td_path))
             self.assertNotEqual(code, 0)
             self.assertIn("[missing-images]", out)
             self.assertNotIn("[dead-links]", out)
+
+    def test_angle_bracket_dead_link_detected(self):
+        """Verify that angle-bracket destinations with missing targets are detected."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            td_path = Path(td)
+            rm = td_path / "README.md"
+            rm.write_text(
+                '# Title\n\n[Bad](<missing_file.md>)\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(td_path))
+            self.assertNotEqual(code, 0)
+            self.assertIn("[dead-links]", out)
+            self.assertIn("missing_file.md", out)
 
     def test_badge_dead_link_target_detected(self):
         """Verify that [![Badge](img)](dead_local.md) is detected as a dead link."""
