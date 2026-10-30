@@ -238,11 +238,15 @@ modifying any files.
      caller requests an unimplemented write mode (`improve` or `rewrite`,
      tracked in Ticket #6, §5), stop immediately as `BLOCKED` with zero file
      writes rather than attempting edits or silently downgrading.
-   - Target path: `<readme>` (defaults to `<repo-root>/README.md`) and
-     `<repo-root>` (resolved via `git -C "<readme-dir>" rev-parse --show-toplevel`
-     when `<readme>` is inside a Git worktree, or the parent directory of
-     `<readme>` when not in a Git worktree, so nested READMEs such as
-     `docs/README.md` still bind `<repo-root>` to the repository root).
+   - Target path: `<readme>` (defaults to `<repo-root>/README.md`). `<repo-root>`
+     is resolved in this order: (1) the caller's explicit `--repo-root`; (2)
+     `git -C "<readme-dir>" rev-parse --show-toplevel` when `<readme>` is inside
+     a Git worktree, so a nested `docs/README.md` binds to the repository root;
+     (3) the parent directory of `<readme>`.
+   - Git state: record whether `<repo-root>` is inside a Git worktree
+     (`git -C "<repo-root>" rev-parse --is-inside-work-tree` prints `true`).
+     A non-Git `<repo-root>` is supported; it only changes the `VERIFY`
+     zero-write check.
    - Optional **repo-set mode**: enabled only when `--repo-set <manifest>` is
      passed; off by default.
 2. **Select intensity tier:**
@@ -252,7 +256,12 @@ modifying any files.
 3. **Detect language and companion files:**
    - Record the primary language of `<readme>` and any existing localized
      companion README so `TRUTH` and `RESTRUCTURE` check them in lockstep.
-4. **Enforce the pointer contract and trust gate (§1):**
+4. **Capture the zero-write baseline (before any upstream file is read or run):**
+   - Record a file-tree snapshot of `<repo-root>`: relative path and SHA-256
+     of every file, excluding `.git/`.
+   - When `<repo-root>` is inside a Git worktree, also record
+     `git --no-optional-locks -C "<repo-root>" status --porcelain --ignored -- .`.
+5. **Enforce the pointer contract and trust gate (§1):**
    - Resolve `readme-crafter-skill` using the search order, canonical match
      rules, required-files check (`SKILL.md`, `references/repo-integrity.md`,
      `scripts/scan-project.py`, `scripts/scan_project_readme.py`, and
@@ -262,13 +271,14 @@ modifying any files.
      to a verified user-level installation at roots #3–#5 if present, or stop
      as `BLOCKED`). On any missing file or unauthorized project-local skill
      without a verified user-level copy at roots #3–#5, apply the §1
-     stop-on-miss gate immediately (zero file writes; emit the §4 `BLOCKED`
-     report naming the missing or untrusted path in `[Receipts]` and the §1
-     install commands in `[Residual risk]`).
+     stop-on-miss gate immediately: write nothing, repeat the step 4 capture
+     and compare it with the baseline, then emit the §4 `BLOCKED` report with
+     the missing or untrusted path and the snapshot comparison in `[Receipts]`
+     and the §1 install commands in `[Residual risk]`.
 
-**Completion criterion:** Run mode (`audit`), `<readme>`, `<repo-root>`,
-**intensity tier** (`lite` | `standard`), **repo-set mode** state, and trusted
-verified paths to
+**Completion criterion:** Run mode (`audit`), `<readme>`, `<repo-root>`, Git
+state, **intensity tier** (`lite` | `standard`), **repo-set mode** state, the
+zero-write baseline, and trusted verified paths to
 `readme-crafter-skill/{SKILL.md,references/repo-integrity.md,scripts/scan-project.py,scripts/scan_project_readme.py,scripts/scan_project_support.py}`
 are locked.
 
@@ -364,10 +374,13 @@ a `HIGH` / `MEDIUM` / `LOW` finding with zero README commands executed.
 5. **Diagnose skeleton isomorphism and language tells (`references/readme-rules.md` §4.2, §5 & `references/de-ai-language.md`):**
    - Check whether the heading skeleton fits the repository's Project Type and
      Distribution Posture rather than a generic template.
-   - Outside the **freeze zone**, log prose tells under the active **intensity
-     tier** (`lite` or `standard`): clustered ban-list words, abstract-noun
-     chains, trailing `-ing` clauses, uniform sentence runs (3+ near-equal
-     sentences), and Chinese (`zh`) calibration tells.
+   - Outside the **freeze zone**, log prose tells allowed by the active
+     **intensity tier** (§2):
+     - `lite`: only clustered AI vocabulary, chatbot turn wrappers, and
+       repeated **self-attestation**.
+     - `standard`: clustered ban-list words, abstract-noun chains, trailing
+       `-ing` clauses, uniform sentence runs (3+ near-equal sentences), and
+       Chinese (`zh`) calibration tells.
 
 **Completion criterion:** All structural, **self-attestation**, **generation
 trace**, **skeleton isomorphism**, and language findings are logged with
@@ -397,11 +410,15 @@ are modified.
 2. **Walk the binary verification checklist (`references/checklist.md`):**
    - Evaluate `references/checklist.md` §§1–8 against the probe **receipt** and
      the `TRUTH` / `RESTRUCTURE` findings.
-   - Confirm across `<repo-root>` (comparing pre/post
-     `git --no-optional-locks -C "<repo-root>" status --porcelain --ignored` and
-     the `<repo-root>` file-tree snapshot) that zero files were written,
-     modified, or left untracked in the target repository (and no `.bak` or
-     `__pycache__/*.pyc` files were created in `<repo-root>`).
+   - Repeat the `ROUTE` step 4 capture and compare it with the baseline:
+     - Every `<repo-root>`: the file-tree snapshots must match (same paths,
+       same SHA-256 values; no new `.bak` or `__pycache__/*.pyc` files).
+     - Git `<repo-root>` only: the two
+       `git --no-optional-locks -C "<repo-root>" status --porcelain --ignored -- .`
+       outputs must also match.
+     - Non-Git `<repo-root>`: the file-tree comparison is the whole receipt.
+       Do not run `git status` there, and do not treat the missing Git
+       repository as an audit failure.
 3. **Emit the three-line delivery report (§4).**
 
 **Completion criterion:** `scripts/check-readme.py` has run, its stdout
