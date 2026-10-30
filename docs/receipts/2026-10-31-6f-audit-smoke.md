@@ -103,7 +103,7 @@ or chatbot-wrapper comments exist in either README.
 | MEDIUM | **Defensive disclaimers not recast** — `README.md:33` *"do not read this page as a finished product"*, `README.md:150`/`179` *"they do not impersonate real audits"*, `README.md:163` external-drift caveat: multi-clause negative disclaimers that §2 rule 2 wants as `fact + link`. | `README.md:33,150,163,179` |
 | MEDIUM | **Over-completeness vs `docs/`** — full upstream-lock status matrix (`README.md:99-107`), `0.x` versioning policy (`README.md:49`), ownership-boundary/contract tables (`README.md:124-133`) restate material that lives in `engine/upstream-lock.yaml` and `docs/versioning.md`. Deliberately labeled "engineering layer" (`README.md:187`), but per `references/readme-rules.md` §4.1 the span `Upstream components/Ownership/Contracts (lines 97-133) → recommended docs/` migration is flagged. | `README.md:49,97-133` |
 | LOW | **30-second first screen weak** — the shortest install path (`## Install`, line 51) sits below a 90-word jargon-dense one-liner (`README.md:18`) and a 6-bullet highlights block; a stranger reads the preview caveat before the install command. `lite` keeps the author's structure; flagged as diagnosis only. | `README.md:18-60` |
-| LOW | **zh date typo** — `README.zh-CN.md:38` dates the status note `2026-10-05` identically to EN — actually consistent; no defect (recorded as verified, not a finding). | — |
+| N/A — verified, not a finding | `README.zh-CN.md:38` dates the status note `2026-10-05` identically to EN — consistent across both files; checked during the zh sweep and recorded here so it is not mistaken for an unexamined span. | `README.zh-CN.md:38` ↔ `README.md:33` |
 
 `lite`-scoped language tells: no clustered AI vocabulary, no chatbot wrappers,
 no second-person openers in EN; the repeated **self-attestation** above is the
@@ -149,6 +149,9 @@ Checklist (`references/checklist.md` §§1–8) evaluated:
 Per the ticket's acceptance criteria, every expectation↔behavior gap observed
 is recorded as a finding, not silently corrected:
 
+Severity key: `LOW` = doc/contract discrepancy finding counted in the
+three-line report; `INFO` = host context, not a defect finding.
+
 | # | Severity | Discrepancy | Receipt |
 |---|---|---|---|
 | D1 | LOW | `SKILL.md` §3 TRUTH implies a `2`-class execution error ("exit `2`") for the scanner, but upstream `scan-project.py` has no `exit 2` path — invalid directory returns `1` (same code as a findings exit in SKILL.md's own "exit 1 with findings" contract), and the shell fallback also returns `1`. Distinguishing "scan with findings" from "invalid root" must be done by output shape, not exit code alone. | `scan-project.py:main` (`return 1` / `return 0`), `scan-project.sh:17` (`exit 1`) |
@@ -161,7 +164,7 @@ is recorded as a finding, not silently corrected:
 
 ```text
 [Conclusion]: FAIL — audit on D:/Aworker/6F/README.md (intensity tier: lite); audit completed and found 2 HIGH, 4 MEDIUM, 3 LOW findings (zh mirror carries the same HIGH/MEDIUM set; 0 files modified).
-[Receipts]: scan-project.py "D:/Aworker/6F" -> exit 0 (0 README-to-repo mismatches); check-readme.py README.md -> exit 0 (6/6 checks PASS), README.zh-CN.md -> exit 0 (6/6 PASS), repo-set: N/A; HIGH: README.md:164 denies a first-class `audit` subcommand that cli.ts:143 implements; HIGH: preview/honesty boundary restated 5x (README.md:33,47,49,149-150,183-187); MEDIUM: standalone honesty section (183-187), tracker IDs on front page (33,39,107,154,164), negative disclaimers (33,150,163), docs-worthy depth blocks (49,97-133); LOW: install path below first fold (18-60), 1424-facts and dist-size claims verified as context only; <repo-root> snapshot unchanged (1113 files, ff32c55b…, git status match).
+[Receipts]: scan-project.py "D:/Aworker/6F" -> exit 0 (0 README-to-repo mismatches); check-readme.py README.md -> exit 0 (6/6 checks PASS), README.zh-CN.md -> exit 0 (6/6 PASS), repo-set: N/A; HIGH: README.md:164 denies a first-class `audit` subcommand that cli.ts:143 implements; HIGH: preview/honesty boundary restated 5x (README.md:33,47,49,149-150,183-187); MEDIUM: standalone honesty section (183-187), tracker IDs on front page (33,39,107,154,164), negative disclaimers (33,150,163), docs-worthy depth blocks (49,97-133); LOW: install path below first fold (18-60), SKILL.md-vs-behavior discrepancies D1/D2/D4 (§6: scanner exit codes, `.sh` degraded-but-exit-0 fallback, `repo-set: N/A` not printed); <repo-root> snapshot unchanged (1113 files, ff32c55b…, git status match).
 [Residual risk]: README commands need manual verification — `npm install && npm test` (README.md:82-84), `node dist/cli.js selftest` (:60), `/plugin marketplace add/install` (:56-57), `repo add` (:158-159), `demo` (:149); external shields.io badge URLs and the github.com/actions badge target unfetched offline.
 ```
 
