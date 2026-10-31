@@ -85,23 +85,27 @@ at fixed search roots, non-recursively (`UPSTREAM.md`, ADR-0001):
 - **Project-local executable trust gate (root #2 `./.agents/skills/` and any
   `$AGENT_SKILLS_DIR` inside `<repo-root>`):** A project-local skill directory
   inside the target repository is never trusted implicitly:
-  1. Without explicit user authorization for that project-local tree, READJH
-     **never executes code or loads `SKILL.md` / `references/` from the
-     project-local directory** (preventing both poisoned instructions and
-     sibling `.py`/`.pth` module hijacking in `scripts/`). If a verified
-     user-level installation exists at roots #3–#5 (`~/.agents/skills/`,
-     `~/.claude/skills/`, `~/.codex/skills/`), READJH reads `SKILL.md` and
-     `references/repo-integrity.md` and executes `scripts/scan-project.py`
-     (`python3 -s -E -B -X utf8`) directly from that trusted user-level
-     installation instead; if no verified user-level installation resolves at
-     roots #3–#5, stop immediately as `BLOCKED` and report the untrusted
-     project-local path in `[Receipts]`.
-  2. Even when the user explicitly authorizes a project-local skill for the
-     current run, verify `SKILL.md`, `references/repo-integrity.md`, and every
-     file in `scripts/` (confirming no extra `.py` or `.pth` modules exist in
-     `scripts/` beyond `scan-project.py`, `scan_project_readme.py`, and
-     `scan_project_support.py`) and run Python with environment and user
-     site-packages disabled (`python3 -s -E -B -X utf8`).
+  1. **Authorization (applies to both executors):** Without explicit user
+     authorization for that project-local tree, READJH **never executes code
+     or loads `SKILL.md` / `references/` from the project-local directory**
+     (preventing both poisoned instructions and sibling `.py`/`.pth` module
+     hijacking). If a verified user-level installation of the same executor
+     exists at roots #3–#5 (`~/.agents/skills/`, `~/.claude/skills/`,
+     `~/.codex/skills/`), READJH uses that trusted user-level installation
+     instead; if no verified user-level installation resolves at roots #3–#5,
+     stop immediately as `BLOCKED` and report the untrusted project-local
+     path in `[Receipts]`.
+  2. **Per-executor integrity manifest (whichever installation is used):**
+     the required-files check from the table binds to each executor's own
+     canonical name. For `readme-crafter-skill`: verify `SKILL.md`,
+     `references/repo-integrity.md`, and every file in `scripts/`
+     (confirming no extra `.py` or `.pth` modules exist in `scripts/` beyond
+     `scan-project.py`, `scan_project_readme.py`, and
+     `scan_project_support.py`), and run Python with environment and user
+     site-packages disabled (`python3 -s -E -B -X utf8`). For
+     `writing-humanize`: verify `SKILL.md`, `references/patterns.md`, and
+     `agents/openai.yaml` — it ships no executable `scripts/`, so the
+     `readme-crafter-skill` `scripts/` allowlist does not apply to it.
 - **Stop on miss (zero silent degradation):** If `<skills-root>/<canonical-name>/SKILL.md`
   is missing, its frontmatter `name:` mismatches, any required file inside it
   is missing, or a project-local candidate is unauthorized with no trusted
