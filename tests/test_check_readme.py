@@ -946,6 +946,110 @@ class TestFragmentLinks(unittest.TestCase):
             self.assertNotEqual(code, 0)
             self.assertIn("#item", out)
 
+    def test_mixed_case_fragment_resolves(self):
+        """#Limitations resolves to ## Limitations — GitHub matches
+        fragments case-insensitively."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n[Go](#Limitations)\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertEqual(code, 0, f"Out:\n{out}")
+            self.assertIn("- dead-links: PASS", out)
+
+    def test_escaped_backticks_do_not_open_code_span(self):
+        """\\`[x](missing.md)\\` renders a real link — the dead link FAILs."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n\\`[Bad](missing.md)\\`\n\\`![M](missing.png)\\`\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root),
+                "--checks", "dead-links,missing-images",
+            )
+            self.assertNotEqual(code, 0)
+            self.assertIn("missing.md", out)
+            self.assertIn("missing.png", out)
+
+    def test_unmatched_backtick_cannot_pair_across_paragraphs(self):
+        """A stray ` in one paragraph cannot pair with ` in a later one —
+        the links/images between them stay rendered and FAIL."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n`unmatched\n\n[Bad](missing.md)\n![M](missing.png)\n\n`later`\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root),
+                "--checks", "dead-links,missing-images",
+            )
+            self.assertNotEqual(code, 0)
+            self.assertIn("missing.md", out)
+            self.assertIn("missing.png", out)
+
+    def test_unmatched_backtick_does_not_stop_later_spans(self):
+        """After an unmatched `, a later ``...`` code span is still
+        recognized — its code example is not a real link (no false FAIL)."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n`unmatched\n\nUse ``[Example](missing.md)`` as syntax.\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertEqual(code, 0, f"Out:\n{out}")
+            self.assertIn("- dead-links: PASS", out)
+
+    def test_fence_markers_inside_comments_do_not_pair(self):
+        """``` inside two closed HTML comments is comment text — it must
+        not pair up and blank the real links between the comments."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n<!--\n```\n-->\n\n[Bad](missing.md)\n![M](missing.png)\n\n<!--\n```\n-->\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root),
+                "--checks", "dead-links,missing-images,code-fences",
+            )
+            self.assertNotEqual(code, 0)
+            self.assertIn("missing.md", out)
+            self.assertIn("missing.png", out)
+
+    def test_escaped_comment_marker_is_literal(self):
+        """\\<!-- is an escaped '<', not a comment — later links stay real."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n\\<!-- hidden -->\n\n[Bad](missing.md)\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertNotEqual(code, 0)
+            self.assertIn("missing.md", out)
+
 
 class TestStdlibOnly(unittest.TestCase):
     """Ensure scripts/check-readme.py has no third-party dependencies."""

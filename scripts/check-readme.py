@@ -156,55 +156,17 @@ def _match_fence_close(line: str, fence_char: str, fence_len: int) -> bool:
     return bool(m and m.group(1)[0] == fence_char and len(m.group(1)) >= fence_len)
 
 
-def strip_code_fences(content: str) -> str:
-    """Return content with all fenced code blocks replaced by blank lines (preserving line count)."""
-    lines = content.splitlines(keepends=True)
-    out = []
-    in_fence = False
-    fence_char = ""
-    fence_len = 0
-    for line in lines:
-        if not in_fence:
-            fence = _match_fence_open(line)
-            if fence:
-                in_fence = True
-                fence_char, fence_len = fence
-                out.append("\n")
-                continue
-            out.append(line)
-        else:
-            if _match_fence_close(line, fence_char, fence_len):
-                in_fence = False
-            out.append("\n")
-    return "".join(out)
-
-
 def check_code_fences(content: str) -> List[Finding]:
-    """Check 3: Detect unclosed code fences."""
+    """Check 3: Detect unclosed code fences (comment/fence context aware)."""
     findings = []
-    lines = content.splitlines()
-    in_fence = False
-    fence_char = ""
-    fence_len = 0
-    start_line = 0
-
-    for i, line in enumerate(lines, start=1):
-        if not in_fence:
-            fence = _match_fence_open(line)
-            if fence:
-                in_fence = True
-                fence_char, fence_len = fence
-                start_line = i
-        else:
-            if _match_fence_close(line, fence_char, fence_len):
-                in_fence = False
-
-    if in_fence:
+    _, unclosed = _rendered_text(content)
+    if unclosed and unclosed[0] == "code-fence":
+        _, start_line, marker = unclosed
         findings.append(
             Finding(
                 check_name="code-fences",
                 line=start_line,
-                message=f"Unclosed code fence (opened with {fence_char * fence_len} at line {start_line}, reached EOF without closing)",
+                message=f"Unclosed code fence (opened with {marker} at line {start_line}, reached EOF without closing)",
             )
         )
     return findings
@@ -273,10 +235,19 @@ def _github_slug(heading: str) -> str:
     return t.replace(" ", "-")
 
 
-def _code_span_end(text: str, start: int) -> Optional[int]:
+def _block_bound(text: str, start: int) -> int:
+    """Block boundary for inline parsing: index of the newline that opens the
+    next blank line, or end of text. A code span can contain line endings
+    inside its block but cannot cross a blank line (GFM code spans)."""
+    m = re.search(r"\n[ \t\r]*\n", text[start:])
+    return start + m.start() + 1 if m else len(text)
+
+
+def _code_span_end(text: str, start: int, bound: int) -> Optional[int]:
     """If a backtick code span opens at `start`, return the index just past its
-    closing run. GFM: the closing run must be exactly the opening length; an
-    unmatched opener is literal text, so return None."""
+    closing run. GFM: the closing run must be exactly the opening length, must
+    end inside the same block (`bound`), and neither opener nor closer may be
+    backslash-escaped. An unmatched opener is literal text → None."""
     tick_end = start
     while tick_end < len(text) and text[tick_end] == "`":
         tick_end += 1
@@ -287,69 +258,136 @@ def _code_span_end(text: str, start: int) -> Optional[int]:
         while k2 < len(text) and text[k2] == "`":
             k2 += 1
         if k2 - k == tlen:
-            return k2
+            bs = 0
+            while k - 1 - bs >= 0 and text[k - 1 - bs] == "\\":
+                bs += 1
+            if k2 <= bound and bs % 2 == 0:
+                return k2
         k = text.find("`", k2)
     return None
 
 
-def _strip_html_comments(text: str) -> str:
-    """Remove HTML comment spans so commented-out markup never registers as
-    real, while keeping rendered text around inline comments. Code-span aware:
-    `<!--` inside backticks is literal text, not a comment. Newlines inside
-    comments are preserved to keep line numbers stable; an unclosed comment
-    swallows the rest of the document, like the renderer."""
+def _rendered_text(content: str) -> Tuple[str, Optional[Tuple[str, int, str]]]:
+    """Single linear pass over the document that keeps rendered text and
+    blanks what Markdown does not render: fenced code blocks and HTML
+    comments. A `` ``` `` inside a comment is comment text (never opens a
+    fence); a `<!--` inside a code span is literal text (never opens a
+    comment); fences are recognized only at line starts. Inline code spans
+    keep their contents — `_strip_inline_code` blanks them only for
+    link/image/anchor extraction. Newlines are preserved everywhere so
+    finding line numbers stay stable.
+
+    Returns (rendered_text, unclosed): unclosed is
+    ("code-fence", start_line, marker) if EOF was reached inside a fence,
+    ("comment", start_line, "") if inside a comment, else None.
+    """
+    out = []
+    i = 0
+    n = len(content)
+    cur_line = 1
+    at_line_start = True
+    unclosed = None
+    while i < n:
+        if at_line_start:
+            at_line_start = False
+            line_end = content.find("\n", i)
+            line = content[i:line_end if line_end != -1 else n]
+            fence = _match_fence_open(line)
+            if fence:
+                fence_char, fence_len = fence
+                start_line = cur_line
+                j = i
+                closed = False
+                while j <= n:
+                    le = content.find("\n", j)
+                    if le == -1:
+                        j = n
+                        break
+                    if _match_fence_close(content[j:le], fence_char, fence_len):
+                        out.append("\n")
+                        j = le + 1
+                        cur_line += 1
+                        closed = True
+                        break
+                    out.append("\n")
+                    j = le + 1
+                    cur_line += 1
+                if not closed:
+                    unclosed = ("code-fence", start_line, fence_char * fence_len)
+                i = j
+                at_line_start = True
+                continue
+        ch = content[i]
+        if ch == "\n":
+            out.append("\n")
+            i += 1
+            cur_line += 1
+            at_line_start = True
+            continue
+        if ch == "\\":
+            out.append(ch)
+            i += 1
+            if i < n and content[i] != "\n":
+                out.append(content[i])
+                i += 1
+            continue
+        if ch == "`":
+            span_end = _code_span_end(content, i, _block_bound(content, i))
+            if span_end is None:
+                while i < n and content[i] == "`":
+                    out.append("`")
+                    i += 1
+                continue
+            out.append(content[i:span_end])
+            cur_line += content.count("\n", i, span_end)
+            i = span_end
+            continue
+        if content.startswith("<!--", i):
+            start_line = cur_line
+            end = content.find("-->", i + 4)
+            if end == -1:
+                out.append("\n" * content.count("\n", i, n))
+                unclosed = ("comment", start_line, "")
+                i = n
+                break
+            out.append("\n" * content.count("\n", i, end + 3))
+            cur_line += content.count("\n", i, end + 3)
+            i = end + 3
+            continue
+        out.append(ch)
+        i += 1
+    return "".join(out), unclosed
+
+
+def _strip_inline_code(text: str) -> str:
+    """Blank the contents of inline code spans (fences/comments already
+    stripped by _rendered_text), so markup shown inside backticks is never
+    treated as rendered links, images, or anchors. Newlines are preserved;
+    unmatched or escaped backtick runs are literal per GFM and left alone."""
     out = []
     i = 0
     n = len(text)
     while i < n:
-        cstart = text.find("<!--", i)
-        tstart = text.find("`", i)
-        if cstart == -1 and tstart == -1:
-            out.append(text[i:])
-            break
-        if tstart != -1 and (cstart == -1 or tstart < cstart):
-            # A backtick run comes first — emit the whole code span (or the
-            # literal unmatched run) so `<!--` inside it stays text.
-            span_end = _code_span_end(text, tstart)
-            if span_end is None:
-                run_end = tstart
-                while run_end < n and text[run_end] == "`":
-                    run_end += 1
-                out.append(text[i:run_end])
-                i = run_end
-                continue
-            out.append(text[i:span_end])
-            i = span_end
+        ch = text[i]
+        if ch == "\\":
+            out.append(ch)
+            i += 1
+            if i < n and text[i] != "\n":
+                out.append(text[i])
+                i += 1
             continue
-        out.append(text[i:cstart])
-        end = text.find("-->", cstart + 4)
-        if end == -1:
-            out.append("\n" * text[cstart:].count("\n"))
-            break
-        out.append("\n" * text[cstart:end + 3].count("\n"))
-        i = end + 3
-    return "".join(out)
-
-
-def _strip_inline_code(text: str) -> str:
-    """Blank the contents of inline code spans (fences already stripped), so
-    markup shown inside backticks is never treated as rendered. Newlines are
-    preserved to keep line numbers stable; an unmatched backtick run is
-    literal text per GFM and is left alone."""
-    out = []
-    i = 0
-    while True:
-        start = text.find("`", i)
-        if start == -1:
-            out.append(text[i:])
-            break
-        end = _code_span_end(text, start)
-        if end is None:
-            out.append(text[i:])
-            break
-        out.append(text[i:start])
-        out.append("".join("\n" if c == "\n" else " " for c in text[start:end]))
-        i = end
+        if ch == "`":
+            end = _code_span_end(text, i, _block_bound(text, i))
+            if end is None:
+                while i < n and text[i] == "`":
+                    out.append("`")
+                    i += 1
+                continue
+            out.append("".join("\n" if c == "\n" else " " for c in text[i:end]))
+            i = end
+            continue
+        out.append(ch)
+        i += 1
     return "".join(out)
 
 
@@ -362,10 +400,10 @@ def _markdown_anchor_ids(path: Path) -> Optional[set]:
     except OSError:
         return None
 
-    # Anchors only from rendered content: fenced code stripped first (an
-    # unclosed comment inside a fence is just code), then comment spans
-    # removed — code-span aware, so a `<!--` inside backticks is literal.
-    visible = _strip_html_comments(strip_code_fences(text))
+    # Anchors only from rendered content: one pass blanks fences and HTML
+    # comments with shared context — a fence inside a comment stays comment,
+    # a `<!--` inside a code span stays literal.
+    visible, _ = _rendered_text(text)
     lines = visible.splitlines()
 
     # Explicit anchors: parse each HTML tag attribute-by-attribute so id=
@@ -447,9 +485,8 @@ def check_dead_links(content: str, readme_path: Path, repo_root: Path) -> List[F
     findings = []
     # Rendered content only: links inside fenced code, inline code, or HTML
     # comments are not clickable and never resolve.
-    text_no_fences = _strip_inline_code(
-        _strip_html_comments(strip_code_fences(content))
-    )
+    rendered, _ = _rendered_text(content)
+    text_no_fences = _strip_inline_code(rendered)
     lines = text_no_fences.splitlines()
     readme_dir = readme_path.parent.resolve()
     own_anchors: Optional[set] = None
@@ -474,7 +511,8 @@ def check_dead_links(content: str, readme_path: Path, repo_root: Path) -> List[F
                 if fragment:
                     if own_anchors is None:
                         own_anchors = _markdown_anchor_ids(readme_path)
-                    if own_anchors is not None and fragment not in own_anchors:
+                    # GitHub resolves fragments case-insensitively
+                    if own_anchors is not None and not _anchor_match(fragment, own_anchors):
                         findings.append(
                             Finding(
                                 check_name="dead-links",
@@ -498,7 +536,7 @@ def check_dead_links(content: str, readme_path: Path, repo_root: Path) -> List[F
             # File resolves — validate the fragment against the target's anchors
             if fragment and resolved.is_file() and resolved.suffix.lower() in (".md", ".markdown"):
                 target_anchors = _markdown_anchor_ids(resolved)
-                if target_anchors is not None and fragment not in target_anchors:
+                if target_anchors is not None and not _anchor_match(fragment, target_anchors):
                     findings.append(
                         Finding(
                             check_name="dead-links",
@@ -554,9 +592,8 @@ def parse_srcset_urls(raw_srcset: str) -> List[str]:
 def check_missing_images(content: str, readme_path: Path, repo_root: Path) -> List[Finding]:
     """Check 2: Missing local image paths."""
     findings = []
-    text_no_fences = _strip_inline_code(
-        _strip_html_comments(strip_code_fences(content))
-    )
+    rendered, _ = _rendered_text(content)
+    text_no_fences = _strip_inline_code(rendered)
     lines = text_no_fences.splitlines()
 
     md_img_re = re.compile(r"!\[([^\]]*)\]\(([^)]+)\)")
@@ -599,10 +636,18 @@ def check_missing_images(content: str, readme_path: Path, repo_root: Path) -> Li
     return findings
 
 
+def _anchor_match(fragment: str, anchors: set) -> bool:
+    """Case-insensitive fragment match — GitHub resolves #Limitations to
+    the #limitations anchor."""
+    folded = fragment.casefold()
+    return any(a.casefold() == folded for a in anchors)
+
+
 def check_badge_domains(content: str) -> List[Finding]:
     """Check 4: Badge URL domain sanity."""
     findings = []
-    text_no_fences = strip_code_fences(content)
+    rendered, _ = _rendered_text(content)
+    text_no_fences = _strip_inline_code(rendered)
     lines = text_no_fences.splitlines()
 
     badge_md_re = re.compile(r"\[!\[([^\]]*)\]\(([^)]+)\)\]\(([^)]+)\)")
@@ -661,7 +706,7 @@ def check_badge_domains(content: str) -> List[Finding]:
 def check_boundary_duplicates(content: str) -> List[Finding]:
     """Check 5: Boundary-phrase duplicate counting."""
     findings = []
-    text_no_fences = strip_code_fences(content)
+    text_no_fences, _ = _rendered_text(content)
     lines = text_no_fences.splitlines()
 
     phrase_matches: dict[str, list[int]] = {phrase: [] for phrase in BOUNDARY_PHRASES}
@@ -693,7 +738,7 @@ def check_boundary_duplicates(content: str) -> List[Finding]:
 def check_honest_gaps(content: str) -> List[Finding]:
     """Check 6: Honest-gap signal presence (detects suspicious completeness)."""
     findings = []
-    text_no_fences = strip_code_fences(content)
+    text_no_fences, _ = _rendered_text(content)
 
     found_signals = []
     for pat in HONEST_GAP_PATTERNS:
@@ -715,7 +760,7 @@ def check_honest_gaps(content: str) -> List[Finding]:
 def extract_headings(content: str) -> List[Tuple[int, str]]:
     """Extract markdown headings as (level, normalized_title)."""
     headings = []
-    text_no_fences = strip_code_fences(content)
+    text_no_fences, _ = _rendered_text(content)
     for line in text_no_fences.splitlines():
         m = re.match(r"^(#{1,6})\s+(.*)$", line.strip())
         if m:
