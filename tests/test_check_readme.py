@@ -696,6 +696,107 @@ class TestFragmentLinks(unittest.TestCase):
             self.assertEqual(code, 0)
             self.assertIn("- dead-links: PASS", out)
 
+    def test_data_id_attribute_is_not_an_anchor(self):
+        """<span data-id="ghost"> has no id attribute — #ghost must FAIL."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                '# T\n\n[Bad](#ghost)\n\n<span data-id="ghost"></span>\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertNotEqual(code, 0)
+            self.assertIn("ghost", out)
+
+    def test_plain_text_id_equals_is_not_an_anchor(self):
+        """Bare text id="ghost" outside any HTML tag is not an anchor."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                '# T\n\n[Bad](#ghost)\n\nSet id="ghost" in your config.\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertNotEqual(code, 0)
+            self.assertIn("ghost", out)
+
+    def test_inline_comment_in_heading_keeps_anchor(self):
+        """## Setup <!-- note --> still renders a #setup target."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n[Go](#setup)\n\n## Setup <!-- internal note -->\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertEqual(code, 0, f"Out:\n{out}")
+            self.assertIn("- dead-links: PASS", out)
+
+    def test_unclosed_comment_inside_fence_does_not_swallow(self):
+        """An unclosed <!-- inside a fenced block is code, not a comment —
+        headings after the fence still produce anchors."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n[Go](#real)\n\n```html\n<!-- unclosed example\n```\n\n## Real\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertEqual(code, 0, f"Out:\n{out}")
+            self.assertIn("- dead-links: PASS", out)
+
+    def test_digit_led_setext_heading_slug(self):
+        """2026 Overview + === underline is a valid Setext heading."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n[Go](#2026-overview)\n\n2026 Overview\n=============\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertEqual(code, 0, f"Out:\n{out}")
+            self.assertIn("- dead-links: PASS", out)
+
+    def test_ordered_list_marker_not_setext_text(self):
+        """'1. Item' + === is a list marker line, not heading text."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n[Bad](#1-item)\n\n1. Item\n=======\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertNotEqual(code, 0)
+            self.assertIn("1-item", out)
+
+    def test_commented_out_dead_link_not_flagged(self):
+        """A dead link inside an HTML comment is not rendered — no finding."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n<!-- [Gone](missing.md) -->\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertEqual(code, 0, f"Out:\n{out}")
+            self.assertIn("- dead-links: PASS", out)
+
 
 class TestStdlibOnly(unittest.TestCase):
     """Ensure scripts/check-readme.py has no third-party dependencies."""

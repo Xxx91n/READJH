@@ -274,40 +274,48 @@ def _github_slug(heading: str) -> str:
 
 
 def _strip_html_comments(text: str) -> str:
-    """Replace HTML comments with blank lines (line count preserved) so
-    commented-out anchors and markup never register as real."""
-    lines = text.splitlines(keepends=True)
+    """Remove HTML comment spans so commented-out anchors and markup never
+    register as real, while keeping rendered text around inline comments.
+    Newlines inside comments are preserved to keep line numbers stable; an
+    unclosed comment swallows the rest of the document, like the renderer."""
     out = []
-    in_comment = False
-    for line in lines:
-        if in_comment:
-            if "-->" in line:
-                in_comment = False
-            out.append("\n")
-            continue
-        if "<!--" in line:
-            if "-->" not in line.split("<!--", 1)[1]:
-                in_comment = True
-            out.append("\n")
-            continue
-        out.append(line)
+    i = 0
+    while True:
+        start = text.find("<!--", i)
+        if start == -1:
+            out.append(text[i:])
+            break
+        out.append(text[i:start])
+        end = text.find("-->", start + 4)
+        if end == -1:
+            out.append("\n" * text[start:].count("\n"))
+            break
+        out.append("\n" * text[start:end + 3].count("\n"))
+        i = end + 3
     return "".join(out)
 
 
 def _markdown_anchor_ids(path: Path) -> Optional[set]:
-    """Collect valid fragment anchors in a markdown file: explicit {#id} ids,
-    rendered <a id>/<a name> attributes, and GitHub-slugified heading anchors
-    (indented ATX, Setext, duplicate-suffixed). Returns None on read error."""
+    """Collect valid fragment anchors in a markdown file: rendered id/name
+    attributes on HTML tags and GitHub-slugified heading anchors (indented
+    ATX, Setext, duplicate-suffixed). Returns None on read error."""
     try:
         text = path.read_text(encoding="utf-8", errors="replace")
     except OSError:
         return None
 
-    # Anchors only from rendered content: fenced code and HTML comments stripped
-    visible = strip_code_fences(_strip_html_comments(text))
+    # Anchors only from rendered content: fenced code stripped first (an
+    # unclosed comment inside a fence is just code), then comment spans
+    # removed without touching the rendered text around them.
+    visible = _strip_html_comments(strip_code_fences(text))
     lines = visible.splitlines()
 
-    ids = set(re.findall(r"""(?:id|name)\s*=\s*["']([^"']+)["']""", visible))
+    # Explicit anchors: id/name attributes on real HTML tags only — a
+    # data-id="x" attribute or bare text id="x" is not an anchor target.
+    ids = set()
+    for tag in re.findall(r"<[^>]+>", visible):
+        for m in re.finditer(r"""[\s"'](?:id|name)\s*=\s*["']([^"']+)["']""", tag):
+            ids.add(m.group(1))
     slug_counts: dict = {}
     generated: set = set()
 
@@ -331,10 +339,13 @@ def _markdown_anchor_ids(path: Path) -> Optional[set]:
             _register(m.group(1))
             continue
         # Setext heading: plain text line followed by === or --- underline.
-        # Lines starting with list/blockquote markers are not heading text.
+        # Lines starting with list/blockquote markers are not heading text;
+        # digits are fine (2026 Overview) — only a real ordered marker like
+        # "1. " or "2) " is excluded.
         if (
             line.strip()
-            and re.match(r"^ {0,3}[^\s>#*+\-\d]", line)
+            and re.match(r"^ {0,3}[^\s>#*+\-]", line)
+            and not re.match(r"^ {0,3}\d{1,9}[.)](?:\s|$)", line)
             and i + 1 < len(lines)
             and re.match(r"^ {0,3}(=+|-+)\s*$", lines[i + 1])
         ):
@@ -359,7 +370,9 @@ def _extract_fragment(target: str) -> Optional[str]:
 def check_dead_links(content: str, readme_path: Path, repo_root: Path) -> List[Finding]:
     """Check 1: Dead local links and broken fragments."""
     findings = []
-    text_no_fences = strip_code_fences(content)
+    # Rendered content only: links inside fenced code or HTML comments are
+    # not clickable and never resolve.
+    text_no_fences = _strip_html_comments(strip_code_fences(content))
     lines = text_no_fences.splitlines()
     readme_dir = readme_path.parent.resolve()
     own_anchors: Optional[set] = None
@@ -464,7 +477,7 @@ def parse_srcset_urls(raw_srcset: str) -> List[str]:
 def check_missing_images(content: str, readme_path: Path, repo_root: Path) -> List[Finding]:
     """Check 2: Missing local image paths."""
     findings = []
-    text_no_fences = strip_code_fences(content)
+    text_no_fences = _strip_html_comments(strip_code_fences(content))
     lines = text_no_fences.splitlines()
 
     md_img_re = re.compile(r"!\[([^\]]*)\]\(([^)]+)\)")

@@ -96,8 +96,9 @@ python -B scripts/check-readme.py <fixture>/docs/architecture.md    --repo-root 
 python -B scripts/check-readme.py <fixture>/docs/upstream-policy.md --repo-root <fixture> --checks dead-links,missing-images,code-fences → exit 0
 python -B scripts/check-readme.py <fixture>/docs/versioning.md      --repo-root <fixture> --checks dead-links,missing-images,code-fences → exit 0
 
-(re-run after the round-2 probe hardening: fragment validation in dead-links
-and code-fences in the destination subset — all five files still clean)
+(re-run after each round of probe hardening — fragment validation in
+dead-links, code-fences in the destination subset, and the round-4
+rendered-content fixes: all five files still clean)
 ```
 
 Write-set check (tree diff vs baseline) — **exactly** the intended set:
@@ -168,25 +169,30 @@ fixture-context. Also not demonstrated by that demo: real writes, `.bak`
 creation, ledger execution, runtime suppression behavior — all covered by
 Run B now.
 
-## Round-2 probe hardening receipts (post-review)
+## Post-review probe hardening receipts (rounds 2–4)
 
 - `check-readme.py --checks ",,"` and `--checks ""` → **exit 2** (explicit
   empty selection rejected; omitted flag = all checks); unknown names →
   exit 2; duplicates de-duplicated.
 - `dead-links` validates fragments **to GitHub's rendering semantics**:
   same-file `#anchor` and `file.md#anchor` resolved against
-  GitHub-slugified heading anchors (indented ATX + Setext + duplicate
-  `-1`/`-2` suffixes, `{#id}` text folded into the slug per GFM) plus
-  rendered `<a id>/<a name>` attributes — fenced-code and commented-out
-  `id` attributes do not count. Underscores inside names/code spans are
-  preserved.
+  GitHub-slugified heading anchors (indented ATX + Setext incl. digit-led
+  text + duplicate `-1`/`-2` suffixes, `{#id}` text folded into the slug
+  per GFM) plus rendered `id`/`name` attributes on real HTML tags —
+  `data-id=`, bare text `id=`, fenced-code, and commented-out attributes
+  do not count, and inline comments no longer erase heading text.
+  Underscores inside names/code spans are preserved. Links and images
+  inside HTML comments are skipped entirely (not rendered).
 - Run B's five probed files re-checked with
   `--checks dead-links,missing-images,code-fences` → all exit 0.
-- Unit tests: `python -m unittest discover -s tests` → **55 tests OK**
-  (21 total new: `--checks` subset/empty/dedup/repo-set combination +
-  fragment same-file/cross-file/dup-suffix/indented-ATX/Setext/CJK/
-  underscore cases, incl. negative fixtures for fenced and commented
-  `id` attributes and `#custom` curlies).
+- Unit tests: `python -m unittest discover -s tests` → **62 tests OK**
+  (28 total new across rounds 2–4: `--checks` subset/empty/dedup/repo-set
+  combination + fragment same-file/cross-file/dup-suffix/indented-ATX/
+  Setext/CJK/underscore cases, incl. negative fixtures for fenced and
+  commented `id` attributes, `#custom` curlies, `data-id` and bare-text
+  `id=` non-anchors, ordered-list-marker Setext exclusion; positives for
+  inline-comment headings, unclosed-comment-in-fence, digit-led Setext,
+  and commented-out dead links).
 
 ## Acceptance mapping
 
