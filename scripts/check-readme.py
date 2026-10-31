@@ -273,25 +273,83 @@ def _github_slug(heading: str) -> str:
     return t.replace(" ", "-")
 
 
+def _code_span_end(text: str, start: int) -> Optional[int]:
+    """If a backtick code span opens at `start`, return the index just past its
+    closing run. GFM: the closing run must be exactly the opening length; an
+    unmatched opener is literal text, so return None."""
+    tick_end = start
+    while tick_end < len(text) and text[tick_end] == "`":
+        tick_end += 1
+    tlen = tick_end - start
+    k = text.find("`", tick_end)
+    while k != -1:
+        k2 = k
+        while k2 < len(text) and text[k2] == "`":
+            k2 += 1
+        if k2 - k == tlen:
+            return k2
+        k = text.find("`", k2)
+    return None
+
+
 def _strip_html_comments(text: str) -> str:
-    """Remove HTML comment spans so commented-out anchors and markup never
-    register as real, while keeping rendered text around inline comments.
-    Newlines inside comments are preserved to keep line numbers stable; an
-    unclosed comment swallows the rest of the document, like the renderer."""
+    """Remove HTML comment spans so commented-out markup never registers as
+    real, while keeping rendered text around inline comments. Code-span aware:
+    `<!--` inside backticks is literal text, not a comment. Newlines inside
+    comments are preserved to keep line numbers stable; an unclosed comment
+    swallows the rest of the document, like the renderer."""
+    out = []
+    i = 0
+    n = len(text)
+    while i < n:
+        cstart = text.find("<!--", i)
+        tstart = text.find("`", i)
+        if cstart == -1 and tstart == -1:
+            out.append(text[i:])
+            break
+        if tstart != -1 and (cstart == -1 or tstart < cstart):
+            # A backtick run comes first — emit the whole code span (or the
+            # literal unmatched run) so `<!--` inside it stays text.
+            span_end = _code_span_end(text, tstart)
+            if span_end is None:
+                run_end = tstart
+                while run_end < n and text[run_end] == "`":
+                    run_end += 1
+                out.append(text[i:run_end])
+                i = run_end
+                continue
+            out.append(text[i:span_end])
+            i = span_end
+            continue
+        out.append(text[i:cstart])
+        end = text.find("-->", cstart + 4)
+        if end == -1:
+            out.append("\n" * text[cstart:].count("\n"))
+            break
+        out.append("\n" * text[cstart:end + 3].count("\n"))
+        i = end + 3
+    return "".join(out)
+
+
+def _strip_inline_code(text: str) -> str:
+    """Blank the contents of inline code spans (fences already stripped), so
+    markup shown inside backticks is never treated as rendered. Newlines are
+    preserved to keep line numbers stable; an unmatched backtick run is
+    literal text per GFM and is left alone."""
     out = []
     i = 0
     while True:
-        start = text.find("<!--", i)
+        start = text.find("`", i)
         if start == -1:
             out.append(text[i:])
             break
-        out.append(text[i:start])
-        end = text.find("-->", start + 4)
-        if end == -1:
-            out.append("\n" * text[start:].count("\n"))
+        end = _code_span_end(text, start)
+        if end is None:
+            out.append(text[i:])
             break
-        out.append("\n" * text[start:end + 3].count("\n"))
-        i = end + 3
+        out.append(text[i:start])
+        out.append("".join("\n" if c == "\n" else " " for c in text[start:end]))
+        i = end
     return "".join(out)
 
 
@@ -306,16 +364,29 @@ def _markdown_anchor_ids(path: Path) -> Optional[set]:
 
     # Anchors only from rendered content: fenced code stripped first (an
     # unclosed comment inside a fence is just code), then comment spans
-    # removed without touching the rendered text around them.
+    # removed — code-span aware, so a `<!--` inside backticks is literal.
     visible = _strip_html_comments(strip_code_fences(text))
     lines = visible.splitlines()
 
-    # Explicit anchors: id/name attributes on real HTML tags only — a
-    # data-id="x" attribute or bare text id="x" is not an anchor target.
+    # Explicit anchors: parse each HTML tag attribute-by-attribute so id=
+    # inside another attribute's value cannot fake an anchor (e.g.
+    # <span title='id="ghost"'>). Any tag's `id` counts; `name` only on <a>.
+    attr_re = re.compile(
+        r"""([^\s=/>]+)\s*(?:=\s*("[^"]*"|'[^']*'|[^\s>]+))?"""
+    )
     ids = set()
-    for tag in re.findall(r"<[^>]+>", visible):
-        for m in re.finditer(r"""[\s"'](?:id|name)\s*=\s*["']([^"']+)["']""", tag):
-            ids.add(m.group(1))
+    for tag in re.findall(r"<[^>]+>", _strip_inline_code(visible)):
+        m = re.match(r"</?\s*([a-zA-Z][^\s/>]*)", tag)
+        if not m:
+            continue
+        tag_name = m.group(1).lower()
+        for attr in attr_re.finditer(tag, m.end()):
+            attr_name = attr.group(1).lower()
+            attr_val = (attr.group(2) or "").strip("\"'")
+            if attr_name == "id" and attr_val:
+                ids.add(attr_val)
+            elif attr_name == "name" and tag_name == "a" and attr_val:
+                ids.add(attr_val)
     slug_counts: dict = {}
     generated: set = set()
 
@@ -339,13 +410,17 @@ def _markdown_anchor_ids(path: Path) -> Optional[set]:
             _register(m.group(1))
             continue
         # Setext heading: plain text line followed by === or --- underline.
-        # Lines starting with list/blockquote markers are not heading text;
-        # digits are fine (2026 Overview) — only a real ordered marker like
-        # "1. " or "2) " is excluded.
+        # Only real block markers are excluded — "> " blockquote, "# " ATX,
+        # "* " / "+ " / "- " unordered markers, "1. " ordered markers, and
+        # thematic-break-only lines. Marker chars inside text (**Note**,
+        # 2026 Overview, -foo) stay valid heading text.
         if (
             line.strip()
-            and re.match(r"^ {0,3}[^\s>#*+\-]", line)
-            and not re.match(r"^ {0,3}\d{1,9}[.)](?:\s|$)", line)
+            and re.match(
+                r"^ {0,3}(?!>|#{1,6}(?:\s|$)|[*+\-](?:\s|$)|"
+                r"\d{1,9}[.)](?:\s|$)|[*\-_ ]*$)\S",
+                line,
+            )
             and i + 1 < len(lines)
             and re.match(r"^ {0,3}(=+|-+)\s*$", lines[i + 1])
         ):
@@ -370,9 +445,11 @@ def _extract_fragment(target: str) -> Optional[str]:
 def check_dead_links(content: str, readme_path: Path, repo_root: Path) -> List[Finding]:
     """Check 1: Dead local links and broken fragments."""
     findings = []
-    # Rendered content only: links inside fenced code or HTML comments are
-    # not clickable and never resolve.
-    text_no_fences = _strip_html_comments(strip_code_fences(content))
+    # Rendered content only: links inside fenced code, inline code, or HTML
+    # comments are not clickable and never resolve.
+    text_no_fences = _strip_inline_code(
+        _strip_html_comments(strip_code_fences(content))
+    )
     lines = text_no_fences.splitlines()
     readme_dir = readme_path.parent.resolve()
     own_anchors: Optional[set] = None
@@ -477,7 +554,9 @@ def parse_srcset_urls(raw_srcset: str) -> List[str]:
 def check_missing_images(content: str, readme_path: Path, repo_root: Path) -> List[Finding]:
     """Check 2: Missing local image paths."""
     findings = []
-    text_no_fences = _strip_html_comments(strip_code_fences(content))
+    text_no_fences = _strip_inline_code(
+        _strip_html_comments(strip_code_fences(content))
+    )
     lines = text_no_fences.splitlines()
 
     md_img_re = re.compile(r"!\[([^\]]*)\]\(([^)]+)\)")

@@ -797,6 +797,155 @@ class TestFragmentLinks(unittest.TestCase):
             self.assertEqual(code, 0, f"Out:\n{out}")
             self.assertIn("- dead-links: PASS", out)
 
+    def test_id_inside_attribute_value_is_not_an_anchor(self):
+        """title='id="ghost"' is a value, not an id attribute — must FAIL."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n[Bad](#ghost)\n\n<span title='id=\"ghost\"'></span>\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertNotEqual(code, 0)
+            self.assertIn("ghost", out)
+
+    def test_div_name_attribute_is_not_an_anchor(self):
+        """name= anchors only on <a>; <div name='ghost'> must FAIL."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                '# T\n\n[Bad](#ghost)\n\n<div name="ghost"></div>\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertNotEqual(code, 0)
+            self.assertIn("ghost", out)
+
+    def test_comment_marker_inside_inline_code_does_not_swallow(self):
+        """`<!--` inside backticks is literal — a real dead link after it
+        must still FAIL (no false PASS)."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\nType `<!--` to start a comment.\n\n[Bad](missing.md)\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertNotEqual(code, 0)
+            self.assertIn("missing.md", out)
+
+    def test_comment_marker_inside_multibacktick_code(self):
+        """Same guard for `` ... `` spans — dead link after still FAILs."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\nExample ``<!-- x -->`` inline.\n\n[Bad](missing.md)\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertNotEqual(code, 0)
+            self.assertIn("missing.md", out)
+
+    def test_link_inside_inline_code_not_flagged(self):
+        """`[x](missing.md)` inside backticks is rendered code — no finding."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\nUse `[Example](missing.md)` as the syntax.\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertEqual(code, 0, f"Out:\n{out}")
+            self.assertIn("- dead-links: PASS", out)
+
+    def test_image_inside_inline_code_not_flagged(self):
+        """`![x](missing.png)` inside backticks is rendered code — no finding."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\nUse `![alt](missing.png)` as the syntax.\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "missing-images"
+            )
+            self.assertEqual(code, 0, f"Out:\n{out}")
+            self.assertIn("- missing-images: PASS", out)
+
+    def test_a_id_inside_inline_code_not_an_anchor(self):
+        """`<a id="x">` inside backticks is code — the fragment must FAIL."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                '# T\n\nMarkup: `<a id="ghost"></a>`\n\n[Bad](#ghost)\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertNotEqual(code, 0)
+            self.assertIn("ghost", out)
+
+    def test_marker_led_setext_heading_slug(self):
+        """**Note** + === is a valid Setext heading — #note resolves."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n[Go](#note)\n\n**Note**\n========\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertEqual(code, 0, f"Out:\n{out}")
+            self.assertIn("- dead-links: PASS", out)
+
+    def test_dash_word_setext_heading_slug(self):
+        """-foo + === is Setext text (- is not followed by a space)."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n[Go](#-foo)\n\n-foo\n====\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertEqual(code, 0, f"Out:\n{out}")
+            self.assertIn("- dead-links: PASS", out)
+
+    def test_unordered_list_marker_not_setext_text(self):
+        """'- Item' + === is a list marker line, not heading text."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n[Bad](#item)\n\n- Item\n======\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertNotEqual(code, 0)
+            self.assertIn("#item", out)
+
 
 class TestStdlibOnly(unittest.TestCase):
     """Ensure scripts/check-readme.py has no third-party dependencies."""

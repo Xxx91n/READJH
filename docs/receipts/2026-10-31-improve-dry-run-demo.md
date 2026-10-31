@@ -97,7 +97,7 @@ python -B scripts/check-readme.py <fixture>/docs/upstream-policy.md --repo-root 
 python -B scripts/check-readme.py <fixture>/docs/versioning.md      --repo-root <fixture> --checks dead-links,missing-images,code-fences → exit 0
 
 (re-run after each round of probe hardening — fragment validation in
-dead-links, code-fences in the destination subset, and the round-4
+dead-links, code-fences in the destination subset, and the round-4/5
 rendered-content fixes: all five files still clean)
 ```
 
@@ -177,22 +177,26 @@ Run B now.
 - `dead-links` validates fragments **to GitHub's rendering semantics**:
   same-file `#anchor` and `file.md#anchor` resolved against
   GitHub-slugified heading anchors (indented ATX + Setext incl. digit-led
-  text + duplicate `-1`/`-2` suffixes, `{#id}` text folded into the slug
-  per GFM) plus rendered `id`/`name` attributes on real HTML tags —
-  `data-id=`, bare text `id=`, fenced-code, and commented-out attributes
-  do not count, and inline comments no longer erase heading text.
-  Underscores inside names/code spans are preserved. Links and images
-  inside HTML comments are skipped entirely (not rendered).
+  and marker-char-led text + duplicate `-1`/`-2` suffixes, `{#id}` text
+  folded into the slug per GFM) plus `id`/`name` attributes parsed
+  attribute-by-attribute on real HTML tags — `data-id=`, `id=` inside
+  another attribute's value, bare text `id=`, `name=` on non-`<a>` tags,
+  and fenced/inline-code/commented attributes do not count. Inline
+  comments no longer erase heading text; `<!--` inside code spans is
+  literal and cannot swallow later content. Underscores inside
+  names/code spans are preserved. Links and images inside HTML comments
+  or inline code are skipped entirely (not rendered).
 - Run B's five probed files re-checked with
   `--checks dead-links,missing-images,code-fences` → all exit 0.
-- Unit tests: `python -m unittest discover -s tests` → **62 tests OK**
-  (28 total new across rounds 2–4: `--checks` subset/empty/dedup/repo-set
+- Unit tests: `python -m unittest discover -s tests` → **72 tests OK**
+  (38 total new across rounds 2–5: `--checks` subset/empty/dedup/repo-set
   combination + fragment same-file/cross-file/dup-suffix/indented-ATX/
-  Setext/CJK/underscore cases, incl. negative fixtures for fenced and
-  commented `id` attributes, `#custom` curlies, `data-id` and bare-text
-  `id=` non-anchors, ordered-list-marker Setext exclusion; positives for
-  inline-comment headings, unclosed-comment-in-fence, digit-led Setext,
-  and commented-out dead links).
+  Setext/CJK/underscore cases, incl. negative fixtures for fenced,
+  inline-code, and commented `id`/`name` attributes, attribute-value
+  `id=`, `data-id`, bare-text `id=`, `#custom` curlies, list-marker
+  Setext exclusions; positives for inline-comment headings,
+  unclosed-comment-in-fence, code-span `<!--` literals, digit- and
+  marker-led Setext, and commented/inline-code dead links and images).
 
 ## Acceptance mapping
 
