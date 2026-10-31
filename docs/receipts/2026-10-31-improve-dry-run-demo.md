@@ -173,13 +173,20 @@ Run B now.
 - `check-readme.py --checks ",,"` and `--checks ""` → **exit 2** (explicit
   empty selection rejected; omitted flag = all checks); unknown names →
   exit 2; duplicates de-duplicated.
-- `dead-links` now validates fragments: same-file `#anchor` and
-  `file.md#anchor` resolved against heading slugs + `{#id}` + `<a id>`
-  anchors of the target — Run B's five probed files re-checked with
+- `dead-links` validates fragments **to GitHub's rendering semantics**:
+  same-file `#anchor` and `file.md#anchor` resolved against
+  GitHub-slugified heading anchors (indented ATX + Setext + duplicate
+  `-1`/`-2` suffixes, `{#id}` text folded into the slug per GFM) plus
+  rendered `<a id>/<a name>` attributes — fenced-code and commented-out
+  `id` attributes do not count. Underscores inside names/code spans are
+  preserved.
+- Run B's five probed files re-checked with
   `--checks dead-links,missing-images,code-fences` → all exit 0.
-- Unit tests: `python -m unittest discover -s tests` → **47 tests OK**
-  (14 new: `--checks` subset/empty/dedup/repo-set combination + fragment
-  same-file/cross-file/`{#id}`/`<a id>`/CJK slug cases).
+- Unit tests: `python -m unittest discover -s tests` → **55 tests OK**
+  (21 total new: `--checks` subset/empty/dedup/repo-set combination +
+  fragment same-file/cross-file/dup-suffix/indented-ATX/Setext/CJK/
+  underscore cases, incl. negative fixtures for fenced and commented
+  `id` attributes and `#custom` curlies).
 
 ## Acceptance mapping
 
