@@ -469,12 +469,15 @@ a `HIGH` / `MEDIUM` / `LOW` finding with zero README commands executed.
      references — both same-page `#anchor` links and `file.md#anchor`
      links in `<readme>`, its companion, and other repo files that point
      at the moved heading. For each moved heading, derive its old and new
-     anchors, scan `<readme>` and the companion for references, and
-     repoint them at the destination (`docs/<file>.md#<anchor>`); record
-     the remap in the ledger. References from files outside the write set
-     are listed in `[Residual risk]` for manual follow-up — VERIFY's
-     `dead-links` fragment check flags any that were missed inside the
-     write set.
+     anchors — the new anchor is the heading's **unique slug after the
+     merge**, including the `-1`/`-2` suffix GitHub adds when the
+     destination already has a heading of the same text; the repointed
+     link must identify the moved heading, not the existing duplicate.
+     Scan `<readme>` and the companion for references, repoint them at
+     the destination (`docs/<file>.md#<anchor>`), and record the remap in
+     the ledger. References from files outside the write set are listed
+     in `[Residual risk]` for manual follow-up — VERIFY's `dead-links`
+     fragment check flags any that were missed inside the write set.
    - Converge **self-attestation** repeats to one statement or a link and
      remove **generation traces** (`references/readme-rules.md` §2, §3).
    - `improve`: reorder and trim the existing skeleton to the repository's
