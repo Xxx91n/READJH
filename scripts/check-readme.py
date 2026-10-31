@@ -12,6 +12,7 @@ Seven static checks:
 
 CLI contract:
     python3 scripts/check-readme.py <readme> [--repo-root <dir>] [--repo-set <manifest>]
+                                           [--checks dead-links,missing-images,...]
 Exit codes:
     0: All checks passed (no blocking findings)
     1: One or more blocking findings detected
@@ -132,6 +133,7 @@ class ProbeReport:
     findings: List[Finding] = field(default_factory=list)
     passed_checks: List[str] = field(default_factory=list)
     skeleton_info: Optional[str] = None
+    selected_checks: Optional[List[str]] = None
 
     @property
     def has_blocking_findings(self) -> bool:
@@ -646,9 +648,26 @@ def check_repo_set(
     return findings, "\n".join(summary_lines)
 
 
-def run_checks(readme_path: Path, repo_root: Path, repo_set_manifest: Optional[Path] = None) -> ProbeReport:
-    """Run all applicable static checks on the target README."""
+ALL_CHECKS = [
+    "dead-links",
+    "missing-images",
+    "code-fences",
+    "badge-domains",
+    "boundary-duplicates",
+    "honest-gaps",
+]
+
+
+def run_checks(
+    readme_path: Path,
+    repo_root: Path,
+    repo_set_manifest: Optional[Path] = None,
+    checks: Optional[List[str]] = None,
+) -> ProbeReport:
+    """Run the selected static checks on the target README (default: all)."""
+    selected = checks if checks is not None else list(ALL_CHECKS)
     report = ProbeReport(readme_path=readme_path, repo_root=repo_root)
+    report.selected_checks = list(selected)
 
     if not readme_path.is_file():
         report.findings.append(Finding(check_name="cli", message=f"README file not found: {readme_path}"))
@@ -657,46 +676,52 @@ def run_checks(readme_path: Path, repo_root: Path, repo_set_manifest: Optional[P
     content = readme_path.read_text(encoding="utf-8", errors="replace")
 
     # 1. Dead links
-    dead_link_findings = check_dead_links(content, readme_path, repo_root)
-    if dead_link_findings:
-        report.findings.extend(dead_link_findings)
-    else:
-        report.passed_checks.append("dead-links")
+    if "dead-links" in selected:
+        dead_link_findings = check_dead_links(content, readme_path, repo_root)
+        if dead_link_findings:
+            report.findings.extend(dead_link_findings)
+        else:
+            report.passed_checks.append("dead-links")
 
     # 2. Missing images
-    missing_image_findings = check_missing_images(content, readme_path, repo_root)
-    if missing_image_findings:
-        report.findings.extend(missing_image_findings)
-    else:
-        report.passed_checks.append("missing-images")
+    if "missing-images" in selected:
+        missing_image_findings = check_missing_images(content, readme_path, repo_root)
+        if missing_image_findings:
+            report.findings.extend(missing_image_findings)
+        else:
+            report.passed_checks.append("missing-images")
 
     # 3. Code fence balance
-    code_fence_findings = check_code_fences(content)
-    if code_fence_findings:
-        report.findings.extend(code_fence_findings)
-    else:
-        report.passed_checks.append("code-fences")
+    if "code-fences" in selected:
+        code_fence_findings = check_code_fences(content)
+        if code_fence_findings:
+            report.findings.extend(code_fence_findings)
+        else:
+            report.passed_checks.append("code-fences")
 
     # 4. Badge URL domain sanity
-    badge_findings = check_badge_domains(content)
-    if badge_findings:
-        report.findings.extend(badge_findings)
-    else:
-        report.passed_checks.append("badge-domains")
+    if "badge-domains" in selected:
+        badge_findings = check_badge_domains(content)
+        if badge_findings:
+            report.findings.extend(badge_findings)
+        else:
+            report.passed_checks.append("badge-domains")
 
     # 5. Boundary phrase duplicates
-    boundary_findings = check_boundary_duplicates(content)
-    if boundary_findings:
-        report.findings.extend(boundary_findings)
-    else:
-        report.passed_checks.append("boundary-duplicates")
+    if "boundary-duplicates" in selected:
+        boundary_findings = check_boundary_duplicates(content)
+        if boundary_findings:
+            report.findings.extend(boundary_findings)
+        else:
+            report.passed_checks.append("boundary-duplicates")
 
     # 6. Honest-gap presence
-    honest_gap_findings = check_honest_gaps(content)
-    if honest_gap_findings:
-        report.findings.extend(honest_gap_findings)
-    else:
-        report.passed_checks.append("honest-gaps")
+    if "honest-gaps" in selected:
+        honest_gap_findings = check_honest_gaps(content)
+        if honest_gap_findings:
+            report.findings.extend(honest_gap_findings)
+        else:
+            report.passed_checks.append("honest-gaps")
 
     # 7. Optional repo-set mode
     if repo_set_manifest:
@@ -722,6 +747,13 @@ def main() -> int:
     parser.add_argument("readme", nargs="?", default=None, help="Path to README file to verify")
     parser.add_argument("--repo-root", default=None, help="Root directory of repository (default: README parent dir)")
     parser.add_argument("--repo-set", default=None, help="Manifest file for cross-repo skeleton diff")
+    parser.add_argument(
+        "--checks",
+        default=None,
+        help="Comma-separated subset of checks to run (default: all). "
+        f"Names: {', '.join(ALL_CHECKS)}. Used by VERIFY to scope probes, "
+        "e.g. --checks dead-links,missing-images on docs/ migration destinations.",
+    )
 
     args = parser.parse_args()
 
@@ -742,7 +774,19 @@ def main() -> int:
         print(f"Error: Manifest file '{repo_set_manifest}' does not exist.", file=sys.stderr)
         return 2
 
-    report = run_checks(readme_path, repo_root, repo_set_manifest)
+    selected_checks: Optional[List[str]] = None
+    if args.checks:
+        selected_checks = [c.strip() for c in args.checks.split(",") if c.strip()]
+        unknown = [c for c in selected_checks if c not in ALL_CHECKS]
+        if unknown:
+            print(
+                f"Error: unknown check name(s): {', '.join(unknown)} "
+                f"(valid: {', '.join(ALL_CHECKS)})",
+                file=sys.stderr,
+            )
+            return 2
+
+    report = run_checks(readme_path, repo_root, repo_set_manifest, checks=selected_checks)
 
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
@@ -750,6 +794,11 @@ def main() -> int:
     print(f"[check-readme] Target: {report.readme_path.name} (repo root: {report.repo_root})")
     if report.skeleton_info:
         print(report.skeleton_info)
+
+    if report.selected_checks is not None and report.selected_checks != ALL_CHECKS:
+        skipped = [c for c in ALL_CHECKS if c not in report.selected_checks]
+        if skipped:
+            print(f"[check-readme] Checks not selected: {', '.join(skipped)}")
 
     if report.passed_checks:
         print("[check-readme] Checks evaluated:")

@@ -593,11 +593,13 @@ migrations here), and the intensity tier's scope was respected.
        no ledger entry fails `VERIFY`; any other new, modified, or deleted
        file also fails and must be reverted before delivery.
    - **Probe every migration destination (write modes, no `--dry-run`):**
-     run `check-readme.py` on each new or merged `docs/` destination file
-     with the same `--repo-root`, so moved spans are checked for
-     `dead-links` and `missing-images` from their new location — including
-     every re-based target. A destination that fails is reverted or the
-     re-basing corrected before delivery.
+     run `check-readme.py --checks dead-links,missing-images` on each new
+     or merged `docs/` destination file with the same `--repo-root`, so
+     moved spans are checked from their new location — including every
+     re-based target (deep docs are scoped to the move-integrity checks;
+     README-facing checks like `honest-gaps` do not apply there). A
+     destination that fails is reverted or the re-basing corrected before
+     delivery.
 3. **Emit the three-line delivery report (§4).**
 
 **Completion criterion:** `scripts/check-readme.py` has run, its stdout
