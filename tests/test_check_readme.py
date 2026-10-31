@@ -1257,6 +1257,73 @@ class TestFragmentLinks(unittest.TestCase):
             self.assertEqual(code, 0, f"Out:\n{out}")
             self.assertIn("- dead-links: PASS", out)
 
+    def test_comment_block_tail_heading_not_markdown(self):
+        """<!-- note --> ## Ghost: text after a block comment's --> is raw
+        HTML, not a heading — #ghost must FAIL."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n<!-- note --> ## Ghost\n\n[Go](#ghost)\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertNotEqual(code, 0)
+            self.assertIn("ghost", out)
+
+    def test_comment_block_tail_link_not_markdown(self):
+        """<!-- note --> [x](missing.md): the tail is raw HTML — the
+        pseudo-link there produces no dead-links finding."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n<!-- note --> [Example](missing.md)\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertEqual(code, 0, f"Out:\n{out}")
+            self.assertIn("- dead-links: PASS", out)
+
+    def test_comment_block_tail_anchor_still_counts(self):
+        """<!-- note --> <a id="real">: a real HTML anchor in the tail is
+        still a valid fragment target — #real resolves."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                '# T\n\n<!-- note --> <a id="real"></a>\n\n[Go](#real)\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertEqual(code, 0, f"Out:\n{out}")
+            self.assertIn("- dead-links: PASS", out)
+
+    def test_code_span_underscores_kept_in_slug(self):
+        """## `__init__` renders underscores literally → #__init__."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n[Go](#__init__)\n\n## `__init__`\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertEqual(code, 0, f"Out:\n{out}")
+            self.assertIn("- dead-links: PASS", out)
+
 
 class TestStdlibOnly(unittest.TestCase):
     """Ensure scripts/check-readme.py has no third-party dependencies."""

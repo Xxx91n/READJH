@@ -159,7 +159,7 @@ def _match_fence_close(line: str, fence_char: str, fence_len: int) -> bool:
 def check_code_fences(content: str) -> List[Finding]:
     """Check 3: Detect unclosed code fences (comment/fence context aware)."""
     findings = []
-    _, unclosed = _rendered_text(content)
+    _, _, unclosed = _rendered_text(content)
     if unclosed and unclosed[0] == "code-fence":
         _, start_line, marker = unclosed
         findings.append(
@@ -232,13 +232,15 @@ def _github_slug(heading: str) -> str:
         else re.sub(r"</?[A-Za-z][A-Za-z0-9-]*(?:\s[^<>]*)?/?>", "", p)
         for p in parts
     )
+    t = t.strip()                                        # heading text is trimmed
+    # Paired leading/trailing underscores outside code spans are emphasis;
+    # interior ones and code-span text (`__init__`) stay — strip emphasis
+    # BEFORE unwrapping the backticks so `_+` can't see inside the span.
+    t = re.sub(r"^_+(.+?)_+$", r"\1", t)
     t = re.sub(r"`+([^`]*)`+", r"\1", t)                # inline code
     t = re.sub(r"!?\[([^\]]*)\]\([^)]*\)", r"\1", t)    # links/images -> text
-    t = t.strip()                                        # heading text is trimmed
+    t = t.strip()
     t = re.sub(r"[*~]", "", t)                           # *, ~ emphasis markers
-    # Paired leading/trailing underscores are emphasis; interior ones stay
-    # (my_func, _private keep their underscores like GitHub's renderer).
-    t = re.sub(r"^_+(.+?)_+$", r"\1", t)
     t = t.lower()
     t = re.sub(r"[^\w\- ]", "", t)                       # keep word chars (incl. CJK), hyphens, spaces
     return t.replace(" ", "-")
@@ -302,25 +304,34 @@ def _code_span_end(text: str, start: int, bound: int) -> Optional[int]:
     return None
 
 
-def _rendered_text(content: str) -> Tuple[str, Optional[Tuple[str, int, str]]]:
-    """Single linear pass over the document that keeps rendered text and
-    blanks what Markdown does not render: fenced code blocks and HTML
-    comments. A `` ``` `` inside a comment is comment text (never opens a
-    fence); a `<!--` inside a code span is literal text (never opens a
-    comment); fences are recognized only at line starts. Inline code spans
-    keep their contents — `_strip_inline_code` blanks them only for
-    link/image/anchor extraction. Newlines are preserved everywhere so
-    finding line numbers stay stable.
+def _rendered_text(
+    content: str,
+) -> Tuple[str, str, Optional[Tuple[str, int, str]]]:
+    """Single linear pass producing two views of the document:
 
-    Returns (rendered_text, unclosed): unclosed is
+    - ``visible``: text Markdown actually parses — fenced code blocks and
+      HTML comments blanked, and (per GFM §4.6) the rest of a comment
+      block's *closing line* is raw HTML, so its markdown markup is
+      blanked too. `` ``` `` inside a comment stays comment; `<!--`
+      inside a code span stays literal; fences are recognized only at
+      line starts. Inline code spans keep their contents —
+      `_strip_inline_code` blanks them for link/image/anchor extraction.
+    - ``html``: same view except a comment block's closing-line tail is
+      kept as raw text, so real ``<a id=…>`` anchors there still count
+      while its pseudo-markup (##, [x](…)) does not.
+
+    Newlines are preserved everywhere so finding line numbers stay
+    stable. Returns (visible, html, unclosed): unclosed is
     ("code-fence", start_line, marker) if EOF was reached inside a fence,
     ("comment", start_line, "") if inside a comment, else None.
     """
     out = []
+    hout = []
     i = 0
     n = len(content)
     cur_line = 1
     at_line_start = True
+    html_block_tail = False
     unclosed = None
     while i < n:
         if at_line_start:
@@ -336,6 +347,7 @@ def _rendered_text(content: str) -> Tuple[str, Optional[Tuple[str, int, str]]]:
                 j = line_end + 1 if line_end != -1 else n
                 if line_end != -1:
                     out.append("\n")
+                    hout.append("\n")
                     cur_line += 1
                 closed = False
                 while j < n:
@@ -346,6 +358,7 @@ def _rendered_text(content: str) -> Tuple[str, Optional[Tuple[str, int, str]]]:
                     )
                     if le != -1:
                         out.append("\n")
+                        hout.append("\n")
                         cur_line += 1
                     j = n if le == -1 else le + 1
                     if is_close:
@@ -356,18 +369,36 @@ def _rendered_text(content: str) -> Tuple[str, Optional[Tuple[str, int, str]]]:
                 i = j
                 at_line_start = True
                 continue
+        if html_block_tail:
+            # Text after --> on a comment block's closing line is raw HTML
+            # (GFM §4.6): invisible to markdown parsing, still real HTML.
+            ch = content[i]
+            if ch == "\n":
+                html_block_tail = False
+                out.append("\n")
+                hout.append("\n")
+                cur_line += 1
+                at_line_start = True
+            else:
+                out.append(" ")
+                hout.append(ch)
+            i += 1
+            continue
         ch = content[i]
         if ch == "\n":
             out.append("\n")
+            hout.append("\n")
             i += 1
             cur_line += 1
             at_line_start = True
             continue
         if ch == "\\":
             out.append(ch)
+            hout.append(ch)
             i += 1
             if i < n and content[i] != "\n":
                 out.append(content[i])
+                hout.append(content[i])
                 i += 1
             continue
         if ch == "`":
@@ -375,9 +406,11 @@ def _rendered_text(content: str) -> Tuple[str, Optional[Tuple[str, int, str]]]:
             if span_end is None:
                 while i < n and content[i] == "`":
                     out.append("`")
+                    hout.append("`")
                     i += 1
                 continue
             out.append(content[i:span_end])
+            hout.append(content[i:span_end])
             cur_line += content.count("\n", i, span_end)
             i = span_end
             continue
@@ -395,20 +428,26 @@ def _rendered_text(content: str) -> Tuple[str, Optional[Tuple[str, int, str]]]:
                 # that can't close within the block is literal text
                 # (GFM type-2 HTML blocks only start at a line start).
                 out.append("<")
+                hout.append("<")
                 i += 1
                 continue
             if end == -1:
                 out.append("\n" * content.count("\n", i, n))
+                hout.append("\n" * content.count("\n", i, n))
                 unclosed = ("comment", start_line, "")
                 i = n
                 break
             out.append("\n" * content.count("\n", i, end + 3))
+            hout.append("\n" * content.count("\n", i, end + 3))
             cur_line += content.count("\n", i, end + 3)
             i = end + 3
+            if is_html_block:
+                html_block_tail = True
             continue
         out.append(ch)
+        hout.append(ch)
         i += 1
-    return "".join(out), unclosed
+    return "".join(out), "".join(hout), unclosed
 
 
 def _strip_inline_code(text: str) -> str:
@@ -454,18 +493,21 @@ def _markdown_anchor_ids(path: Path) -> Optional[set]:
 
     # Anchors only from rendered content: one pass blanks fences and HTML
     # comments with shared context — a fence inside a comment stays comment,
-    # a `<!--` inside a code span stays literal.
-    visible, _ = _rendered_text(text)
+    # a `<!--` inside a code span stays literal, and markdown after a block
+    # comment's --> is raw HTML (kept in the html view only).
+    visible, html_visible, _ = _rendered_text(text)
     lines = visible.splitlines()
 
     # Explicit anchors: parse each HTML tag attribute-by-attribute so id=
     # inside another attribute's value cannot fake an anchor (e.g.
     # <span title='id="ghost"'>). Any tag's `id` counts; `name` only on <a>.
+    # The html view keeps comment-block closing-line tails, where a real
+    # <a id="…"> is still a valid anchor even though it is raw HTML.
     attr_re = re.compile(
         r"""([^\s=/>]+)\s*(?:=\s*("[^"]*"|'[^']*'|[^\s>]+))?"""
     )
     ids = set()
-    for tag in re.findall(r"<[^>]+>", _strip_inline_code(visible)):
+    for tag in re.findall(r"<[^>]+>", _strip_inline_code(html_visible)):
         m = re.match(r"</?\s*([a-zA-Z][^\s/>]*)", tag)
         if not m:
             continue
@@ -536,8 +578,9 @@ def check_dead_links(content: str, readme_path: Path, repo_root: Path) -> List[F
     """Check 1: Dead local links and broken fragments."""
     findings = []
     # Rendered content only: links inside fenced code, inline code, or HTML
-    # comments are not clickable and never resolve.
-    rendered, _ = _rendered_text(content)
+    # comments (incl. a comment block's raw-HTML closing-line tail) are not
+    # clickable and never resolve.
+    rendered, _, _ = _rendered_text(content)
     text_no_fences = _strip_inline_code(rendered)
     lines = text_no_fences.splitlines()
     readme_dir = readme_path.parent.resolve()
@@ -644,7 +687,7 @@ def parse_srcset_urls(raw_srcset: str) -> List[str]:
 def check_missing_images(content: str, readme_path: Path, repo_root: Path) -> List[Finding]:
     """Check 2: Missing local image paths."""
     findings = []
-    rendered, _ = _rendered_text(content)
+    rendered, _, _ = _rendered_text(content)
     text_no_fences = _strip_inline_code(rendered)
     lines = text_no_fences.splitlines()
 
@@ -698,7 +741,9 @@ def _anchor_match(fragment: str, anchors: set) -> bool:
 def check_badge_domains(content: str) -> List[Finding]:
     """Check 4: Badge URL domain sanity."""
     findings = []
-    rendered, _ = _rendered_text(content)
+    # Badges are HTML in READMEs — scan the html view so a badge in a
+    # comment block's closing-line tail (raw HTML) is still checked.
+    _, rendered, _ = _rendered_text(content)
     text_no_fences = _strip_inline_code(rendered)
     lines = text_no_fences.splitlines()
 
@@ -758,7 +803,7 @@ def check_badge_domains(content: str) -> List[Finding]:
 def check_boundary_duplicates(content: str) -> List[Finding]:
     """Check 5: Boundary-phrase duplicate counting."""
     findings = []
-    text_no_fences, _ = _rendered_text(content)
+    text_no_fences, _, _ = _rendered_text(content)
     lines = text_no_fences.splitlines()
 
     phrase_matches: dict[str, list[int]] = {phrase: [] for phrase in BOUNDARY_PHRASES}
@@ -790,7 +835,7 @@ def check_boundary_duplicates(content: str) -> List[Finding]:
 def check_honest_gaps(content: str) -> List[Finding]:
     """Check 6: Honest-gap signal presence (detects suspicious completeness)."""
     findings = []
-    text_no_fences, _ = _rendered_text(content)
+    text_no_fences, _, _ = _rendered_text(content)
 
     found_signals = []
     for pat in HONEST_GAP_PATTERNS:
@@ -812,7 +857,7 @@ def check_honest_gaps(content: str) -> List[Finding]:
 def extract_headings(content: str) -> List[Tuple[int, str]]:
     """Extract markdown headings as (level, normalized_title)."""
     headings = []
-    text_no_fences, _ = _rendered_text(content)
+    text_no_fences, _, _ = _rendered_text(content)
     for line in text_no_fences.splitlines():
         m = re.match(r"^(#{1,6})\s+(.*)$", line.strip())
         if m:
