@@ -1450,6 +1450,91 @@ class TestFragmentLinks(unittest.TestCase):
             self.assertIn("#setup-2", out)
             self.assertNotIn("no anchor '#setup-1'", out)
 
+    def test_angle_destination_with_title_fragment(self):
+        """[x](<file.md#frag> "Title"): the fragment is 'frag', not 'frag>' —
+        a valid fragment must PASS, not false-FAIL on the trailing '>'."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            doc = root / "doc.md"
+            rm.write_text(
+                '# T\n\nSee [x](<doc.md#frag> "Title").\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            doc.write_text("# Frag\n", encoding="utf-8")
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertEqual(code, 0, f"Out:\n{out}")
+
+    def test_angle_fragment_link_with_title(self):
+        """[x](<#limitations> "T"): an anchor-only <...> destination with a
+        title is still a same-document fragment — resolves, not dead."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                '# T\n\nSee [x](<#limitations> "T").\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertEqual(code, 0, f"Out:\n{out}")
+
+    def test_angle_fragment_link_with_title_dead(self):
+        """[x](<#nope> "T"): the same shape still FAILs when the fragment
+        does not exist — title stripping must not skip validation."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                '# T\n\nSee [x](<#nope> "T").\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertNotEqual(code, 0)
+            self.assertIn("#nope", out)
+
+    def test_angle_image_src_with_title(self):
+        """![x](<i.png> "t"): an angle-bracket image src with a title resolves
+        like a normal src — PASS, not a false missing-images FAIL."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            (root / "i.png").write_bytes(b"x")
+            rm.write_text(
+                '# T\n\n![x](<i.png> "t")\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "missing-images"
+            )
+            self.assertEqual(code, 0, f"Out:\n{out}")
+
+    def test_angle_badge_url_with_title_still_validated(self):
+        """[![x](<//localhost/badge> "t")](y): a scheme-relative badge URL in
+        angle brackets is still host-validated — localhost must FAIL."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                '# T\n\n[![x](<//localhost/badge> "t")](https://example.org)\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "badge-domains"
+            )
+            self.assertNotEqual(code, 0)
+            self.assertIn("localhost", out)
+
 
 class TestStdlibOnly(unittest.TestCase):
     """Ensure scripts/check-readme.py has no third-party dependencies."""

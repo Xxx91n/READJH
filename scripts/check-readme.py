@@ -582,10 +582,13 @@ def _markdown_anchor_ids(path: Path) -> Optional[set]:
 def _extract_fragment(target: str) -> Optional[str]:
     """Return the URL fragment of a link target (without '#'), or None."""
     t = target.strip()
-    if t.startswith("<") and t.endswith(">"):
-        t = t[1:-1].strip()
-    # Drop an optional title ("..." / '...' / (...) after whitespace)
-    t = re.split(r"\s", t, 1)[0]
+    if t.startswith("<") and ">" in t:
+        # Angle destination may carry a title: <doc.md#x> "Title" — cut at
+        # the first '>' so the fragment is not "x>".
+        t = t[1:t.find(">")].strip()
+    else:
+        # Drop an optional title ("..." / '...' / (...) after whitespace)
+        t = re.split(r"\s", t, maxsplit=1)[0]
     if "#" not in t:
         return None
     frag = t.split("#", 1)[1]
@@ -617,8 +620,9 @@ def check_dead_links(content: str, readme_path: Path, repo_root: Path) -> List[F
             if not target:
                 continue
             clean_target = target.strip()
-            if clean_target.startswith("<") and clean_target.endswith(">"):
-                clean_target = clean_target[1:-1].strip()
+            if clean_target.startswith("<") and ">" in clean_target:
+                # <dest> may carry a title — cut at the first '>'.
+                clean_target = clean_target[1:clean_target.find(">")].strip()
 
             # Ignore external schemes; anchor-only links get fragment validation below
             if clean_target.startswith(("http://", "https://", "mailto:", "data:", "ftp:", "javascript:", "tel:", "//")):
@@ -743,8 +747,9 @@ def check_missing_images(content: str, readme_path: Path, repo_root: Path) -> Li
             if not src:
                 continue
             clean_src = src.strip()
-            if clean_src.startswith("<") and clean_src.endswith(">"):
-                clean_src = clean_src[1:-1].strip()
+            if clean_src.startswith("<") and ">" in clean_src:
+                # <src> may carry a title — cut at the first '>'.
+                clean_src = clean_src[1:clean_src.find(">")].strip()
 
             if clean_src.startswith(("http://", "https://", "data:", "//")):
                 continue
@@ -800,8 +805,9 @@ def check_badge_domains(content: str) -> List[Finding]:
 
         for raw_url in badge_urls:
             url = raw_url.strip()
-            if url.startswith("<") and url.endswith(">"):
-                url = url[1:-1].strip()
+            if url.startswith("<") and ">" in url:
+                # <url> may carry a title — cut at the first '>'.
+                url = url[1:url.find(">")].strip()
             if not url:
                 continue
 
