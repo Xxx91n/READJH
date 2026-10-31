@@ -423,15 +423,24 @@ a `HIGH` / `MEDIUM` / `LOW` finding with zero README commands executed.
      will create or modify.
    - **Git-recoverable check, per member:** an existing file is
      Git-recoverable only when it is tracked **and** clean. Tracked is
-     proven explicitly — `git ls-files --error-unmatch -- <path>` must
-     succeed for the member; status-output absence is not proof (Git may
-     report only `?? docs/` for an untracked directory, so an untracked
+     proven explicitly — `git --literal-pathspecs -C "<repo-root>"
+     ls-files --error-unmatch -- <repo-relative-path>` must succeed for
+     the member. `ls-files` treats the argument as a **pathspec**, not a
+     literal path: `docs/[1]/guide.md` globs onto `docs/1/guide.md`, so a
+     plain `--error-unmatch` query can prove a different tracked file and
+     wrongly clear the `.bak` skip — `--` ends option parsing but does not
+     disable pathspec matching; `--literal-pathspecs` does.
+     Status-output absence is not proof either (Git may report only
+     `?? docs/` for an untracked directory, so an untracked
      `docs/<file>.md` can hide behind it). Clean means absent from the
      `ROUTE` step 4 `git --no-optional-locks status --porcelain --ignored`
      baseline — tracked-and-clean files appear in the file-tree snapshot
      but not in the status list. A new destination file is always
      recoverable by deleting it after the run. Git cannot restore an
-     untracked, ignored, or dirty existing file.
+     untracked, ignored, or dirty existing file. Every per-path Git
+     command in this step — status probes and the `git restore` rollback
+     alike — uses the same literal pathspec handling so the check and the
+     rollback address the identical path set.
    - **Git path:** `<repo-root>` is inside a Git worktree **and** every
      existing member of the write set is tracked and clean — skip `.bak`
      entirely; rollback is `git restore` on each modified path plus
