@@ -402,6 +402,187 @@ class TestCheck7RepoSetSkeletonDiff(unittest.TestCase):
             self.assertIn("analysis (3 repos)", out)
 
 
+class TestChecksSubset(unittest.TestCase):
+    """--checks CLI contract: subset selection, empty rejection, dedup."""
+
+    def test_comma_only_checks_rejected(self):
+        """--checks ,, selects no checks and must exit 2, not PASS."""
+        clean_readme = FIXTURES_DIR / "clean" / "README.md"
+        code, out, err = run_probe(str(clean_readme), "--repo-root", str(FIXTURES_DIR / "clean"), "--checks", ",,")
+        self.assertEqual(code, 2, f"Expected exit 2 for empty selection, got {code}. Out:\n{out}")
+        self.assertIn("no checks", err.lower())
+
+    def test_empty_string_checks_rejected(self):
+        """--checks '' (explicit empty) is a selection error, exit 2."""
+        clean_readme = FIXTURES_DIR / "clean" / "README.md"
+        code, out, err = run_probe(str(clean_readme), "--repo-root", str(FIXTURES_DIR / "clean"), "--checks", "")
+        self.assertEqual(code, 2)
+
+    def test_unknown_check_name_rejected(self):
+        clean_readme = FIXTURES_DIR / "clean" / "README.md"
+        code, out, err = run_probe(str(clean_readme), "--repo-root", str(FIXTURES_DIR / "clean"), "--checks", "dead-links,bogus")
+        self.assertEqual(code, 2)
+        self.assertIn("bogus", err)
+
+    def test_subset_runs_only_selected(self):
+        """--checks dead-links,missing-images runs exactly those two; others not evaluated."""
+        clean_readme = FIXTURES_DIR / "clean" / "README.md"
+        code, out, err = run_probe(
+            str(clean_readme), "--repo-root", str(FIXTURES_DIR / "clean"),
+            "--checks", "dead-links,missing-images",
+        )
+        self.assertEqual(code, 0, f"Out:\n{out}\nErr:\n{err}")
+        self.assertIn("- dead-links: PASS", out)
+        self.assertIn("- missing-images: PASS", out)
+        self.assertIn("Checks not selected: code-fences", out)
+        self.assertNotIn("- honest-gaps: PASS", out)
+        self.assertNotIn("- code-fences: PASS", out)
+
+    def test_default_still_runs_all(self):
+        """Omitting --checks keeps the default: every check evaluated."""
+        clean_readme = FIXTURES_DIR / "clean" / "README.md"
+        code, out, err = run_probe(str(clean_readme), "--repo-root", str(FIXTURES_DIR / "clean"))
+        self.assertEqual(code, 0)
+        for chk in ("dead-links", "missing-images", "code-fences", "badge-domains", "boundary-duplicates", "honest-gaps"):
+            self.assertIn(f"- {chk}: PASS", out)
+
+    def test_subset_with_repo_set(self):
+        """--repo-set still runs when a --checks subset is given."""
+        manifest = FIXTURES_DIR / "repo_set" / "manifest_divergent.txt"
+        target_readme = FIXTURES_DIR / "repo_set" / "repo_iso_a" / "README.md"
+        code, out, err = run_probe(
+            str(target_readme), "--repo-set", str(manifest),
+            "--checks", "dead-links",
+        )
+        self.assertEqual(code, 0, f"Out:\n{out}\nErr:\n{err}")
+        self.assertIn("- repo-set: PASS", out)
+        self.assertNotIn("- honest-gaps: PASS", out)
+
+    def test_duplicate_names_deduped(self):
+        """--checks dead-links,dead-links is accepted once, not an error."""
+        clean_readme = FIXTURES_DIR / "clean" / "README.md"
+        code, out, err = run_probe(
+            str(clean_readme), "--repo-root", str(FIXTURES_DIR / "clean"),
+            "--checks", "dead-links,dead-links",
+        )
+        self.assertEqual(code, 0, f"Out:\n{out}\nErr:\n{err}")
+        self.assertIn("- dead-links: PASS", out)
+
+
+class TestFragmentLinks(unittest.TestCase):
+    """dead-links fragment validation: same-file and cross-file anchors."""
+
+    def test_same_file_broken_fragment_detected(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n[Gone](#missing-section)\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertNotEqual(code, 0)
+            self.assertIn("dead-links", out)
+            self.assertIn("missing-section", out)
+
+    def test_same_file_valid_fragment_passes(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n[Go](#limitations)\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertEqual(code, 0, f"Out:\n{out}")
+            self.assertIn("- dead-links: PASS", out)
+
+    def test_cross_file_broken_fragment_detected(self):
+        """file.md#anchor: file exists but the anchor does not."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            (root / "doc.md").write_text("# Doc\n\n## Exists\n", encoding="utf-8")
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n[Bad](doc.md#gone-anchor)\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertNotEqual(code, 0)
+            self.assertIn("dead-links", out)
+            self.assertIn("gone-anchor", out)
+
+    def test_cross_file_valid_fragment_passes(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            (root / "doc.md").write_text("# Doc\n\n## Target Section\n", encoding="utf-8")
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n[Good](doc.md#target-section)\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertEqual(code, 0, f"Out:\n{out}")
+            self.assertIn("- dead-links: PASS", out)
+
+    def test_explicit_curly_anchor_id(self):
+        """Headings with {#custom-id} resolve to that id."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n[Go](#custom)\n\n## Section Name {#custom}\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertEqual(code, 0, f"Out:\n{out}")
+
+    def test_html_a_id_anchor_resolves(self):
+        """<a id='...'> anchors count as valid fragment targets."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                '# T\n\n<a id="install"></a>\n\n[Go](#install)\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertEqual(code, 0, f"Out:\n{out}")
+
+    def test_cjk_heading_slug(self):
+        """CJK heading slug: GitHub keeps CJK chars; {#id} also resolves."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n[CJK slug](#能力矩阵)\n[Explicit](#capability-matrix)\n\n## 能力矩阵 {#capability-matrix}\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertEqual(code, 0, f"Out:\n{out}")
+
+    def test_angle_bracket_anchor_still_not_flagged(self):
+        """<#section> in angle brackets with valid anchor passes (regression)."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# Test\n\n[Section](<#limitations>)\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertEqual(code, 0)
+            self.assertIn("- dead-links: PASS", out)
+
+
 class TestStdlibOnly(unittest.TestCase):
     """Ensure scripts/check-readme.py has no third-party dependencies."""
 

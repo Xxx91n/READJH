@@ -2,7 +2,9 @@
 """scripts/check-readme.py — stdlib-only python3 static probe for README governance.
 
 Seven static checks:
-1. dead local links (markdown links & <a> tags pointing to missing local files, including badge link targets)
+1. dead local links (markdown links & <a> tags pointing to missing local files, including badge
+   link targets) and broken fragments (same-file '#anchor' and 'file.md#anchor' resolved
+   against the target's heading-derived and explicit anchors)
 2. missing image paths (markdown images, <img> tags, and <source> srcset)
 3. code-fence imbalance (unclosed or mismatched backtick/tilde code fences)
 4. badge URL domain sanity (valid hosts, flags placeholders e.g. TODO, example.com, username/repo)
@@ -258,12 +260,61 @@ def extract_all_link_targets(line: str) -> List[str]:
     return targets
 
 
+def _github_slug(heading: str) -> str:
+    """Derive a GitHub-style fragment anchor from a heading line body."""
+    t = re.sub(r"`+([^`]*)`+", r"\1", heading)          # inline code
+    t = re.sub(r"!?\[([^\]]*)\]\([^)]*\)", r"\1", t)    # links/images -> text
+    t = re.sub(r"[*_~]", "", t)                          # emphasis markers
+    t = t.lower()
+    t = re.sub(r"[^\w\- ]", "", t)                       # keep word chars (incl. CJK), hyphens, spaces
+    return t.replace(" ", "-")
+
+
+def _markdown_anchor_ids(path: Path) -> Optional[set]:
+    """Collect valid fragment anchors in a markdown file: explicit {#id} ids,
+    <a id>/<a name> attributes, and GitHub-slugified heading anchors.
+    Returns None when the file cannot be read."""
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+    ids = set(re.findall(r"""(?:id|name)\s*=\s*["']([^"']+)["']""", text))
+    for line in strip_code_fences(text).splitlines():
+        m = re.match(r"^#{1,6}\s+(.*?)\s*#*\s*$", line)
+        if not m:
+            continue
+        heading = m.group(1)
+        explicit = re.search(r"\{#([^}]+)\}\s*$", heading)
+        if explicit:
+            ids.add(explicit.group(1))
+            heading = heading[: explicit.start()].rstrip()
+        slug = _github_slug(heading)
+        if slug:
+            ids.add(slug)
+    return ids
+
+
+def _extract_fragment(target: str) -> Optional[str]:
+    """Return the URL fragment of a link target (without '#'), or None."""
+    t = target.strip()
+    if t.startswith("<") and t.endswith(">"):
+        t = t[1:-1].strip()
+    # Drop an optional title ("..." / '...' / (...) after whitespace)
+    t = re.split(r"\s", t, 1)[0]
+    if "#" not in t:
+        return None
+    frag = t.split("#", 1)[1]
+    frag = urllib.parse.unquote(frag)
+    return frag if frag else None
+
+
 def check_dead_links(content: str, readme_path: Path, repo_root: Path) -> List[Finding]:
-    """Check 1: Dead local links."""
+    """Check 1: Dead local links and broken fragments."""
     findings = []
     text_no_fences = strip_code_fences(content)
     lines = text_no_fences.splitlines()
     readme_dir = readme_path.parent.resolve()
+    own_anchors: Optional[set] = None
 
     for line_idx, line in enumerate(lines, start=1):
         targets = extract_all_link_targets(line)
@@ -274,8 +325,25 @@ def check_dead_links(content: str, readme_path: Path, repo_root: Path) -> List[F
             if clean_target.startswith("<") and clean_target.endswith(">"):
                 clean_target = clean_target[1:-1].strip()
 
-            # Ignore external schemes or anchor-only links
-            if clean_target.startswith(("#", "http://", "https://", "mailto:", "data:", "ftp:", "javascript:", "tel:", "//")):
+            # Ignore external schemes; anchor-only links get fragment validation below
+            if clean_target.startswith(("http://", "https://", "mailto:", "data:", "ftp:", "javascript:", "tel:", "//")):
+                continue
+
+            fragment = _extract_fragment(target)
+
+            if clean_target.startswith("#"):
+                # Same-document fragment: validate against this file's anchors
+                if fragment:
+                    if own_anchors is None:
+                        own_anchors = _markdown_anchor_ids(readme_path)
+                    if own_anchors is not None and fragment not in own_anchors:
+                        findings.append(
+                            Finding(
+                                check_name="dead-links",
+                                line=line_idx,
+                                message=f"Broken fragment link: '{target}' (no anchor '#{fragment}' in this file)",
+                            )
+                        )
                 continue
 
             resolved = _resolve_local_path(target, readme_dir, repo_root)
@@ -287,6 +355,19 @@ def check_dead_links(content: str, readme_path: Path, repo_root: Path) -> List[F
                         message=f"Dead local link: '{target}' (file not found under repo root)",
                     )
                 )
+                continue
+
+            # File resolves — validate the fragment against the target's anchors
+            if fragment and resolved.is_file() and resolved.suffix.lower() in (".md", ".markdown"):
+                target_anchors = _markdown_anchor_ids(resolved)
+                if target_anchors is not None and fragment not in target_anchors:
+                    findings.append(
+                        Finding(
+                            check_name="dead-links",
+                            line=line_idx,
+                            message=f"Broken fragment link: '{target}' (no anchor '#{fragment}' in {resolved.name})",
+                        )
+                    )
     return findings
 
 
@@ -775,8 +856,21 @@ def main() -> int:
         return 2
 
     selected_checks: Optional[List[str]] = None
-    if args.checks:
-        selected_checks = [c.strip() for c in args.checks.split(",") if c.strip()]
+    if args.checks is not None:
+        # An explicit --checks whose normalized selection is empty — whether
+        # "" or ",," — is rejected; an omitted flag means "all checks".
+        selected_checks = []
+        for name in args.checks.split(","):
+            name = name.strip()
+            if name and name not in selected_checks:
+                selected_checks.append(name)
+        if not selected_checks:
+            print(
+                "Error: --checks was given but selects no checks "
+                f"(valid: {', '.join(ALL_CHECKS)})",
+                file=sys.stderr,
+            )
+            return 2
         unknown = [c for c in selected_checks if c not in ALL_CHECKS]
         if unknown:
             print(
