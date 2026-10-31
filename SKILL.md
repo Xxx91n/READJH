@@ -682,6 +682,7 @@ reply locked to **at most three lines**
 | Moved span (heading, `<readme>` lines) | Destination file | Re-based targets (`original → new`) |
 |---|---|---|
 | `## Threat model` (lines 210–248) | `docs/threat-model.md` | `docs/spec.md → ../docs/spec.md` |
+
 - **Distinguish `FAIL` from `BLOCKED`:** When `ROUTE` resolves a trusted
   `readme-crafter-skill`, `scan-project.py` completes its scan (`exit 0`, or
   `exit 1` with scan findings), and `check-readme.py` completes (`exit 0` clean

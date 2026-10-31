@@ -1,6 +1,8 @@
 # Receipts — write-mode runs (Ticket #6 acceptance, rework after PR #13 review)
 
-Date: 2026-10-31 · Skill state: `SKILL.md` on `ticket-6-improve-rewrite-language`
+Date: 2026-10-31 (original runs A–C); addenda dated individually —
+TRUTH supplementary scan and per-span plan reconstruction: 2026-11-01 ·
+Skill state: `SKILL.md` on `ticket-6-improve-rewrite-language`
 (post-review rework; includes the `.bak` write-set, ledger re-base column, and
 `--checks` contract changes) · Executor: READJH pipeline executed manually per
 `SKILL.md` §3 phases. This document supersedes the first fixture demo, which is
@@ -34,11 +36,30 @@ later recorded in the migration ledger — 6 en + 5 zh, destinations
 `docs/architecture.md`, `docs/upstream-policy.md`, `docs/versioning.md`,
 with `docs/… → ../docs/…` re-basing. The LANGUAGE plan named the
 `writing-humanize` catalog + `references/de-ai-language.md` transforms,
-freeze zones excluded (intro abstract-noun chain → artifact names;
-defensive sentence split; meta-honesty claim → plain disclosure; zh mirror
-pass). Per-span wording ranges and before/after shapes were not separately
-recorded for the dry-run plan — that detail only exists once execution
-produces it; Run B's ledger and wording bullets are the executed record.
+freeze zones excluded.
+
+Per SKILL §3 Phase 4 step 5 a `--dry-run` must record the **per-span**
+wording plan — anchor (`<readme>:<line-range>`), tier-allowed transform,
+intended before → after shape — in `[Receipts]`. This run did not retain
+that artifact: a demonstration gap, not a contract exemption — the contract
+still requires the per-span plan without any write. The table below is
+**reconstructed 2026-11-01** from Run B's executed result (each `*.bak` ↔
+current diff), so it documents the shapes the plan named but is not the
+contemporaneous plan receipt:
+
+| Anchor (`file:lines`) | Tier-allowed transform | Intended before → after shape |
+|---|---|---|
+| `README.md:18` | abstract-noun chain → artifact names; passive → active | "are this project's self-built moat and glue" → "are built here"; "Macro + micro engineering-content audit for git-healthy repositories" → "6F audits engineering content at macro and micro scale inside repositories with healthy git history" |
+| `README.md:33` | drop tracker IDs; close defensive parenthetical early; merge badge disclosure | "(Micro-A productionized — #85②, D-204③④)" → "(Micro-A productionized)"; "(install & acceptance details in [engine/README.md](engine/README.md); the official-catalog…" → "(install & acceptance details in [engine/README.md](engine/README.md)); the official-catalog…"; + "Badges show only what is true today (the engine-ci badge was mounted 2026-09-22 after the first green main run)" |
+| `README.md:37` | drop defensive aside | "(the five-scale scope stands)" removed |
+| `README.md:41,43` | drop tracker IDs in capability table | "(…, #51)", "(…, D-205)", "(D-034③ Scorecard…)", "(…— #85② closed, D-204③④)" → removed |
+| `README.md:47` | meta-honesty claim → plain disclosure | leading "Honest preview labeling is a decision, not decoration:" removed — the sentence states the fact directly |
+| `README.zh-CN.md:38` (NOTE) | zh mirror: drop tracker IDs + badge disclosure | "Micro-A 产线化——#85②，D-204③④" → "Micro-A 产线化"; + "badge 只挂当下为真项（engine-ci 徽记于 2026-09-22 首个 main 绿 run 后挂载——event_bound，不预埋）" |
+
+Reconstruction caveat found while diffing `.bak`: the zh mirror covered
+the tracker/badge set but the zh intro keeps the `护城河与黏合剂`
+metaphor — no zh counterpart of the en intro rewrite was applied. Recorded
+as an observed en/zh asymmetry, not smoothed over.
 
 **VERIFY.**
 
@@ -52,9 +73,9 @@ Baseline re-compare: 1113-file SHA-256 snapshot identical; git status
 Delivery report:
 
 ```text
-[Conclusion]: PASS — improve --dry-run on D:\Aworker\6F\README.md (intensity tier: standard); plan produced, zero writes confirmed; findings: HIGH 0 / MEDIUM 0 / LOW 0; migration ledger: none (dry-run — moves planned, not executed; see Run B).
-[Receipts]: scan-project.py exit 0; check-readme.py exit 0 (0 findings); baseline tree + git status identical pre/post.
-[Residual risk]: README commands never executed; plan not applied (dry-run).
+[Conclusion]: PASS — improve --dry-run on D:\Aworker\6F\README.md (intensity tier: standard); plan produced, zero writes confirmed; findings: HIGH 0 / MEDIUM 0 / LOW 0; migration ledger: 11 moves planned (enumerated in the plan above; executed ledger is Run B's).
+[Receipts]: scan-project.py exit 0; check-readme.py exit 0 (0 findings); baseline tree + git status identical pre/post; per-span LANGUAGE plan: reconstructed table above (dated 2026-11-01 — the run itself did not retain the contract-required artifact).
+[Residual risk]: README commands never executed; plan not applied (dry-run); contemporaneous per-span plan not retained — dry-run plan-form requirement undemonstrated by this run.
 ```
 
 ## Run B — `improve` (real writes) on a disposable copy of 6F
@@ -84,6 +105,11 @@ had just run on the same README content in Run A. Supplementary receipt
 python -s -E -B -X utf8 ~/.agents/skills/readme-crafter-skill/scripts/scan-project.py C:\Users\Administrator\.zcode\tmp\6f-improve-run
 → exit 0 (scan complete; "No obvious README-to-repo mismatches detected")
 ```
+
+Evidence boundary: this proves the fixture state at scan time only. It
+cannot retro-prove that a `TRUTH` scan preceded `RESTRUCTURE` in the
+original run — that ordering evidence is Run A's same-content scan, which
+is inherited, not re-demonstrated.
 
 **RESTRUCTURE (executed).** Ledger below. Over-complete sections moved out of
 both READMEs in lockstep; relative link/image targets inside moved spans
@@ -173,15 +199,17 @@ paths (`SKILL.md`, `references/`, `docs/spec/…`), badge row, version/SHA
 strings, LICENSE text — each stays byte-identical through any wording pass.
 **Not demonstrated:** an executed (non-dry) `rewrite`; that remains unverified.
 
-LANGUAGE plan detail: `rewrite` rebuilds to the skeleton, so the plan names
-allowed transforms and the freeze-zone inventory (above) rather than
-per-span wording edits — per-span LANGUAGE plans are only produced on
-execution, which a dry-run never performs. Delivery report:
+LANGUAGE plan detail: `rewrite` rebuilds to the skeleton, so this demo
+retained the plan at scope level — allowed transforms and the freeze-zone
+inventory above. SKILL §3 Phase 4 step 5 requires the per-span form
+(anchor line-range, transform, before → after shape) even under
+`--dry-run`; that artifact was not retained here — a demonstration gap,
+not a contract exemption. Delivery report:
 
 ```text
 [Conclusion]: PASS — rewrite --dry-run on D:\Aworker\READJH\README.md (intensity tier: standard); rebuild plan produced, zero writes confirmed; findings: HIGH 0 / MEDIUM 0 / LOW 0.
 [Receipts]: scan-project.py exit 0; check-readme.py exit 0 (0 findings); git status --porcelain --ignored identical pre/post → zero writes.
-[Residual risk]: executed (non-dry) rewrite not demonstrated; per-span LANGUAGE plan not produced (dry-run plan level only); README commands never executed.
+[Residual risk]: executed (non-dry) rewrite not demonstrated; per-span LANGUAGE plan not retained — required even in dry-run, so the plan-form requirement is undemonstrated; zero-write evidence is git-status-only (full tree SHA-256 compare was not retained and cannot be reconstructed for Run C); README commands never executed.
 ```
 
 ## Original fixture demo (superseded, kept with caveats)
@@ -198,7 +226,7 @@ fixture-context. Also not demonstrated by that demo: real writes, `.bak`
 creation, ledger execution, runtime suppression behavior — all covered by
 Run B now.
 
-## Post-review probe hardening receipts (rounds 2–12)
+## Post-review probe hardening receipts (rounds 2–13)
 
 - `check-readme.py --checks ",,"` and `--checks ""` → **exit 2** (explicit
   empty selection rejected; omitted flag = all checks); unknown names →
@@ -220,8 +248,8 @@ Run B now.
   rendered).
 - Run B's five probed files re-checked with
   `--checks dead-links,missing-images,code-fences` → all exit 0.
-- Unit tests: `python -m unittest discover -s tests` → **109 tests OK**
-  (75 total new across rounds 2–12: `--checks` subset/empty/dedup/repo-set
+- Unit tests: `python -m unittest discover -s tests` → **110 tests OK**
+  (76 total new across rounds 2–13: `--checks` subset/empty/dedup/repo-set
   combination + fragment same-file/cross-file/dup-suffix/indented-ATX/
   Setext/CJK/underscore/mixed-case cases, incl. negative fixtures for
   fenced, inline-code, and commented `id`/`name` attributes,
@@ -237,8 +265,9 @@ Run B now.
   `<a id>`/`<a href>`/`<img>`/`<source>` real elements,
   commented/inline-code dead links and images, unclosed HTML comments,
   explicit-id slug non-collision, angle-bracket destinations carrying
-  titles, backtick info strings that are code spans not fences, and
-  line-start code spans wrapping link/image samples).
+  titles, backtick info strings that are code spans not fences,
+  line-start code spans wrapping link/image samples, and Unicode
+  combining marks preserved in heading slugs).
 
 ## Acceptance mapping
 
