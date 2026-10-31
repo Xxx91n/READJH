@@ -422,10 +422,14 @@ a `HIGH` / `MEDIUM` / `LOW` finding with zero README commands executed.
      `docs/` destination — new or existing —, and any other file the run
      will create or modify.
    - **Git-recoverable check, per member:** an existing file is
-     Git-recoverable only when it is tracked **and** clean (absent from the
+     Git-recoverable only when it is tracked **and** clean. Tracked is
+     proven explicitly — `git ls-files --error-unmatch -- <path>` must
+     succeed for the member; status-output absence is not proof (Git may
+     report only `?? docs/` for an untracked directory, so an untracked
+     `docs/<file>.md` can hide behind it). Clean means absent from the
      `ROUTE` step 4 `git --no-optional-locks status --porcelain --ignored`
      baseline — tracked-and-clean files appear in the file-tree snapshot
-     but not in the status list). A new destination file is always
+     but not in the status list. A new destination file is always
      recoverable by deleting it after the run. Git cannot restore an
      untracked, ignored, or dirty existing file.
    - **Git path:** `<repo-root>` is inside a Git worktree **and** every
