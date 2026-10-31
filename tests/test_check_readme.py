@@ -530,13 +530,126 @@ class TestFragmentLinks(unittest.TestCase):
             self.assertIn("- dead-links: PASS", out)
 
     def test_explicit_curly_anchor_id(self):
-        """Headings with {#custom-id} resolve to that id."""
+        """{#custom} is not a GitHub-rendered id; #custom must FAIL, the
+        GitHub slug of the full heading text must pass."""
         import tempfile
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             rm = root / "README.md"
             rm.write_text(
-                "# T\n\n[Go](#custom)\n\n## Section Name {#custom}\n\n## Limitations\nNone.\n",
+                "# T\n\n[Bad](#custom)\n\n## Section Name {#custom}\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertNotEqual(code, 0)
+            self.assertIn("dead-links", out)
+            self.assertIn("#custom", out)
+
+    def test_curly_id_github_slug_passes(self):
+        """GitHub slugs the {#id} text into the anchor: #section-name-custom."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n[Good](#section-name-custom)\n\n## Section Name {#custom}\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertEqual(code, 0, f"Out:\n{out}")
+
+    def test_fenced_a_id_not_a_real_anchor(self):
+        """An <a id> inside a fenced code block is rendered code, not an anchor."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                '# T\n\n[Bad](#install)\n\n```html\n<a id="install"></a>\n```\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertNotEqual(code, 0)
+            self.assertIn("dead-links", out)
+            self.assertIn("install", out)
+
+    def test_commented_a_id_not_a_real_anchor(self):
+        """An id attribute inside an HTML comment does not render an anchor."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                '# T\n\n[Bad](#ghost)\n\n<!-- <a id="ghost"></a> -->\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertNotEqual(code, 0)
+            self.assertIn("dead-links", out)
+            self.assertIn("ghost", out)
+
+    def test_duplicate_heading_suffix_anchors(self):
+        """Duplicate headings get GitHub -1/-2 suffixes; links to them pass."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n[First](#runtime-view)\n[Second](#runtime-view-1)\n\n## Runtime view\n\nEnglish.\n\n## Runtime View\n\n中文.\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertEqual(code, 0, f"Out:\n{out}")
+            self.assertIn("- dead-links: PASS", out)
+
+    def test_duplicate_heading_missing_suffix_fails(self):
+        """A -2 anchor with only two same-slug headings fails."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n[Bad](#runtime-view-2)\n\n## Runtime view\n\n## Runtime view\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertNotEqual(code, 0)
+            self.assertIn("runtime-view-2", out)
+
+    def test_indented_atx_heading_slug(self):
+        """ATX headings indented 1-3 spaces still produce anchors."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n[Go](#setup)\n\n   ## Setup\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertEqual(code, 0, f"Out:\n{out}")
+
+    def test_setext_heading_slug(self):
+        """Setext headings (text + --- underline) produce anchors."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n[Go](#setup)\n\nSetup\n-----\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(str(rm), "--repo-root", str(root))
+            self.assertEqual(code, 0, f"Out:\n{out}")
+
+    def test_underscore_preserved_in_slug(self):
+        """Underscores inside code spans and names are kept in anchors."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n[A](#my_func-internals)\n[B](#_private-notes)\n\n## `my_func` internals\n\n## _private notes\n\n## Limitations\nNone.\n",
                 encoding="utf-8",
             )
             code, out, err = run_probe(str(rm), "--repo-root", str(root))
@@ -556,13 +669,14 @@ class TestFragmentLinks(unittest.TestCase):
             self.assertEqual(code, 0, f"Out:\n{out}")
 
     def test_cjk_heading_slug(self):
-        """CJK heading slug: GitHub keeps CJK chars; {#id} also resolves."""
+        """CJK heading slug: GitHub keeps CJK chars and slugs {#id} text into
+        the anchor — #能力矩阵-capability-matrix."""
         import tempfile
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             rm = root / "README.md"
             rm.write_text(
-                "# T\n\n[CJK slug](#能力矩阵)\n[Explicit](#capability-matrix)\n\n## 能力矩阵 {#capability-matrix}\n\n## Limitations\nNone.\n",
+                "# T\n\n[Go](#能力矩阵-capability-matrix)\n\n## 能力矩阵 {#capability-matrix}\n\n## Limitations\nNone.\n",
                 encoding="utf-8",
             )
             code, out, err = run_probe(str(rm), "--repo-root", str(root))

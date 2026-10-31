@@ -264,33 +264,81 @@ def _github_slug(heading: str) -> str:
     """Derive a GitHub-style fragment anchor from a heading line body."""
     t = re.sub(r"`+([^`]*)`+", r"\1", heading)          # inline code
     t = re.sub(r"!?\[([^\]]*)\]\([^)]*\)", r"\1", t)    # links/images -> text
-    t = re.sub(r"[*_~]", "", t)                          # emphasis markers
+    t = re.sub(r"[*~]", "", t)                           # *, ~ emphasis markers
+    # Paired leading/trailing underscores are emphasis; interior ones stay
+    # (my_func, _private keep their underscores like GitHub's renderer).
+    t = re.sub(r"^_+(.+?)_+$", r"\1", t)
     t = t.lower()
     t = re.sub(r"[^\w\- ]", "", t)                       # keep word chars (incl. CJK), hyphens, spaces
     return t.replace(" ", "-")
 
 
+def _strip_html_comments(text: str) -> str:
+    """Replace HTML comments with blank lines (line count preserved) so
+    commented-out anchors and markup never register as real."""
+    lines = text.splitlines(keepends=True)
+    out = []
+    in_comment = False
+    for line in lines:
+        if in_comment:
+            if "-->" in line:
+                in_comment = False
+            out.append("\n")
+            continue
+        if "<!--" in line:
+            if "-->" not in line.split("<!--", 1)[1]:
+                in_comment = True
+            out.append("\n")
+            continue
+        out.append(line)
+    return "".join(out)
+
+
 def _markdown_anchor_ids(path: Path) -> Optional[set]:
     """Collect valid fragment anchors in a markdown file: explicit {#id} ids,
-    <a id>/<a name> attributes, and GitHub-slugified heading anchors.
-    Returns None when the file cannot be read."""
+    rendered <a id>/<a name> attributes, and GitHub-slugified heading anchors
+    (indented ATX, Setext, duplicate-suffixed). Returns None on read error."""
     try:
         text = path.read_text(encoding="utf-8", errors="replace")
     except OSError:
         return None
-    ids = set(re.findall(r"""(?:id|name)\s*=\s*["']([^"']+)["']""", text))
-    for line in strip_code_fences(text).splitlines():
-        m = re.match(r"^#{1,6}\s+(.*?)\s*#*\s*$", line)
-        if not m:
-            continue
-        heading = m.group(1)
-        explicit = re.search(r"\{#([^}]+)\}\s*$", heading)
-        if explicit:
-            ids.add(explicit.group(1))
-            heading = heading[: explicit.start()].rstrip()
+
+    # Anchors only from rendered content: fenced code and HTML comments stripped
+    visible = strip_code_fences(_strip_html_comments(text))
+    lines = visible.splitlines()
+
+    ids = set(re.findall(r"""(?:id|name)\s*=\s*["']([^"']+)["']""", visible))
+    slug_counts: dict = {}
+    generated: set = set()
+
+    def _register(heading: str) -> None:
         slug = _github_slug(heading)
-        if slug:
-            ids.add(slug)
+        if not slug:
+            return
+        n = slug_counts.get(slug, 0)
+        candidate = slug if n == 0 else f"{slug}-{n}"
+        while candidate in generated or candidate in ids:
+            n += 1
+            candidate = f"{slug}-{n}"
+        slug_counts[slug] = n + 1
+        generated.add(candidate)
+        ids.add(candidate)
+
+    for i, line in enumerate(lines):
+        # ATX heading (0-3 leading spaces per GFM)
+        m = re.match(r"^ {0,3}#{1,6}\s+(.*?)\s*#*\s*$", line)
+        if m:
+            _register(m.group(1))
+            continue
+        # Setext heading: plain text line followed by === or --- underline.
+        # Lines starting with list/blockquote markers are not heading text.
+        if (
+            line.strip()
+            and re.match(r"^ {0,3}[^\s>#*+\-\d]", line)
+            and i + 1 < len(lines)
+            and re.match(r"^ {0,3}(=+|-+)\s*$", lines[i + 1])
+        ):
+            _register(line.strip())
     return ids
 
 
