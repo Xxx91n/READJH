@@ -1587,6 +1587,25 @@ class TestFragmentLinks(unittest.TestCase):
             self.assertIn("real-missing.md", out)
             self.assertNotIn("'missing.md'", out)
 
+    def test_combining_marks_kept_in_slug(self):
+        """## हिन्दी: GitHub's slugger keeps Unicode combining marks — the
+        #हिन्दी link resolves and the mark-stripped #हनद variant fails.
+        A bare [^\\w\\- ] filter would strip the marks and invert both."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                '# T\n\n## हिन्दी\nx\n\n[a](#हिन्दी) and [b](#हनद).\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertNotEqual(code, 0)
+            self.assertIn("हनद", out)
+            self.assertNotIn("'#हिन्दी'", out)
+
 
 class TestStdlibOnly(unittest.TestCase):
     """Ensure scripts/check-readme.py has no third-party dependencies."""

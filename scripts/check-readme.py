@@ -30,6 +30,7 @@ import json
 import os
 import re
 import sys
+import unicodedata
 import urllib.parse
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -259,7 +260,14 @@ def _github_slug(heading: str) -> str:
     t = t.strip()
     t = re.sub(r"[*~]", "", t)                           # *, ~ emphasis markers
     t = t.lower()
-    t = re.sub(r"[^\w\- ]", "", t)                       # keep word chars (incl. CJK), hyphens, spaces
+    # Keep letters/digits/underscore (incl. CJK), hyphens, spaces — and
+    # Unicode combining marks, which GitHub's slugger preserves (हिन्दी
+    # keeps its marks; a bare [^\w\- ] filter would strip them).
+    t = "".join(
+        c
+        for c in t
+        if c.isalnum() or c in "_- " or unicodedata.category(c).startswith("M")
+    )
     return t.replace(" ", "-")
 
 
