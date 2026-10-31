@@ -254,8 +254,9 @@ states each phase's behavior per mode.
      whether `<readme>` is tracked (`git -C "<repo-root>" ls-files
      --error-unmatch -- "<readme-relative-path>"`), and whether it is clean
      (`git -C "<repo-root>" status --porcelain -- "<readme-relative-path>"`
-     prints nothing). This decides the `.bak` rule (§3, `RESTRUCTURE`
-     step 6) in write modes and the `VERIFY` zero-write check.
+     prints nothing). This seeds the `.bak` rollback decision (§3,
+     `RESTRUCTURE` step 6 — evaluated there against the whole planned write
+     set, not `<readme>` alone) and the `VERIFY` zero-write check.
    - Optional **repo-set mode**: enabled only when `--repo-set <manifest>` is
      passed; off by default.
 2. **Select intensity tier:**
@@ -410,28 +411,50 @@ a `HIGH` / `MEDIUM` / `LOW` finding with zero README commands executed.
    — only the write behavior below differs.
 
 6. **Enforce the `.bak` rollback rule (write modes, before the first file
-   write; skipped on clean git):**
-   - When `<repo-root>` is inside a Git worktree, `<readme>` is tracked, and
-     `<readme>` is clean — no uncommitted changes (`git -C "<repo-root>"
-     status --porcelain -- "<readme-relative-path>"` prints nothing; state
-     locked in `ROUTE` step 1) — Git is the rollback path: skip the `.bak`
-     and record `"rollback: git (<tracked file>, clean)"` in `[Receipts]`.
-   - Otherwise — non-Git `<repo-root>`; `<readme>` untracked or ignored; or
-     `<readme>` tracked with uncommitted changes Git cannot restore — copy
-     `<readme>` to `<readme>.bak` in the same directory **before** any write
-     and record `"rollback: <readme>.bak (git cannot restore)"` in
-     `[Receipts]`.
+   write; skipped only when every write-set member is Git-recoverable):**
+   - **Enumerate the planned write set first** (from the step 7 edit plan):
+     `<readme>`, its companion localized README when one exists, every
+     `docs/` destination — new or existing —, and any other file the run
+     will create or modify.
+   - **Git-recoverable check, per member:** an existing file is
+     Git-recoverable only when it is tracked **and** clean (absent from the
+     `ROUTE` step 4 `git --no-optional-locks status --porcelain --ignored`
+     baseline — tracked-and-clean files appear in the file-tree snapshot
+     but not in the status list). A new destination file is always
+     recoverable by deleting it after the run. Git cannot restore an
+     untracked, ignored, or dirty existing file.
+   - **Git path:** `<repo-root>` is inside a Git worktree **and** every
+     existing member of the write set is tracked and clean — skip `.bak`
+     entirely; rollback is `git restore` on each modified path plus
+     deletion of each newly created path. Record
+     `"rollback: git (<N> existing targets tracked+clean; new files deleted on rollback)"`
+     in `[Receipts]`.
+   - **`.bak` path:** otherwise — non-Git `<repo-root>`, or any existing
+     write-set member untracked, ignored, or dirty — copy **every existing
+     member of the write set** to `<path>.bak` in its own directory before
+     the first write, and record `"rollback: <path>.bak per write-set file
+     (git cannot restore <reason>)"` plus the list of new files (deleted
+     on rollback) in `[Receipts]`.
    - In `--dry-run`, never create the `.bak` — record which rollback path
      *would* apply instead.
 7. **Execute structural edits (write modes; `--dry-run` lists them as the
    plan instead of executing):**
    - Migrate over-complete material to `docs/` per the `RESTRUCTURE`
      diagnosis (`references/readme-rules.md` §4.1): `source heading
-     (lines X–Y) → docs/<file>.md`. Moved spans are relocated verbatim —
-     including their **freeze zone** spans — and every move is appended to
-     the migration ledger (§4) in the same step; a move without a ledger
-     entry fails `VERIFY`. Deletion and migration always precede wording
-     changes, so `LANGUAGE` (Phase 4) never performs migrations.
+     (lines X–Y) → docs/<file>.md`, either as a new file or merged into an
+     existing `docs/` destination. Moved spans are relocated verbatim —
+     including their **freeze zone** spans — with **one controlled
+     exception:** relative link and image targets inside a moved span are
+     re-based so they resolve to the same resource from the destination
+     directory (a root-README link `docs/versioning.md` moved into
+     `docs/architecture.md` becomes `../docs/versioning.md`; root-level
+     paths move up one level). Re-basing happens in this phase only —
+     `LANGUAGE` never mutates link targets — and every re-based target is
+     appended to the migration ledger (§4) with its original and new form.
+     Every move is appended to the migration ledger in the same step; a
+     move without a ledger entry fails `VERIFY`. Deletion and migration
+     always precede wording changes, so `LANGUAGE` (Phase 4) never
+     performs migrations.
    - Converge **self-attestation** repeats to one statement or a link and
      remove **generation traces** (`references/readme-rules.md` §2, §3).
    - `improve`: reorder and trim the existing skeleton to the repository's
@@ -563,10 +586,18 @@ migrations here), and the intensity tier's scope was respected.
        repository as an audit failure.
      - Write modes without `--dry-run`: every difference must belong to the
        intended write set — the edited `<readme>` (and its companion
-       localized README), new `docs/` destination files each recorded in the
-       migration ledger, and the `<readme>.bak` when the `.bak` rule fired
-       (§3, `RESTRUCTURE` step 6). Any other new, modified, or deleted file
-       fails `VERIFY` and must be reverted before delivery.
+       localized README), `docs/` destination files **created or modified**
+       by moves, each linked to a migration-ledger entry, and the
+       `<path>.bak` files for every existing write-set member when the
+       `.bak` path fired (§3, `RESTRUCTURE` step 6). A `docs/` change with
+       no ledger entry fails `VERIFY`; any other new, modified, or deleted
+       file also fails and must be reverted before delivery.
+   - **Probe every migration destination (write modes, no `--dry-run`):**
+     run `check-readme.py` on each new or merged `docs/` destination file
+     with the same `--repo-root`, so moved spans are checked for
+     `dead-links` and `missing-images` from their new location — including
+     every re-based target. A destination that fails is reverted or the
+     re-basing corrected before delivery.
 3. **Emit the three-line delivery report (§4).**
 
 **Completion criterion:** `scripts/check-readme.py` has run, its stdout
@@ -596,17 +627,19 @@ reply locked to **at most three lines**
 
 - **Strict three-line cap:** Output only `[Conclusion]`, `[Receipts]`, and
   `[Residual risk]`. In `improve` / `rewrite` runs that moved sections to
-  `docs/`, only the migration ledger table may follow the three lines.
+  `docs/`, only the migration ledger table may follow the three lines —
+  as a real Markdown table, outside any code fence.
 - **Migration ledger (`improve` / `rewrite` with `docs/` moves — required):**
   Every span moved out of `<readme>` into `docs/` appears in a ledger table
   appended after `[Residual risk]`; a move without a ledger entry fails
-  `VERIFY` (§3, `RESTRUCTURE` step 7). A write-mode run with no moves states
-  `Migration ledger: none` on the `[Conclusion]` line.
-  ```text
-  | Moved span (heading, `<readme>` lines) | Destination file |
-  |---|---|
-  | `## Threat model` (lines 210–248) | `docs/threat-model.md` |
-  ```
+  `VERIFY` (§3, `RESTRUCTURE` step 7). Each entry also lists every relative
+  link/image target re-based by the move (original → new form; `none` when
+  the span carried none) so the re-basing is auditable. A write-mode run
+  with no moves states `Migration ledger: none` on the `[Conclusion]` line.
+
+| Moved span (heading, `<readme>` lines) | Destination file | Re-based targets (`original → new`) |
+|---|---|---|
+| `## Threat model` (lines 210–248) | `docs/threat-model.md` | `docs/spec.md → ../docs/spec.md` |
 - **Distinguish `FAIL` from `BLOCKED`:** When `ROUTE` resolves a trusted
   `readme-crafter-skill`, `scan-project.py` completes its scan (`exit 0`, or
   `exit 1` with scan findings), and `check-readme.py` completes (`exit 0` clean
