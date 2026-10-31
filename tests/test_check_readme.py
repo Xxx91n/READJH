@@ -1050,6 +1050,94 @@ class TestFragmentLinks(unittest.TestCase):
             self.assertNotEqual(code, 0)
             self.assertIn("missing.md", out)
 
+    def test_bare_unclosed_fence_detected(self):
+        """``` + body + EOF: the opener must not self-close — code-fences
+        reports the unclosed fence."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n```\nexample\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "code-fences"
+            )
+            self.assertNotEqual(code, 0)
+            self.assertIn("code-fences", out)
+
+    def test_bare_fence_hides_code_body(self):
+        """``` ... ``` bare fences: the link/image inside is code, not a
+        real resource — no false FAIL."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n```\n[Example](missing.md)\n![Example](missing.png)\n```\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root),
+                "--checks", "dead-links,missing-images,code-fences",
+            )
+            self.assertEqual(code, 0, f"Out:\n{out}")
+
+    def test_closing_fence_at_eof_without_newline(self):
+        """A closing ``` as the final line (no trailing LF) still closes
+        the fence — no false unclosed finding."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n```text\n[Example](missing.md)\n```",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root),
+                "--checks", "dead-links,code-fences",
+            )
+            self.assertEqual(code, 0, f"Out:\n{out}")
+
+    def test_backslash_before_span_closer_is_literal(self):
+        """`x\\` closes at the second backtick — backslashes do not escape
+        inside a code span, so the real dead link after it FAILs."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n`x\\` [Bad](missing.md) ![M](missing.png) `y`\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root),
+                "--checks", "dead-links,missing-images",
+            )
+            self.assertNotEqual(code, 0)
+            self.assertIn("missing.md", out)
+            self.assertIn("missing.png", out)
+
+    def test_span_cannot_pair_across_heading_boundary(self):
+        """A stray ` in a paragraph cannot pair with ` after a heading —
+        the heading is a separate block, so it stays a heading and its
+        anchor resolves (no swallowed heading → false FAIL)."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n`unmatched text\n## Real Heading\nmore ` text\n\n[Go](#real-heading)\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertEqual(code, 0, f"Out:\n{out}")
+            self.assertIn("- dead-links: PASS", out)
+
 
 class TestStdlibOnly(unittest.TestCase):
     """Ensure scripts/check-readme.py has no third-party dependencies."""

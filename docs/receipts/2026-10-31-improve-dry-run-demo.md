@@ -191,17 +191,19 @@ Run B now.
   rendered).
 - Run B's five probed files re-checked with
   `--checks dead-links,missing-images,code-fences` → all exit 0.
-- Unit tests: `python -m unittest discover -s tests` → **78 tests OK**
-  (44 total new across rounds 2–6: `--checks` subset/empty/dedup/repo-set
+- Unit tests: `python -m unittest discover -s tests` → **83 tests OK**
+  (49 total new across rounds 2–7: `--checks` subset/empty/dedup/repo-set
   combination + fragment same-file/cross-file/dup-suffix/indented-ATX/
   Setext/CJK/underscore/mixed-case cases, incl. negative fixtures for
   fenced, inline-code, and commented `id`/`name` attributes,
   attribute-value `id=`, `data-id`, bare-text `id=`, `#custom` curlies,
-  list-marker Setext exclusions, cross-paragraph backtick pairing,
-  comment-wrapped fence markers, escaped backticks/comment markers;
-  positives for inline-comment headings, unclosed-comment-in-fence,
-  code-span `<!--` literals, digit- and marker-led Setext, and
-  commented/inline-code dead links and images).
+  list-marker Setext exclusions, cross-paragraph and cross-heading
+  backtick pairing, comment-wrapped fence markers, escaped
+  backticks/comment markers, bare-fence self-close, and
+  closer-before-backslash spans; positives for inline-comment headings,
+  unclosed-comment-in-fence, code-span `<!--` literals, digit- and
+  marker-led Setext, EOF closing fences, and commented/inline-code dead
+  links and images).
 
 ## Acceptance mapping
 

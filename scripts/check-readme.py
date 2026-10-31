@@ -235,19 +235,46 @@ def _github_slug(heading: str) -> str:
     return t.replace(" ", "-")
 
 
+# Leaf-block boundaries that end a paragraph (GFM precedence): ATX heading,
+# blockquote, fenced code, list item, thematic break, setext underline.
+_BLOCK_BOUNDARY_RE = re.compile(
+    r"(?m)^ {0,3}(?:#{1,6}(?:[ \t]|$)|>|`{3,}|~{3,}|"
+    r"(?:[*+\-]|\d{1,9}[.)])[ \t]|(?:[*_\-][ \t]*){3,}$)"
+)
+
+
 def _block_bound(text: str, start: int) -> int:
-    """Block boundary for inline parsing: index of the newline that opens the
-    next blank line, or end of text. A code span can contain line endings
-    inside its block but cannot cross a blank line (GFM code spans)."""
+    """Block boundary for inline parsing: the position where the block
+    containing `start` ends — at the first blank line, the first line that
+    opens a different leaf block, or the end of an ATX heading line. A code
+    span can contain line endings inside its block but cannot cross into
+    another block (GFM code spans + block precedence)."""
+    n = len(text)
     m = re.search(r"\n[ \t\r]*\n", text[start:])
-    return start + m.start() + 1 if m else len(text)
+    bound = start + m.start() + 1 if m else n
+    # A span opened inside an ATX heading ends at the heading's line end —
+    # headings are single-line blocks.
+    line_start = text.rfind("\n", 0, start) + 1
+    if re.match(r"^ {0,3}#{1,6}[ \t]", text[line_start:]):
+        le = text.find("\n", start)
+        bound = min(bound, n if le == -1 else le)
+    seg = text[start:]
+    is_line_start = start == 0 or text[start - 1] == "\n"
+    for m2 in _BLOCK_BOUNDARY_RE.finditer(seg):
+        # ^ also matches seg position 0 even when `start` sits mid-line;
+        # that spurious match is not a new block line.
+        if m2.start() == 0 and not is_line_start:
+            continue
+        return min(bound, start + m2.start())
+    return bound
 
 
 def _code_span_end(text: str, start: int, bound: int) -> Optional[int]:
     """If a backtick code span opens at `start`, return the index just past its
-    closing run. GFM: the closing run must be exactly the opening length, must
-    end inside the same block (`bound`), and neither opener nor closer may be
-    backslash-escaped. An unmatched opener is literal text → None."""
+    closing run. GFM: the closing run must be exactly the opening length and
+    must end inside the same block (`bound`). Backslashes are literal inside a
+    code span, so they never block a closer (escape handling lives at the
+    opener sites). An unmatched opener is literal text → None."""
     tick_end = start
     while tick_end < len(text) and text[tick_end] == "`":
         tick_end += 1
@@ -257,12 +284,8 @@ def _code_span_end(text: str, start: int, bound: int) -> Optional[int]:
         k2 = k
         while k2 < len(text) and text[k2] == "`":
             k2 += 1
-        if k2 - k == tlen:
-            bs = 0
-            while k - 1 - bs >= 0 and text[k - 1 - bs] == "\\":
-                bs += 1
-            if k2 <= bound and bs % 2 == 0:
-                return k2
+        if k2 - k == tlen and k2 <= bound:
+            return k2
         k = text.find("`", k2)
     return None
 
@@ -296,22 +319,26 @@ def _rendered_text(content: str) -> Tuple[str, Optional[Tuple[str, int, str]]]:
             if fence:
                 fence_char, fence_len = fence
                 start_line = cur_line
-                j = i
+                # The opener line is consumed — it can never be its own
+                # closing fence (a bare ``` would otherwise self-close).
+                j = line_end + 1 if line_end != -1 else n
+                if line_end != -1:
+                    out.append("\n")
+                    cur_line += 1
                 closed = False
-                while j <= n:
+                while j < n:
                     le = content.find("\n", j)
-                    if le == -1:
-                        j = n
-                        break
-                    if _match_fence_close(content[j:le], fence_char, fence_len):
+                    seg_end = n if le == -1 else le
+                    is_close = _match_fence_close(
+                        content[j:seg_end], fence_char, fence_len
+                    )
+                    if le != -1:
                         out.append("\n")
-                        j = le + 1
                         cur_line += 1
+                    j = n if le == -1 else le + 1
+                    if is_close:
                         closed = True
                         break
-                    out.append("\n")
-                    j = le + 1
-                    cur_line += 1
                 if not closed:
                     unclosed = ("code-fence", start_line, fence_char * fence_len)
                 i = j
