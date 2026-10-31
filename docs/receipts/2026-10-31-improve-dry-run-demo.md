@@ -10,12 +10,12 @@ kept at the bottom with its caveats.
 
 ## Run A — `improve --dry-run` on the real 6F repository (zero writes)
 
-**Sample:** `D:\Aworker\6F\README.md` @ `cbfa75374a077729ddc6d8dab47f2bb194c4a3a7`,
+**Sample:** `<repo-root>\README.md` @ `cbfa75374a077729ddc6d8dab47f2bb194c4a3a7`,
 in place inside its real repository (1113 files, LICENSE, `docs/`, `engine/`,
 `.github/workflows/`, companion `README.zh-CN.md` all present). `--dry-run`:
 plan and receipts only, no writes.
 
-**ROUTE.** Mode `improve --dry-run`; `<repo-root>` = `D:\Aworker\6F` (inside a
+**ROUTE.** Mode `improve --dry-run`; `<repo-root>` = `<repo-root>` (inside a
 Git worktree, `README.md` tracked and clean); tier `standard`; companion
 `README.zh-CN.md` detected for lockstep. Baseline: SHA-256 snapshot of all
 1113 files + `git status --porcelain --ignored` (4 ignored entries only).
@@ -26,7 +26,7 @@ Pointer contract resolved at trusted root `~/.agents/skills/`:
 **TRUTH.**
 
 ```text
-python -s -E -B -X utf8 ~/.agents/skills/readme-crafter-skill/scripts/scan-project.py D:\Aworker\6F
+python -s -E -B -X utf8 ~/.agents/skills/readme-crafter-skill/scripts/scan-project.py <repo-root>
 → exit 0 (scan complete; "No obvious README-to-repo mismatches detected")
 ```
 
@@ -64,24 +64,29 @@ as an observed en/zh asymmetry, not smoothed over.
 **VERIFY.**
 
 ```text
-python -B scripts/check-readme.py D:\Aworker\6F\README.md --repo-root D:\Aworker\6F
+python -B scripts/check-readme.py <repo-root>\README.md --repo-root <repo-root>
 → exit 0 — PASS, 0 findings (all 6 single-repo checks; repo-set N/A)
 Baseline re-compare: 1113-file SHA-256 snapshot identical; git status
 --porcelain --ignored identical → zero writes; no .bak, no __pycache__.
+
+(companion probe not recorded during the original run — a VERIFY gap per
+SKILL's probe-every-companion rule; supplementary receipt, 2026-11-01:
+python -B scripts/check-readme.py <repo-root>\README.zh-CN.md --repo-root <repo-root>
+→ exit 0 — PASS, 0 findings, all 6 single-repo checks)
 ```
 
 Delivery report:
 
 ```text
-[Conclusion]: PASS — improve --dry-run on D:\Aworker\6F\README.md (intensity tier: standard); plan produced, zero writes confirmed; findings: HIGH 0 / MEDIUM 0 / LOW 0; migration ledger: 11 moves planned (enumerated in the plan above; executed ledger is Run B's).
-[Receipts]: scan-project.py exit 0; check-readme.py exit 0 (0 findings); baseline tree + git status identical pre/post; per-span LANGUAGE plan: reconstructed table above (dated 2026-11-01 — the run itself did not retain the contract-required artifact).
+[Conclusion]: PASS — improve --dry-run on <repo-root>\README.md (intensity tier: standard); plan produced, zero writes confirmed; findings: HIGH 0 / MEDIUM 0 / LOW 0; migration ledger: 11 moves planned (enumerated in the plan above; executed ledger is Run B's).
+[Receipts]: scan-project.py exit 0; check-readme.py exit 0 on README.md and on README.zh-CN.md (companion — 2026-11-01 supplementary, VERIFY above); baseline tree + git status identical pre/post; per-span LANGUAGE plan: reconstructed table above (dated 2026-11-01 — the run itself did not retain the contract-required artifact).
 [Residual risk]: README commands never executed; plan not applied (dry-run); contemporaneous per-span plan not retained — dry-run plan-form requirement undemonstrated by this run.
 ```
 
 ## Run B — `improve` (real writes) on a disposable copy of 6F
 
 **Sample:** the same 6F tree copied to
-`C:\Users\Administrator\.zcode\tmp\6f-improve-run\` **without `.git`** —
+`<fixture>\` **without `.git`** —
 deliberately exercising the `.bak` rollback path (non-Git `<repo-root>`).
 
 **ROUTE.** Mode `improve` (no `--dry-run`); non-Git `<repo-root>` → file-tree
@@ -102,7 +107,7 @@ had just run on the same README content in Run A. Supplementary receipt
 (post-write state, 2026-11-01):
 
 ```text
-python -s -E -B -X utf8 ~/.agents/skills/readme-crafter-skill/scripts/scan-project.py C:\Users\Administrator\.zcode\tmp\6f-improve-run
+python -s -E -B -X utf8 ~/.agents/skills/readme-crafter-skill/scripts/scan-project.py <fixture>
 → exit 0 (scan complete; "No obvious README-to-repo mismatches detected")
 ```
 
@@ -125,7 +130,10 @@ bound to the new English hash).
 `references/de-ai-language.md` applied outside freeze zones only:
 abstract-noun chain at the intro ("self-built moat and glue" → names the
 artifacts), defensive sentence split, meta-honesty claim recast as plain
-disclosure statement, zh pass kept in lockstep. **Both suppressions held:**
+disclosure statement. The zh pass mirrored the tracker-ID removals and the
+badge disclosure only — the zh intro keeps its `护城河与黏合剂` metaphor
+(recorded in Run A's reconstructed table): not full lockstep on wording.
+**Both suppressions held:**
 no `~/.ink-and-agency/learnings/` or `.ink-and-agency/` file exists anywhere
 (verified by `find`), and no personality/story was injected. Freeze-zone
 integrity: badge row count identical pre/post (5 shields.io refs), all fenced
@@ -159,7 +167,7 @@ Delivery report:
 ```text
 [Conclusion]: PASS — improve on disposable 6F copy (intensity tier: standard); 11 ledger moves (6 en + 5 zh; one span dropped, already migrated), self-attestation converged, tracker IDs removed, wording pass applied; findings: HIGH 0 / MEDIUM 0 / LOW 0; all probes clean.
 [Receipts]: rollback: .bak per write-set file (non-Git); scan-project.py exit 0 (post-write supplementary scan, TRUTH above); 5 probe runs exit 0; tree diff = write set only; both suppressions held (no .ink-and-agency writes, no injected personality).
-[Residual risk]: npm/selftest commands never executed (needs manual verification); Git rollback path planned not exercised; zh sync stamp regenerated by hand, engine gen script not re-run.
+[Residual risk]: npm/selftest commands never executed (needs manual verification); Git rollback path planned not exercised; zh sync stamp regenerated by hand, engine gen script not re-run; zh wording mirror is tracker/badge-only — intro metaphor kept in zh, diverging from the en rewrite.
 ```
 
 ### Migration ledger (Run B)
@@ -181,11 +189,11 @@ Delivery report:
 
 ## Run C — `rewrite --dry-run` on the READJH README (plan only)
 
-**Sample:** `D:\Aworker\READJH\README.md` at HEAD (real repo, real context).
+**Sample:** `<repo-root>\README.md` at HEAD (real repo, real context).
 `--dry-run`: rebuild plan only.
 
 ```text
-scan-project.py D:\Aworker\READJH   → exit 0 (no README-to-repo mismatches)
+scan-project.py <repo-root>   → exit 0 (no README-to-repo mismatches)
 check-readme.py README.md           → exit 0, 0 findings
 git status --porcelain --ignored pre/post → identical (zero writes; the two
 " M" entries are this ticket's uncommitted rework edits, present pre-run)
@@ -207,7 +215,7 @@ inventory above. SKILL §3 Phase 4 step 5 requires the per-span form
 not a contract exemption. Delivery report:
 
 ```text
-[Conclusion]: PASS — rewrite --dry-run on D:\Aworker\READJH\README.md (intensity tier: standard); rebuild plan produced, zero writes confirmed; findings: HIGH 0 / MEDIUM 0 / LOW 0.
+[Conclusion]: PASS — rewrite --dry-run on <repo-root>\README.md (intensity tier: standard); rebuild plan produced, zero writes confirmed; findings: HIGH 0 / MEDIUM 0 / LOW 0.
 [Receipts]: scan-project.py exit 0; check-readme.py exit 0 (0 findings); git status --porcelain --ignored identical pre/post → zero writes.
 [Residual risk]: executed (non-dry) rewrite not demonstrated; per-span LANGUAGE plan not retained — required even in dry-run, so the plan-form requirement is undemonstrated; zero-write evidence is git-status-only (full tree SHA-256 compare was not retained and cannot be reconstructed for Run C); README commands never executed.
 ```
@@ -215,7 +223,7 @@ not a contract exemption. Delivery report:
 ## Original fixture demo (superseded, kept with caveats)
 
 First demo: `improve --dry-run` on a single-file copy of the same 6F README in
-a non-Git fixture (`C:\Users\Administrator\.zcode\tmp\readjh-demo-fixture\`,
+a non-Git fixture (`<fixture-1>\`,
 baseline SHA-256 `3246796f40…b859b`, unchanged pre/post — zero writes). The
 plan produced there was sound, but the fixture lacked repository context, so
 `check-readme.py` reported **exit 1 / 24 blocking findings** (22 dead links +
