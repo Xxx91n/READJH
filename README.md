@@ -30,8 +30,8 @@ Phase sequence by run mode:
   traces, and prose tells; in `improve` and `rewrite` it moves deep material to
   `docs/` under a migration ledger.
 - **LANGUAGE** (`improve` and `rewrite`) runs upstream `writing-humanize` plus
-  distilled README-scoped rules, inside freeze zones and intensity tiers that
-  stop cleanup from corrupting facts or flattening a real voice.
+  distilled README-scoped rules, under freeze-zone guardrails and intensity
+  tiers that stop cleanup from corrupting facts or flattening a real voice.
 - **VERIFY** emits machine-checkable receipts from the static probe and
   a human checklist, and caps the delivery report at three lines:
   conclusion, receipts, residual risk.
