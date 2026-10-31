@@ -208,16 +208,19 @@ def _resolve_local_path(target: str, readme_dir: Path, repo_root: Path) -> Optio
     return p_resolved if p_resolved.exists() else None
 
 
-def extract_all_link_targets(line: str) -> List[str]:
-    """Extract link targets from markdown links (including nested badge links) and HTML <a> tags."""
-    targets = []
-    # Nested markdown link regex: matches [text](target), allowing nested [alt](img) in text
-    md_link_re = re.compile(r"(?<!!)\[((?:[^\[\]]|\[[^\[\]]*\])*)\]\(([^)]+)\)")
-    html_link_re = re.compile(r"""<a\s+[^>]*?href=["']([^"']+)["']""", re.IGNORECASE)
+_MD_LINK_RE = re.compile(r"(?<!!)\[((?:[^\[\]]|\[[^\[\]]*\])*)\]\(([^)]+)\)")
+_HTML_LINK_RE = re.compile(r"""<a\s+[^>]*?href=["']([^"']+)["']""", re.IGNORECASE)
 
-    for m in md_link_re.finditer(line):
+
+def extract_all_link_targets(line: str, html_line: str = "") -> List[str]:
+    """Extract link targets: markdown links (including nested badge links)
+    from `line`, and HTML <a> tags from `html_line` — the html view of the
+    same line, which may additionally contain a comment block's raw-HTML
+    closing-line tail."""
+    targets = []
+    for m in _MD_LINK_RE.finditer(line):
         targets.append(m.group(2).strip())
-    for m in html_link_re.finditer(line):
+    for m in _HTML_LINK_RE.finditer(html_line):
         targets.append(m.group(1).strip())
     return targets
 
@@ -577,17 +580,23 @@ def _extract_fragment(target: str) -> Optional[str]:
 def check_dead_links(content: str, readme_path: Path, repo_root: Path) -> List[Finding]:
     """Check 1: Dead local links and broken fragments."""
     findings = []
-    # Rendered content only: links inside fenced code, inline code, or HTML
-    # comments (incl. a comment block's raw-HTML closing-line tail) are not
-    # clickable and never resolve.
-    rendered, _, _ = _rendered_text(content)
+    # Rendered content only: markdown links/images come from the markdown
+    # view; real HTML <a href> elements also come from the html view, which
+    # keeps a comment block's raw-HTML closing-line tail (a tail [x](...)
+    # stays markdown-invisible there, so pseudo-links are not checked while
+    # real HTML anchors are).
+    rendered, html_rendered, _ = _rendered_text(content)
     text_no_fences = _strip_inline_code(rendered)
+    html_lines = _strip_inline_code(html_rendered).splitlines()
     lines = text_no_fences.splitlines()
     readme_dir = readme_path.parent.resolve()
     own_anchors: Optional[set] = None
 
     for line_idx, line in enumerate(lines, start=1):
-        targets = extract_all_link_targets(line)
+        targets = extract_all_link_targets(
+            line,
+            html_lines[line_idx - 1] if line_idx - 1 < len(html_lines) else "",
+        )
         for target in targets:
             if not target:
                 continue
@@ -687,8 +696,12 @@ def parse_srcset_urls(raw_srcset: str) -> List[str]:
 def check_missing_images(content: str, readme_path: Path, repo_root: Path) -> List[Finding]:
     """Check 2: Missing local image paths."""
     findings = []
-    rendered, _, _ = _rendered_text(content)
+    # Markdown images come from the markdown view; real <img>/<source>
+    # elements also come from the html view (comment-block closing-line
+    # tails keep raw HTML there — a tail ![x](...) stays invisible).
+    rendered, html_rendered, _ = _rendered_text(content)
     text_no_fences = _strip_inline_code(rendered)
+    html_lines = _strip_inline_code(html_rendered).splitlines()
     lines = text_no_fences.splitlines()
 
     md_img_re = re.compile(r"!\[([^\]]*)\]\(([^)]+)\)")
@@ -698,12 +711,13 @@ def check_missing_images(content: str, readme_path: Path, repo_root: Path) -> Li
     readme_dir = readme_path.parent.resolve()
 
     for line_idx, line in enumerate(lines, start=1):
+        html_line = html_lines[line_idx - 1] if line_idx - 1 < len(html_lines) else ""
         sources = []
         for m in md_img_re.finditer(line):
             sources.append(m.group(2).strip())
-        for m in html_img_re.finditer(line):
+        for m in html_img_re.finditer(html_line):
             sources.append(m.group(1).strip())
-        for m in html_source_re.finditer(line):
+        for m in html_source_re.finditer(html_line):
             raw_srcset = m.group(1).strip()
             for candidate_url in parse_srcset_urls(raw_srcset):
                 if candidate_url:
@@ -741,10 +755,12 @@ def _anchor_match(fragment: str, anchors: set) -> bool:
 def check_badge_domains(content: str) -> List[Finding]:
     """Check 4: Badge URL domain sanity."""
     findings = []
-    # Badges are HTML in READMEs — scan the html view so a badge in a
-    # comment block's closing-line tail (raw HTML) is still checked.
-    _, rendered, _ = _rendered_text(content)
+    # Markdown badge syntax from the markdown view; HTML badge markup
+    # (<a><img>) also from the html view, which keeps a comment block's
+    # raw-HTML closing-line tail.
+    rendered, html_rendered, _ = _rendered_text(content)
     text_no_fences = _strip_inline_code(rendered)
+    html_lines = _strip_inline_code(html_rendered).splitlines()
     lines = text_no_fences.splitlines()
 
     badge_md_re = re.compile(r"\[!\[([^\]]*)\]\(([^)]+)\)\]\(([^)]+)\)")
@@ -755,11 +771,12 @@ def check_badge_domains(content: str) -> List[Finding]:
     standalone_badge_md_re = re.compile(r"!\[([^\]]*)\]\((https?://[^)]*(?:shields\.io|badgen\.net|badge\.svg)[^)]*)\)")
 
     for line_idx, line in enumerate(lines, start=1):
+        html_line = html_lines[line_idx - 1] if line_idx - 1 < len(html_lines) else ""
         badge_urls = []
         for m in badge_md_re.finditer(line):
             badge_urls.append(m.group(2).strip())  # img
             badge_urls.append(m.group(3).strip())  # link
-        for m in badge_html_re.finditer(line):
+        for m in badge_html_re.finditer(html_line):
             badge_urls.append(m.group(1).strip())  # link
             badge_urls.append(m.group(2).strip())  # img
         for m in standalone_badge_md_re.finditer(line):

@@ -1324,6 +1324,74 @@ class TestFragmentLinks(unittest.TestCase):
             self.assertEqual(code, 0, f"Out:\n{out}")
             self.assertIn("- dead-links: PASS", out)
 
+    def test_comment_block_tail_html_link_is_real(self):
+        """<!-- note --> <a href="missing.md">API</a>: the tail is raw
+        HTML — a real <a> there is a real link and must FAIL."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                '# T\n\n<!-- note --> <a href="missing.md">API</a>\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertNotEqual(code, 0)
+            self.assertIn("missing.md", out)
+
+    def test_comment_block_tail_html_image_is_real(self):
+        """<!-- note --> <img src="missing.png">: a real <img> in the tail
+        is a real image reference and must FAIL."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                '# T\n\n<!-- note --> <img src="missing.png">\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "missing-images"
+            )
+            self.assertNotEqual(code, 0)
+            self.assertIn("missing.png", out)
+
+    def test_comment_block_tail_source_srcset_is_real(self):
+        """<!-- note --> <source srcset="missing.png 1x">: srcset
+        candidates in the tail are checked and must FAIL."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                '# T\n\n<!-- note --> <source srcset="missing.png 1x">\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "missing-images"
+            )
+            self.assertNotEqual(code, 0)
+            self.assertIn("missing.png", out)
+
+    def test_comment_block_tail_markdown_image_still_invisible(self):
+        """<!-- note --> ![x](missing.png): markdown syntax in the tail is
+        not parsed — no missing-images finding."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n<!-- note --> ![x](missing.png)\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "missing-images"
+            )
+            self.assertEqual(code, 0, f"Out:\n{out}")
+            self.assertIn("- missing-images: PASS", out)
+
 
 class TestStdlibOnly(unittest.TestCase):
     """Ensure scripts/check-readme.py has no third-party dependencies."""

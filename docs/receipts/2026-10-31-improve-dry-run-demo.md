@@ -191,8 +191,8 @@ Run B now.
   rendered).
 - Run B's five probed files re-checked with
   `--checks dead-links,missing-images,code-fences` → all exit 0.
-- Unit tests: `python -m unittest discover -s tests` → **94 tests OK**
-  (60 total new across rounds 2–9: `--checks` subset/empty/dedup/repo-set
+- Unit tests: `python -m unittest discover -s tests` → **98 tests OK**
+  (64 total new across rounds 2–10: `--checks` subset/empty/dedup/repo-set
   combination + fragment same-file/cross-file/dup-suffix/indented-ATX/
   Setext/CJK/underscore/mixed-case cases, incl. negative fixtures for
   fenced, inline-code, and commented `id`/`name` attributes,
@@ -201,11 +201,12 @@ Run B now.
   pairing, `1.`-vs-`2.` paragraph interruption, comment-wrapped fence
   markers, escaped backticks/comment markers, bare-fence self-close,
   closer-before-backslash spans, unclosed inline comments,
-  comment-block-tail pseudo-headings/links; positives for inline-comment
-  headings, unclosed-comment-in-fence, code-span `<!--` literals, digit-
-  and marker-led Setext, EOF closing fences, multiline inline comments,
-  img-tag/autolink/code-span-underscore slugs, tail `<a id>` anchors,
-  and commented/inline-code dead links and images).
+  comment-block-tail pseudo-headings/links/images; positives for
+  inline-comment headings, unclosed-comment-in-fence, code-span `<!--`
+  literals, digit- and marker-led Setext, EOF closing fences, multiline
+  inline comments, img-tag/autolink/code-span-underscore slugs, tail
+  `<a id>`/`<a href>`/`<img>`/`<source>` real elements, and
+  commented/inline-code dead links and images).
 
 ## Acceptance mapping
 
