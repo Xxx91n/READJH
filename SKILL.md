@@ -435,6 +435,11 @@ a `HIGH` / `MEDIUM` / `LOW` finding with zero README commands executed.
      the first write, and record `"rollback: <path>.bak per write-set file
      (git cannot restore <reason>)"` plus the list of new files (deleted
      on rollback) in `[Receipts]`.
+   - **`.bak` collision rule:** before copying, check every planned
+     `<path>.bak` path. If any already exists, stop as `FAIL` with zero
+     writes — never overwrite an older rollback snapshot (the user keeps
+     or removes it first). All backups must succeed before the first
+     edit; a failed copy halts the run with zero source files written.
    - In `--dry-run`, never create the `.bak` — record which rollback path
      *would* apply instead.
 7. **Execute structural edits (write modes; `--dry-run` lists them as the
@@ -455,6 +460,16 @@ a `HIGH` / `MEDIUM` / `LOW` finding with zero README commands executed.
      move without a ledger entry fails `VERIFY`. Deletion and migration
      always precede wording changes, so `LANGUAGE` (Phase 4) never
      performs migrations.
+   - **Inbound links to moved headings:** a moved heading breaks inbound
+     references — both same-page `#anchor` links and `file.md#anchor`
+     links in `<readme>`, its companion, and other repo files that point
+     at the moved heading. For each moved heading, derive its old and new
+     anchors, scan `<readme>` and the companion for references, and
+     repoint them at the destination (`docs/<file>.md#<anchor>`); record
+     the remap in the ledger. References from files outside the write set
+     are listed in `[Residual risk]` for manual follow-up — VERIFY's
+     `dead-links` fragment check flags any that were missed inside the
+     write set.
    - Converge **self-attestation** repeats to one statement or a link and
      remove **generation traces** (`references/readme-rules.md` §2, §3).
    - `improve`: reorder and trim the existing skeleton to the repository's
@@ -564,7 +579,9 @@ migrations here), and the intensity tier's scope was respected.
      `2` = CLI/usage error → `BLOCKED`) and stdout **receipt** covering **all
      applicable checks** (checks 1–6 on single-repository runs; check 7 enabled
      only when `--repo-set <manifest>` is supplied, otherwise `N/A`):
-     1. `dead-links` — dead local markdown and HTML links (including badge link targets)
+     1. `dead-links` — dead local markdown and HTML links (including badge link
+        targets) and broken fragments: `#anchor` and `file.md#anchor` targets
+        resolved against heading-derived and explicit anchors of the target file
      2. `missing-images` — missing local markdown images, `<img>`, and `<source srcset>` paths
      3. `code-fences` — unclosed or mismatched backtick/tilde code fences
      4. `badge-domains` — placeholder or invalid badge URL hosts
@@ -593,13 +610,15 @@ migrations here), and the intensity tier's scope was respected.
        no ledger entry fails `VERIFY`; any other new, modified, or deleted
        file also fails and must be reverted before delivery.
    - **Probe every migration destination (write modes, no `--dry-run`):**
-     run `check-readme.py --checks dead-links,missing-images` on each new
-     or merged `docs/` destination file with the same `--repo-root`, so
-     moved spans are checked from their new location — including every
-     re-based target (deep docs are scoped to the move-integrity checks;
-     README-facing checks like `honest-gaps` do not apply there). A
-     destination that fails is reverted or the re-basing corrected before
-     delivery.
+     run `check-readme.py --checks dead-links,missing-images,code-fences`
+     on each new or merged `docs/` destination file with the same
+     `--repo-root`, so moved spans are checked from their new location —
+     including every re-based target. `code-fences` is mandatory here:
+     the path checks strip fenced blocks first, so an unclosed fence in a
+     moved span could otherwise mask dead links (deep docs are scoped to
+     the move-integrity checks; README-facing checks like `honest-gaps`
+     do not apply there). A destination that fails is reverted or the
+     re-basing corrected before delivery.
 3. **Emit the three-line delivery report (§4).**
 
 **Completion criterion:** `scripts/check-readme.py` has run, its stdout
@@ -635,9 +654,11 @@ reply locked to **at most three lines**
   Every span moved out of `<readme>` into `docs/` appears in a ledger table
   appended after `[Residual risk]`; a move without a ledger entry fails
   `VERIFY` (§3, `RESTRUCTURE` step 7). Each entry also lists every relative
-  link/image target re-based by the move (original → new form; `none` when
-  the span carried none) so the re-basing is auditable. A write-mode run
-  with no moves states `Migration ledger: none` on the `[Conclusion]` line.
+  link/image target re-based by the move and every inbound anchor
+  reference repointed at the destination (original → new form; `none`
+  when the span carried none) so the re-basing is auditable. A write-mode
+  run with no moves states `Migration ledger: none` on the `[Conclusion]`
+  line — inside one of the three lines, never as an extra fourth line.
 
 | Moved span (heading, `<readme>` lines) | Destination file | Re-based targets (`original → new`) |
 |---|---|---|
