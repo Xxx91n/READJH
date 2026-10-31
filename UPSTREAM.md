@@ -58,7 +58,7 @@ Rules, inherited from ADR-0001:
 
 ### Executors (resolved through the pointer contract)
 
-| canonical name | upstream URL | license | required files | search paths | observed location (2026-10-30) | state |
+| canonical name | upstream URL | license | required files | search paths | observed location (first recorded 2026-10-30; row events dated individually) | state |
 |---|---|---|---|---|---|---|
 | `readme-crafter-skill` | https://github.com/linhai0872/readme-crafter-skill | MIT | `SKILL.md`, `references/repo-integrity.md` (in `references/`), `scripts/scan-project.py`, `scripts/scan_project_readme.py`, `scripts/scan_project_support.py` | contract list above | `C:\Users\Administrator\.agents\skills\git\readme\readme-crafter-skill-main\`, resolved at canonical `C:\Users\Administrator\.agents\skills\readme-crafter-skill` via junction (created 2026-10-31 for Ticket #5) | installed — canonical junction in place; target is a captured copy (not a Git checkout), so no live revision hash; contract resolution verified 2026-10-31 |
 | `writing-humanize` | https://github.com/risadams/ink-and-agency (`skills/writing-humanize/`) | MIT (skill `license:` field; repo LICENSE MIT, fork notice credits mattpocock/skills) | `SKILL.md`, `references/patterns.md`, `agents/openai.yaml` | contract list above | `C:\Users\Administrator\.agents\repos\ink-and-agency\` @ `e1f0a00e06d55c00502e0ccbea79ab453e7fb118`, resolved at canonical `C:\Users\Administrator\.agents\skills\writing-humanize` via junction (created 2026-10-31 for Ticket #6) | installed — canonical junction in place; contract resolution verified 2026-10-31 (frontmatter `name:` + 3/3 required files) |
@@ -75,7 +75,7 @@ advancing either upstream checkout.
 
 ### Distilled rule sources (read into context, never invoked)
 
-| canonical name | upstream URL | license | required files | search paths | observed location (2026-10-30) | state |
+| canonical name | upstream URL | license | required files | search paths | observed location (first recorded 2026-10-30; row events dated individually) | state |
 |---|---|---|---|---|---|---|
 | `sepia` | local mirror only — no canonical public upstream recorded | MIT (`license:` field in SKILL.md) | `SKILL.md`, `references/professional-pass.md`, `references/style-pass.md`, `references/languages/` (zh calibration) | n/a — distilled, not resolved | `D:\Aworker\research\ALL\.agents\skills\sepia\`, mirror commit `365185bec8c5eae8711ebd56b4f4556759f685b2` | present — source of truth for distilled rules; **no runtime dep** |
 | `anti-defensive-writing` (EN, Kiterlin) | https://github.com/Kiterlin/anti-defensive-writing | MIT | `SKILL.md` | n/a — distilled | `D:\Aworker\research\ALL\vendor\anti-defensive\`, mirror commit `365185bec8c5eae8711ebd56b4f4556759f685b2` | present — distilled only. Disambiguate **by path**: a second same-named source exists at `vendor\anti-defensive-skill\` and is not used |
