@@ -1430,6 +1430,26 @@ class TestFragmentLinks(unittest.TestCase):
             self.assertNotEqual(code, 0)
             self.assertIn("missing.md", out)
 
+    def test_explicit_id_does_not_shift_heading_slugs(self):
+        """<a id="setup"> plus two '## Setup' headings: GitHub generates
+        #setup and #setup-1 — #setup-1 resolves and #setup-2 must FAIL
+        (the slugger deduplicates against heading slugs only)."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                '# T\n\n<a id="setup"></a>\n\n## Setup\nx\n\n## Setup\ny\n\n'
+                'See [a](#setup-1) and [b](#setup-2).\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertNotEqual(code, 0)
+            self.assertIn("#setup-2", out)
+            self.assertNotIn("no anchor '#setup-1'", out)
+
 
 class TestStdlibOnly(unittest.TestCase):
     """Ensure scripts/check-readme.py has no third-party dependencies."""

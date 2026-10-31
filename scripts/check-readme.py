@@ -545,7 +545,9 @@ def _markdown_anchor_ids(path: Path) -> Optional[set]:
             return
         n = slug_counts.get(slug, 0)
         candidate = slug if n == 0 else f"{slug}-{n}"
-        while candidate in generated or candidate in ids:
+        # GitHub's slugger deduplicates only against heading slugs — an
+        # explicit <a id="setup"> does not push ## Setup to #setup-1.
+        while candidate in generated:
             n += 1
             candidate = f"{slug}-{n}"
         slug_counts[slug] = n + 1
