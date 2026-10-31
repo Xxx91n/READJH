@@ -469,7 +469,10 @@ a `HIGH` / `MEDIUM` / `LOW` finding with zero README commands executed.
      references — both same-page `#anchor` links and `file.md#anchor`
      links in `<readme>`, its companion, and other repo files that point
      at the moved heading. For each moved heading, derive its old and new
-     anchors — the new anchor is the heading's **unique slug after the
+     anchors: when the moved span carries an explicit HTML `id`/`name`
+     anchor that the inbound link targets, that anchor moves with the
+     span — repoint at it rather than substituting a heading slug.
+     Otherwise the new anchor is the heading's **unique slug after the
      merge**, including the `-1`/`-2` suffix GitHub adds when the
      destination already has a heading of the same text; the repointed
      link must identify the moved heading, not the existing duplicate.
@@ -586,7 +589,10 @@ migrations here), and the intensity tier's scope was respected.
    - Capture the exit code (`0` = pass, `1` = blocking findings in `<readme>`,
      `2` = CLI/usage error → `BLOCKED`) and stdout **receipt** covering **all
      applicable checks** (checks 1–6 on single-repository runs; check 7 enabled
-     only when `--repo-set <manifest>` is supplied, otherwise `N/A`):
+     only when `--repo-set <manifest>` is supplied, otherwise `N/A`). Run the
+     same probe on every companion localized README detected in `ROUTE` —
+     write modes edit it in lockstep, so its links, images, fragments, and
+     fences need the same verification receipt as `<readme>`:
      1. `dead-links` — dead local markdown and HTML links (including badge link
         targets) and broken fragments: `#anchor` and `file.md#anchor` targets
         resolved against heading-derived and explicit anchors of the target file
