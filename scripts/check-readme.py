@@ -7,6 +7,7 @@ Seven static checks:
    against the target's heading-derived and explicit anchors)
 2. missing image paths (markdown images, <img> tags, and <source> srcset)
 3. code-fence imbalance (unclosed or mismatched backtick/tilde code fences)
+   and unclosed HTML comments — both mask trailing rendered content
 4. badge URL domain sanity (valid hosts, flags placeholders e.g. TODO, example.com, username/repo)
 5. boundary-phrase duplicate counting (ensures boundaries & disclaimers are stated at most once)
 6. honest-gap signal presence (detects suspicious completeness when limitations/caveats/gaps are absent)
@@ -143,11 +144,15 @@ class ProbeReport:
 
 
 def _match_fence_open(line: str) -> Optional[Tuple[str, int]]:
-    """Match opening of a code fence (``` or ~~~)."""
-    m = re.match(r"^(`{3,}|~{3,})", line.strip())
-    if m:
-        return m.group(1)[0], len(m.group(1))
-    return None
+    """Match opening of a code fence (``` or ~~~). Per CommonMark a backtick
+    info string cannot contain backticks, so a line like ```x``` is an
+    inline code span, not a fence (tilde info strings may contain them)."""
+    m = re.match(r"^(`{3,}|~{3,})(.*)$", line.strip())
+    if not m:
+        return None
+    if m.group(1)[0] == "`" and "`" in m.group(2):
+        return None
+    return m.group(1)[0], len(m.group(1))
 
 
 def _match_fence_close(line: str, fence_char: str, fence_len: int) -> bool:
@@ -157,7 +162,8 @@ def _match_fence_close(line: str, fence_char: str, fence_len: int) -> bool:
 
 
 def check_code_fences(content: str) -> List[Finding]:
-    """Check 3: Detect unclosed code fences (comment/fence context aware)."""
+    """Check 3: Detect unclosed code fences and HTML comments — both mask
+    the rest of the document from renderers."""
     findings = []
     _, _, unclosed = _rendered_text(content)
     if unclosed and unclosed[0] == "code-fence":
@@ -167,6 +173,14 @@ def check_code_fences(content: str) -> List[Finding]:
                 check_name="code-fences",
                 line=start_line,
                 message=f"Unclosed code fence (opened with {marker} at line {start_line}, reached EOF without closing)",
+            )
+        )
+    elif unclosed and unclosed[0] == "comment":
+        findings.append(
+            Finding(
+                check_name="code-fences",
+                line=unclosed[1],
+                message=f"Unclosed HTML comment (opened at line {unclosed[1]}, hides the rest of the document)",
             )
         )
     return findings

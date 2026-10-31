@@ -1392,6 +1392,44 @@ class TestFragmentLinks(unittest.TestCase):
             self.assertEqual(code, 0, f"Out:\n{out}")
             self.assertIn("- missing-images: PASS", out)
 
+    def test_unclosed_block_comment_reported(self):
+        """An unclosed line-start <!-- hides the rest of the document on
+        GitHub — code-fences must FAIL, not silently pass."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                '# T\n\n<!-- note\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "code-fences"
+            )
+            self.assertNotEqual(code, 0)
+            self.assertIn("Unclosed HTML comment", out)
+
+    def test_backtick_info_string_is_not_a_fence(self):
+        """A line like ```x``` is an inline code span, not a fence opener:
+        code-fences must PASS and the following dead link must still FAIL."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                '# T\n\n```x``` inline\n\n[dead](missing.md)\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "code-fences"
+            )
+            self.assertEqual(code, 0, f"Out:\n{out}")
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertNotEqual(code, 0)
+            self.assertIn("missing.md", out)
+
 
 class TestStdlibOnly(unittest.TestCase):
     """Ensure scripts/check-readme.py has no third-party dependencies."""

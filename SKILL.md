@@ -597,7 +597,8 @@ migrations here), and the intensity tier's scope was respected.
         targets) and broken fragments: `#anchor` and `file.md#anchor` targets
         resolved against heading-derived and explicit anchors of the target file
      2. `missing-images` — missing local markdown images, `<img>`, and `<source srcset>` paths
-     3. `code-fences` — unclosed or mismatched backtick/tilde code fences
+     3. `code-fences` — unclosed or mismatched backtick/tilde code fences,
+        and unclosed HTML comments (both mask trailing rendered content)
      4. `badge-domains` — placeholder or invalid badge URL hosts
      5. `boundary-duplicates` — repeated boundary/disclaimer phrases (**self-attestation** count)
      6. `honest-gaps` — presence of repository-backed limitation/caveat/non-goal signals
