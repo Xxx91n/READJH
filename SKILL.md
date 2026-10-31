@@ -166,10 +166,11 @@ also documents linking/renaming an existing non-canonical checkout):
   ln -s "$HOME/.agents/repos/ink-and-agency/skills/writing-humanize" "$HOME/.agents/skills/writing-humanize"
   ```
 - **Verification after install:** confirm `<skills-root>/<canonical-name>/SKILL.md`
-  exists, its frontmatter `name:` equals `<canonical-name>`, and all required
-  files listed in the table above (`references/repo-integrity.md`,
-  `scripts/scan-project.py`, `scripts/scan_project_readme.py`, and
-  `scripts/scan_project_support.py`) exist.
+  exists, its frontmatter `name:` equals `<canonical-name>`, and the required
+  files for that canonical name in the table above exist — for
+  `readme-crafter-skill`: `references/repo-integrity.md` and the three
+  `scripts/scan*.py` files; for `writing-humanize`: `references/patterns.md`
+  and `agents/openai.yaml`.
 
 ---
 
