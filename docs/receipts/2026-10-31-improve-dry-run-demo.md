@@ -43,10 +43,9 @@ Baseline re-compare: 1113-file SHA-256 snapshot identical; git status
 Delivery report:
 
 ```text
-[Conclusion]: PASS — improve --dry-run on D:\Aworker\6F\README.md (intensity tier: standard); plan produced, zero writes confirmed.
+[Conclusion]: PASS — improve --dry-run on D:\Aworker\6F\README.md (intensity tier: standard); plan produced, zero writes confirmed; migration ledger: none (dry-run — moves planned, not executed; see Run B).
 [Receipts]: scan-project.py exit 0; check-readme.py exit 0 (0 findings); baseline tree + git status identical pre/post.
 [Residual risk]: README commands never executed; plan not applied (dry-run).
-Migration ledger: none (dry-run — moves planned, not executed; see Run B).
 ```
 
 ## Run B — `improve` (real writes) on a disposable copy of 6F
@@ -93,9 +92,12 @@ blocks, URLs, versions, commands byte-identical.
 ```text
 python -B scripts/check-readme.py <fixture>/README.md --repo-root <fixture>          → exit 0, 0 findings
 python -B scripts/check-readme.py <fixture>/README.zh-CN.md --repo-root <fixture>    → exit 0, 0 findings
-python -B scripts/check-readme.py <fixture>/docs/architecture.md    --repo-root <fixture> --checks dead-links,missing-images → exit 0
-python -B scripts/check-readme.py <fixture>/docs/upstream-policy.md --repo-root <fixture> --checks dead-links,missing-images → exit 0
-python -B scripts/check-readme.py <fixture>/docs/versioning.md      --repo-root <fixture> --checks dead-links,missing-images → exit 0
+python -B scripts/check-readme.py <fixture>/docs/architecture.md    --repo-root <fixture> --checks dead-links,missing-images,code-fences → exit 0
+python -B scripts/check-readme.py <fixture>/docs/upstream-policy.md --repo-root <fixture> --checks dead-links,missing-images,code-fences → exit 0
+python -B scripts/check-readme.py <fixture>/docs/versioning.md      --repo-root <fixture> --checks dead-links,missing-images,code-fences → exit 0
+
+(re-run after the round-2 probe hardening: fragment validation in dead-links
+and code-fences in the destination subset — all five files still clean)
 ```
 
 Write-set check (tree diff vs baseline) — **exactly** the intended set:
@@ -165,6 +167,19 @@ repo context — probe exit 0, 0 findings — confirming all 24 were
 fixture-context. Also not demonstrated by that demo: real writes, `.bak`
 creation, ledger execution, runtime suppression behavior — all covered by
 Run B now.
+
+## Round-2 probe hardening receipts (post-review)
+
+- `check-readme.py --checks ",,"` and `--checks ""` → **exit 2** (explicit
+  empty selection rejected; omitted flag = all checks); unknown names →
+  exit 2; duplicates de-duplicated.
+- `dead-links` now validates fragments: same-file `#anchor` and
+  `file.md#anchor` resolved against heading slugs + `{#id}` + `<a id>`
+  anchors of the target — Run B's five probed files re-checked with
+  `--checks dead-links,missing-images,code-fences` → all exit 0.
+- Unit tests: `python -m unittest discover -s tests` → **47 tests OK**
+  (14 new: `--checks` subset/empty/dedup/repo-set combination + fragment
+  same-file/cross-file/`{#id}`/`<a id>`/CJK slug cases).
 
 ## Acceptance mapping
 

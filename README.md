@@ -61,8 +61,7 @@ deliberate suppressions of `writing-humanize`:
 Point your Agent Skills host at this repository root — the root is the
 skill. Then make the two executors resolvable at
 `<skills-root>/<canonical-name>/SKILL.md` per the install actions in
-`UPSTREAM.md`; on the authoring machine `readme-crafter-skill` sits at a
-non-canonical path and `writing-humanize` is not yet installed.
+`UPSTREAM.md`.
 
 ## Quickstart
 
