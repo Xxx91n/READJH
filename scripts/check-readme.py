@@ -224,8 +224,17 @@ def extract_all_link_targets(line: str) -> List[str]:
 
 def _github_slug(heading: str) -> str:
     """Derive a GitHub-style fragment anchor from a heading line body."""
-    t = re.sub(r"`+([^`]*)`+", r"\1", heading)          # inline code
+    # Raw HTML tags outside code spans render no text. Autolinks like
+    # <https://example.com> are not tags — they render as link text.
+    parts = re.split(r"(`+[^`]*`+)", heading)
+    t = "".join(
+        p if p.startswith("`")
+        else re.sub(r"</?[A-Za-z][A-Za-z0-9-]*(?:\s[^<>]*)?/?>", "", p)
+        for p in parts
+    )
+    t = re.sub(r"`+([^`]*)`+", r"\1", t)                # inline code
     t = re.sub(r"!?\[([^\]]*)\]\([^)]*\)", r"\1", t)    # links/images -> text
+    t = t.strip()                                        # heading text is trimmed
     t = re.sub(r"[*~]", "", t)                           # *, ~ emphasis markers
     # Paired leading/trailing underscores are emphasis; interior ones stay
     # (my_func, _private keep their underscores like GitHub's renderer).
@@ -236,10 +245,13 @@ def _github_slug(heading: str) -> str:
 
 
 # Leaf-block boundaries that end a paragraph (GFM precedence): ATX heading,
-# blockquote, fenced code, list item, thematic break, setext underline.
+# blockquote, fenced code, line-start HTML comment, list item (unordered, or
+# ordered "1."/"1)" — only 1 can interrupt a paragraph per GFM list rules),
+# thematic break, and setext underlines (=+, and -/-- too short for a break).
 _BLOCK_BOUNDARY_RE = re.compile(
-    r"(?m)^ {0,3}(?:#{1,6}(?:[ \t]|$)|>|`{3,}|~{3,}|"
-    r"(?:[*+\-]|\d{1,9}[.)])[ \t]|(?:[*_\-][ \t]*){3,}$)"
+    r"(?m)^ {0,3}(?:#{1,6}(?:[ \t]|$)|>|`{3,}|~{3,}|<!--|"
+    r"(?:[*+\-][ \t]|1[.)][ \t])|(?:[*_\-][ \t]*){3,}$|"
+    r"(?:=+|-{1,2})[ \t]*$)"
 )
 
 
@@ -371,7 +383,20 @@ def _rendered_text(content: str) -> Tuple[str, Optional[Tuple[str, int, str]]]:
             continue
         if content.startswith("<!--", i):
             start_line = cur_line
+            line_start = content.rfind("\n", 0, i) + 1
+            is_html_block = (
+                re.fullmatch(r" {0,3}", content[line_start:i]) is not None
+            )
             end = content.find("-->", i + 4)
+            if not is_html_block and (
+                end == -1 or end + 3 > _block_bound(content, i)
+            ):
+                # An inline comment is parsed inside its block: an opener
+                # that can't close within the block is literal text
+                # (GFM type-2 HTML blocks only start at a line start).
+                out.append("<")
+                i += 1
+                continue
             if end == -1:
                 out.append("\n" * content.count("\n", i, n))
                 unclosed = ("comment", start_line, "")

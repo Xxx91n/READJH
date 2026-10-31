@@ -1138,6 +1138,125 @@ class TestFragmentLinks(unittest.TestCase):
             self.assertEqual(code, 0, f"Out:\n{out}")
             self.assertIn("- dead-links: PASS", out)
 
+    def test_span_cannot_pair_across_setext_equals(self):
+        """`unmatched / === / link `x` — the === line is a Setext underline
+        (new block), so the stray ` can't hide the real dead link."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n`unmatched\n===\n[Bad](missing.md) `later`\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertNotEqual(code, 0)
+            self.assertIn("missing.md", out)
+
+    def test_ordered_marker_2_does_not_break_span(self):
+        """'2.' cannot interrupt a paragraph (only '1.' can per GFM) — a
+        multi-line span containing a 2.-led line stays code: no finding."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\nUse `example\n2. [Example](missing.md)\nend` here.\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertEqual(code, 0, f"Out:\n{out}")
+            self.assertIn("- dead-links: PASS", out)
+
+    def test_ordered_marker_1_breaks_span(self):
+        """'1.' CAN interrupt a paragraph — the stray ` pairs nothing, so
+        the real link on the 1. line is checked and FAILs."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\nUse `example\n1. [Bad](missing.md)\nend` here.\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertNotEqual(code, 0)
+            self.assertIn("missing.md", out)
+
+    def test_unclosed_inline_comment_is_literal(self):
+        """An inline <!-- (not at a line start) that never closes within
+        its block is literal text — the real link after it FAILs."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\nText <!-- unclosed inline\n\n[Bad](missing.md)\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertNotEqual(code, 0)
+            self.assertIn("missing.md", out)
+
+    def test_multiline_inline_comment_within_block_still_hides(self):
+        """A mid-line comment that DOES close within its block still
+        hides its contents — commented dead link produces no finding."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\nText <!-- [Gone](missing.md) --> more\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertEqual(code, 0, f"Out:\n{out}")
+            self.assertIn("- dead-links: PASS", out)
+
+    def test_img_tag_heading_slug(self):
+        """## <img src=...> Features renders as 'Features' — #features
+        resolves; the img tag text never enters the slug."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                '# T\n\n[Go](#features)\n\n## <img src="icon.png" width="20"> Features\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertEqual(code, 0, f"Out:\n{out}")
+            self.assertIn("- dead-links: PASS", out)
+
+    def test_autolink_heading_slug(self):
+        """## Setup <https://example.com> — the autolink renders as link
+        text 'https://example.com' → slug 'setup-httpsexamplecom'."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n[Go](#setup-httpsexamplecom)\n\n## Setup <https://example.com>\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertEqual(code, 0, f"Out:\n{out}")
+            self.assertIn("- dead-links: PASS", out)
+
 
 class TestStdlibOnly(unittest.TestCase):
     """Ensure scripts/check-readme.py has no third-party dependencies."""
