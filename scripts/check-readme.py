@@ -290,11 +290,13 @@ def _block_bound(text: str, start: int) -> int:
         le = text.find("\n", start)
         bound = min(bound, n if le == -1 else le)
     seg = text[start:]
-    is_line_start = start == 0 or text[start - 1] == "\n"
     for m2 in _BLOCK_BOUNDARY_RE.finditer(seg):
-        # ^ also matches seg position 0 even when `start` sits mid-line;
-        # that spurious match is not a new block line.
-        if m2.start() == 0 and not is_line_start:
+        # A match at seg position 0 is always spurious: the character at
+        # `start` is what the caller is scanning past — a backtick run that
+        # did not open a fence is an inline code span, not a block start
+        # (GFM: a backtick info string cannot contain backticks), and a
+        # mid-line position is never a block boundary either way.
+        if m2.start() == 0:
             continue
         return min(bound, start + m2.start())
     return bound

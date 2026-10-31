@@ -1535,6 +1535,58 @@ class TestFragmentLinks(unittest.TestCase):
             self.assertNotEqual(code, 0)
             self.assertIn("localhost", out)
 
+    def test_line_start_span_wrapping_link_and_image(self):
+        """```[Example](missing.md) ![M](missing.png)``` on its own line is
+        a code span (a backtick info string cannot contain backticks), so
+        the sample link/image inside are code, not real resources — PASS."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                '# T\n\n```[Example](missing.md) ![M](missing.png)```\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links,missing-images"
+            )
+            self.assertEqual(code, 0, f"Out:\n{out}")
+
+    def test_line_start_span_matches_prefixed_shape(self):
+        """The same span with a 'Use ' prefix already stayed code; the
+        line-start shape must behave identically (no path findings)."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                '# T\n\nUse ```[Example](missing.md) ![M](missing.png)```\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links,missing-images"
+            )
+            self.assertEqual(code, 0, f"Out:\n{out}")
+
+    def test_line_start_span_does_not_mask_real_links(self):
+        """```[Example](missing.md)``` followed by a real dead link: only
+        the real link is reported — the span hides its own code sample
+        but must not swallow or hide what follows."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                '# T\n\n```[Example](missing.md)```\n\n[real](real-missing.md)\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links,missing-images"
+            )
+            self.assertNotEqual(code, 0)
+            self.assertIn("real-missing.md", out)
+            self.assertNotIn("'missing.md'", out)
+
 
 class TestStdlibOnly(unittest.TestCase):
     """Ensure scripts/check-readme.py has no third-party dependencies."""
