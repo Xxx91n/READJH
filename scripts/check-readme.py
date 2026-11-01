@@ -538,16 +538,21 @@ def _markdown_anchor_ids(path: Path) -> Optional[set]:
         r"""([^\s=/>]+)\s*(?:=\s*("[^"]*"|'[^']*'|[^\s>]+))?"""
     )
     ids = set()
-    # GFM raw-HTML tag boundary: the tag name comes immediately after '<'
-    # (prose like "< b" never opens a candidate), and quoted values only
-    # appear inside name=value attributes — so a stray '<' can't join a
-    # later "quoted" fragment into a fake tag, while a real tag's
-    # quoted '<'/'>' stays inside its own brackets.
+    # GFM raw-HTML tag boundary, per the CommonMark raw-HTML grammar: a
+    # tag name is an ASCII letter followed by letters/digits/hyphens;
+    # attributes are name[=value] where the name starts with an ASCII
+    # letter, '_', or ':' and an unquoted value excludes whitespace,
+    # quotes, '=', '<', '>', and backticks. A malformed run (a stray
+    # '<' in prose, an attribute name containing '<') fails the tag
+    # instead of consuming the next real tag — 'Vec<u8 then <a
+    # name="legacy">' leaves the anchor visible.
     tag_re = re.compile(
-        r"""</?[A-Za-z][^\s/>]*(?:\s+[^\s=/>]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]*))?)*\s*/?>"""
+        r"""</?[A-Za-z][A-Za-z0-9-]*"""
+        r"""(?:\s+[A-Za-z_:][A-Za-z0-9_.:-]*"""
+        r"""(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'=<>`]+))?)*\s*/?>"""
     )
     for tag in tag_re.findall(_strip_inline_code(html_visible)):
-        m = re.match(r"</?([a-zA-Z][^\s/>]*)", tag)
+        m = re.match(r"</?([a-zA-Z][a-zA-Z0-9-]*)", tag)
         if not m:
             continue
         tag_name = m.group(1).lower()

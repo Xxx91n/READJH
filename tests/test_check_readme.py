@@ -1708,6 +1708,25 @@ class TestFragmentLinks(unittest.TestCase):
             )
             self.assertEqual(code, 0, f"Out:\n{out}")
 
+    def test_vec_like_run_cannot_merge_later_anchor(self):
+        """'Vec<u8 then <a name="legacy">' must not merge into one fake
+        'u8' tag that swallows name="legacy" — under the GFM tag grammar
+        the run fails before the real <a> tag, so the anchor registers
+        and [x](#legacy) resolves."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                '# T\n\nRequires Vec<u8 then <a name="legacy"></a> works.\n\n'
+                '[x](#legacy)\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertEqual(code, 0, f"Out:\n{out}")
+
     def test_mid_heading_underscore_emphasis_slug(self):
         """## Use _this_ flag: mid-heading _x_ emphasis resolves to the
         GitHub-style #use-this-flag anchor, and the literal
