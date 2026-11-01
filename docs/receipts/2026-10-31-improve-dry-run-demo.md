@@ -223,9 +223,9 @@ inventory above. SKILL §3 Phase 4 step 5 requires the per-span form
 not a contract exemption. Delivery report:
 
 ```text
-[Conclusion]: PASS — rewrite --dry-run on <repo-root>\README.md (intensity tier: standard); rebuild plan produced, zero writes confirmed; findings: HIGH 0 / MEDIUM 0 / LOW 0.
-[Receipts]: scan-project.py exit 0; check-readme.py exit 0 (0 findings); git status --porcelain --ignored identical pre/post → zero writes.
-[Residual risk]: executed (non-dry) rewrite not demonstrated; per-span LANGUAGE plan not retained — required even in dry-run, so the plan-form requirement is undemonstrated; zero-write evidence is git-status-only (full tree SHA-256 compare was not retained and cannot be reconstructed for Run C); README commands never executed.
+[Conclusion]: INCOMPLETE — rewrite --dry-run on <repo-root>\README.md (intensity tier: standard); rebuild plan produced and spot checks clean, but SKILL's dry-run zero-write verification requires the pre/post file-tree path + SHA-256 compare, which was not retained — git status alone cannot rule out changes inside pre-existing dirty/ignored files; findings: HIGH 0 / MEDIUM 0 / LOW 0.
+[Receipts]: scan-project.py exit 0; check-readme.py exit 0 (0 findings); git status --porcelain --ignored identical pre/post (partial zero-write evidence only — no tree SHA-256 compare).
+[Residual risk]: executed (non-dry) rewrite not demonstrated; per-span LANGUAGE plan not retained — required even in dry-run, so the plan-form requirement is undemonstrated; zero-write verification incomplete (see [Conclusion]); README commands never executed.
 ```
 
 ## Original fixture demo (superseded, kept with caveats)
