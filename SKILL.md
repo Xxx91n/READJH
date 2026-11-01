@@ -254,6 +254,14 @@ states each phase's behavior per mode.
      `git -C "<readme-dir>" rev-parse --show-toplevel` when `<readme>` is inside
      a Git worktree, so a nested `docs/README.md` binds to the repository root;
      (3) the parent directory of `<readme>`.
+   - **Self-write guard (write modes):** resolve `<readme>` and every
+     write-set member through symlinks (`.resolve()` semantics) before
+     planning. If a resolved write target is this skill's own `SKILL.md`,
+     anything under `references/` or `scripts/` of this skill, or inside a
+     resolved upstream skill directory (the trusted dependency paths
+     resolved by the pointer contract), stop `BLOCKED` — no writes, no
+     `.bak`. The skill and its dependencies are never their own rewrite
+     targets.
    - Git state: record whether `<repo-root>` is inside a Git worktree
      (`git -C "<repo-root>" rev-parse --is-inside-work-tree` prints `true`),
      whether `<readme>` is tracked (`git -C "<repo-root>" ls-files
