@@ -80,7 +80,7 @@ Once installed, invoke the skill by name on a repository:
 SKILL.md            # the skill (model-invoked): pipeline + contracts
 references/         # orchestration-layer rules + distilled supplements
 scripts/            # check-readme.py — static probe, stdlib-only python3
-tests/              # pytest suite + fixtures for the probe
+tests/              # unittest suite + fixtures for the probe
 UPSTREAM.md         # dependencies, pointer contract, deviations
 NOTICE              # upstream credits and licenses
 GLOSSARY.md         # domain language + banned synonyms

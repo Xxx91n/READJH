@@ -75,7 +75,7 @@ Kiterlin）、`academic-humanizer`（声明↔凭据纪律）、`humanize-readme
 SKILL.md            # 技能本体（模型调用）：流程 + 契约
 references/         # 编排层规则 + 提炼补充规则
 scripts/            # check-readme.py —— 静态探针，只用标准库的 python3
-tests/              # 探针的 pytest 测试与 fixtures
+tests/              # 探针的 unittest 测试与 fixtures
 UPSTREAM.md         # 依赖、指针契约、偏差记录
 NOTICE              # 上游致谢与许可证
 GLOSSARY.md         # 领域术语 + 禁用同义词
