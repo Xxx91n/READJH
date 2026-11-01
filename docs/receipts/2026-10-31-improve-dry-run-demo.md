@@ -50,7 +50,7 @@ contemporaneous plan receipt:
 | Anchor (`file:lines`) | Tier-allowed transform | Intended before → after shape |
 |---|---|---|
 | `README.md:18` | abstract-noun chain → artifact names; passive → active | "are this project's self-built moat and glue" → "are built here"; "Macro + micro engineering-content audit for git-healthy repositories" → "6F audits engineering content at macro and micro scale inside repositories with healthy git history" |
-| `README.md:33` | drop tracker IDs; close defensive parenthetical early; merge badge disclosure | "(Micro-A productionized — #85②, D-204③④)" → "(Micro-A productionized)"; "(install & acceptance details in [engine/README.md](engine/README.md); the official-catalog…" → "(install & acceptance details in [engine/README.md](engine/README.md)); the official-catalog…"; + "Badges show only what is true today (the engine-ci badge was mounted 2026-09-22 after the first green main run)" |
+| `README.md:33` | drop tracker IDs; close defensive parenthetical early; merge badge disclosure | "(Micro-A productionized — #85②, D-204③④)" → "(Micro-A productionized)"; "(install & acceptance details in `engine/README.md`; the official-catalog…" → "(install & acceptance details in `engine/README.md`); the official-catalog…"; + "Badges show only what is true today (the engine-ci badge was mounted 2026-09-22 after the first green main run)" |
 | `README.md:37` | drop defensive aside | "(the five-scale scope stands)" removed |
 | `README.md:41,43` | drop tracker IDs in capability table | "(…, #51)", "(…, D-205)", "(D-034③ Scorecard…)", "(…— #85② closed, D-204③④)" → removed |
 | `README.md:47` | meta-honesty claim → plain disclosure | leading "Honest preview labeling is a decision, not decoration:" removed — the sentence states the fact directly |
@@ -197,35 +197,59 @@ Delivery report:
 
 ## Run C — `rewrite --dry-run` on the READJH README (plan only)
 
-**Sample:** `<repo-root>\README.md` at HEAD (real repo, real context).
-`--dry-run`: rebuild plan only.
+**Superseded 2026-11-01 by Run C2 below.** The original run (2026-10-31)
+produced a rebuild plan and clean spot checks but did not retain the
+required pre/post file-tree SHA-256 compare or the per-span LANGUAGE plan
+— under SKILL §3 Phase 5 its zero-write verification could not be
+certified, so no valid delivery status ever applied to it. Kept here only
+as the history of why Run C2 was needed; the old receipt text is removed
+rather than re-graded.
+
+## Run C2 — `rewrite --dry-run` on the READJH README (2026-11-01, complete receipts)
+
+**Sample:** `<repo-root>\README.md` at branch `ticket-6-improve-rewrite-language`
+HEAD `f522bcd`, real Git worktree (50 files hashed for the baseline).
+`--dry-run`: rebuild plan and receipts only, no writes.
+
+**ROUTE / TRUTH.**
 
 ```text
 scan-project.py <repo-root>   → exit 0 (no README-to-repo mismatches)
-check-readme.py README.md           → exit 0, 0 findings
-git status --porcelain --ignored pre/post → identical (zero writes; the two
-" M" entries are this ticket's uncommitted rework edits, present pre-run)
+baseline: SHA-256 of all 50 repo files + git status --porcelain --ignored
+pre  status: !! .coverage, !! .pytest_cache/, !! scripts/__pycache__/,
+             !! tests/__pycache__/
 ```
 
-Plan (not executed): rebuild `README.md` to the skill/tool skeleton — name +
-one-liner, install/prereqs, three modes + `--dry-run` quickstart, phase flow,
-docs map (spec/ADR/UPSTREAM/GLOSSARY pointers). Freeze-zone inventory for the
-rebuild: fenced command blocks (`python3 scripts/check-readme.py …`), file
-paths (`SKILL.md`, `references/`, `docs/spec/…`), badge row, version/SHA
-strings, LICENSE text — each stays byte-identical through any wording pass.
-**Not demonstrated:** an executed (non-dry) `rewrite`; that remains unverified.
+**Plan (not executed).** Rebuild `README.md` to the skill/tool skeleton —
+name + one-liner, install/prereqs, three modes + `--dry-run` quickstart,
+phase flow, docs map (spec/ADR/UPSTREAM/GLOSSARY pointers). Freeze-zone
+inventory: fenced command blocks (`python3 scripts/check-readme.py …`),
+file paths (`SKILL.md`, `references/`, `docs/spec/…`), badge row,
+version/SHA strings, LICENSE text — byte-identical through any wording
+pass. Per-span LANGUAGE plan (SKILL §3 Phase 4 step 5 form):
 
-LANGUAGE plan detail: `rewrite` rebuilds to the skeleton, so this demo
-retained the plan at scope level — allowed transforms and the freeze-zone
-inventory above. SKILL §3 Phase 4 step 5 requires the per-span form
-(anchor line-range, transform, before → after shape) even under
-`--dry-run`; that artifact was not retained here — a demonstration gap,
-not a contract exemption. Delivery report:
+| Anchor (`<readme>:lines`) | Tier-allowed transform | Intended before → after shape |
+|---|---|---|
+| `README.md:14–37` (`## What it does`) | compress meta-commentary → plain verbs | feature bullets keep repo-backed facts; phrasing like "under freeze-zone guardrails" stays only if factual, no added flourish |
+| `README.md:66–78` (`## Quickstart`) | split compound commands → one-per-line with expected output | each `python3 scripts/check-readme.py …` invocation gets its own fenced block + result line |
+| `README.md:93–96` (`## Status`) | hedge → plain disclosure | status stated as fact table (branch, checks, known gaps) rather than evaluative prose |
+
+**VERIFY.**
 
 ```text
-[Conclusion]: PASS (with unverified zero-write evidence) — rewrite --dry-run on <repo-root>\README.md (intensity tier: standard); rebuild plan produced and probes clean, but the pre/post file-tree path + SHA-256 compare SKILL requires was not retained — git status alone cannot rule out changes inside pre-existing dirty/ignored files; findings: HIGH 0 / MEDIUM 0 / LOW 0.
-[Receipts]: scan-project.py exit 0; check-readme.py exit 0 (0 findings); git status --porcelain --ignored identical pre/post (partial zero-write evidence only — no tree SHA-256 compare).
-[Residual risk]: executed (non-dry) rewrite not demonstrated; per-span LANGUAGE plan not retained — required even in dry-run, so the plan-form requirement is undemonstrated; zero-write verification incomplete (see [Conclusion]); README commands never executed.
+python -B scripts/check-readme.py <repo-root>\README.md --repo-root <repo-root>
+→ exit 0 — PASS, 0 findings (all 6 single-repo checks; repo-set N/A)
+post-run tree: SHA-256 of all 50 files identical to baseline — zero writes
+post status:   !! .coverage, !! .pytest_cache/, !! scripts/__pycache__/,
+               !! tests/__pycache__/  — identical to pre-run
+```
+
+Delivery report:
+
+```text
+[Conclusion]: PASS — rewrite --dry-run on <repo-root>\README.md (intensity tier: standard); rebuild plan + per-span LANGUAGE plan produced, zero writes verified; findings: HIGH 0 / MEDIUM 0 / LOW 0.
+[Receipts]: scan-project.py exit 0; check-readme.py exit 0 (0 findings); 50-file SHA-256 snapshot identical pre/post; git status --porcelain --ignored identical pre/post → zero writes.
+[Residual risk]: executed (non-dry) rewrite not demonstrated; README commands never executed; Run C2's per-span plan was produced as part of this receipt demonstration (plan-level, not a second live run of the executor's own planning tool).
 ```
 
 ## Original fixture demo (superseded, kept with caveats)
@@ -298,4 +322,4 @@ Run B now.
   step 1; **runtime-held in Run B** (no journal files; no injected voice).
 - Demo: `improve --dry-run` plan + zero writes — **Run A** (real repo, probe
   clean, tree identical). Executed-write receipt — **Run B**; `rewrite` —
-  plan-level only (Run C), executed `rewrite` not demonstrated.
+  plan-level only (Run C2, complete receipts), executed `rewrite` not demonstrated.
