@@ -1690,6 +1690,25 @@ class TestFragmentLinks(unittest.TestCase):
             self.assertNotEqual(code, 0)
             self.assertIn("#ghost", out)
 
+    def test_mid_heading_underscore_emphasis_slug(self):
+        """## Use _this_ flag: mid-heading _x_ emphasis resolves to the
+        GitHub-style #use-this-flag anchor, and the literal
+        #use-_this_-flag must FAIL."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                '# T\n\n## Use _this_ flag\nx\n\n[a](#use-this-flag) and [b](#use-_this_-flag).\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertNotEqual(code, 0)
+            self.assertIn("#use-_this_-flag", out)
+            self.assertNotIn("'#use-this-flag'", out)
+
 
 class TestStdlibOnly(unittest.TestCase):
     """Ensure scripts/check-readme.py has no third-party dependencies."""

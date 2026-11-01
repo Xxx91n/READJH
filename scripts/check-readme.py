@@ -247,7 +247,11 @@ def _github_slug(heading: str) -> str:
     parts = re.split(r"(`+[^`]*`+)", heading)
     t = "".join(
         p if p.startswith("`")
-        else re.sub(r"</?[A-Za-z][A-Za-z0-9-]*(?:\s[^<>]*)?/?>", "", p)
+        else re.sub(
+            r"(?<![\w])_+([^_]+?)_+(?![\w])",
+            r"\1",
+            re.sub(r"</?[A-Za-z][A-Za-z0-9-]*(?:\s[^<>]*)?/?>", "", p),
+        )
         for p in parts
     )
     t = t.strip()                                        # heading text is trimmed
