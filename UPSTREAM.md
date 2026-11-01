@@ -58,10 +58,15 @@ Rules, inherited from ADR-0001:
 
 ### Executors (resolved through the pointer contract)
 
-| canonical name | upstream URL | license | required files | search paths | observed location (2026-10-30) | state |
+| canonical name | upstream URL | license | required files | search paths | observed location (first recorded 2026-10-30; row events dated individually) | state |
 |---|---|---|---|---|---|---|
-| `readme-crafter-skill` | https://github.com/linhai0872/readme-crafter-skill | MIT | `SKILL.md`, `references/repo-integrity.md` (in `references/`), `scripts/scan-project.py`, `scripts/scan_project_readme.py`, `scripts/scan_project_support.py` | contract list above | `C:\Users\Administrator\.agents\skills\git\readme\readme-crafter-skill-main\`, resolved at canonical `C:\Users\Administrator\.agents\skills\readme-crafter-skill` via junction (created 2026-10-31 for Ticket #5) | installed — canonical junction in place; target is a captured copy (not a Git checkout), so no live revision hash; contract resolution verified 2026-10-31 |
-| `writing-humanize` | https://github.com/risadams/ink-and-agency (`skills/writing-humanize/`) | MIT (skill `license:` field; repo LICENSE MIT, fork notice credits mattpocock/skills) | `SKILL.md`, `references/patterns.md`, `agents/openai.yaml` | contract list above | — | **not installed locally**; clone required (see Install actions) |
+| `readme-crafter-skill` | https://github.com/linhai0872/readme-crafter-skill | MIT | `SKILL.md`, `references/repo-integrity.md` (in `references/`), `scripts/scan-project.py`, `scripts/scan_project_readme.py`, `scripts/scan_project_support.py` | contract list above | `<user-profile>\.agents\skills\git\readme\readme-crafter-skill-main\`, resolved at canonical `<user-profile>\.agents\skills\readme-crafter-skill` via junction (created 2026-10-31 for Ticket #5) | installed — canonical junction in place; target is a captured copy (not a Git checkout), so no live revision hash; contract resolution verified 2026-10-31 |
+| `writing-humanize` | https://github.com/risadams/ink-and-agency (`skills/writing-humanize/`) | MIT (skill `license:` field; repo LICENSE MIT, fork notice credits mattpocock/skills) | `SKILL.md`, `references/patterns.md`, `agents/openai.yaml` | contract list above | `<user-profile>\.agents\repos\ink-and-agency\` @ `e1f0a00e06d55c00502e0ccbea79ab453e7fb118`, resolved at canonical `<user-profile>\.agents\skills\writing-humanize` via junction (created 2026-10-31 for Ticket #6) | installed — canonical junction in place; contract resolution verified 2026-10-31 (frontmatter `name:` + 3/3 required files) |
+
+`<user-profile>` / `<local-repo>` in the `observed location` cells are
+redacted machine-specific roots on the authoring host (account and
+workspace layout kept out of the record); canonical skill names, junction
+structure, and revision hashes are retained verbatim.
 
 Upstream commits observed at authoring time: `readme-crafter-skill`
 `08db7782836c542d9b597860da33fcc159e36433`, `ink-and-agency`
@@ -75,11 +80,11 @@ advancing either upstream checkout.
 
 ### Distilled rule sources (read into context, never invoked)
 
-| canonical name | upstream URL | license | required files | search paths | observed location (2026-10-30) | state |
+| canonical name | upstream URL | license | required files | search paths | observed location (first recorded 2026-10-30; row events dated individually) | state |
 |---|---|---|---|---|---|---|
-| `sepia` | local mirror only — no canonical public upstream recorded | MIT (`license:` field in SKILL.md) | `SKILL.md`, `references/professional-pass.md`, `references/style-pass.md`, `references/languages/` (zh calibration) | n/a — distilled, not resolved | `D:\Aworker\research\ALL\.agents\skills\sepia\`, mirror commit `365185bec8c5eae8711ebd56b4f4556759f685b2` | present — source of truth for distilled rules; **no runtime dep** |
-| `anti-defensive-writing` (EN, Kiterlin) | https://github.com/Kiterlin/anti-defensive-writing | MIT | `SKILL.md` | n/a — distilled | `D:\Aworker\research\ALL\vendor\anti-defensive\`, mirror commit `365185bec8c5eae8711ebd56b4f4556759f685b2` | present — distilled only. Disambiguate **by path**: a second same-named source exists at `vendor\anti-defensive-skill\` and is not used |
-| `academic-humanizer` | https://github.com/AIScientists-Dev/academic-humanizer | MIT | `SKILL.md` | n/a — distilled | `D:\Aworker\research\ALL\vendor\academic-humanizer\`, mirror commit `365185bec8c5eae8711ebd56b4f4556759f685b2` | present — distilled only |
+| `sepia` | local mirror only — no canonical public upstream recorded | MIT (`license:` field in SKILL.md) | `SKILL.md`, `references/professional-pass.md`, `references/style-pass.md`, `references/languages/` (zh calibration) | n/a — distilled, not resolved | `<local-repo>\research\ALL\.agents\skills\sepia\`, mirror commit `365185bec8c5eae8711ebd56b4f4556759f685b2` | present — source of truth for distilled rules; **no runtime dep** |
+| `anti-defensive-writing` (EN, Kiterlin) | https://github.com/Kiterlin/anti-defensive-writing | MIT | `SKILL.md` | n/a — distilled | `<local-repo>\research\ALL\vendor\anti-defensive\`, mirror commit `365185bec8c5eae8711ebd56b4f4556759f685b2` | present — distilled only. Disambiguate **by path**: a second same-named source exists at `vendor\anti-defensive-skill\` and is not used |
+| `academic-humanizer` | https://github.com/AIScientists-Dev/academic-humanizer | MIT | `SKILL.md` | n/a — distilled | `<local-repo>\research\ALL\vendor\academic-humanizer\`, mirror commit `365185bec8c5eae8711ebd56b4f4556759f685b2` | present — distilled only |
 | `humanize-readme` | https://github.com/b4r7x/agent-skills (`humanize-readme/`) | MIT | `SKILL.md` (rules reference only — **never executed**, see deviations) | n/a — not resolved, read at the upstream repo | — | not installed locally; rules reference only. Upstream commit `292bad1458a30384e9e6eb3d46ba24428d7c5618` |
 
 ## Install actions
@@ -107,10 +112,12 @@ What a fresh machine needs so the contract resolves:
     *(already created — `Get-Item` reports LinkType Junction → `…\git\readme\readme-crafter-skill-main`)*
   - or rename the directory in place to `readme-crafter-skill` at the skills
     root (loses the `git\readme` grouping).
-- **`writing-humanize`** — not installed. Clone the repo to a stable location
-  (junctions into temp dirs break on cleanup), check out the recorded commit
-  (`e1f0a00e06d55c00502e0ccbea79ab453e7fb118`), and expose only the skill
-  directory at the canonical name:
+- **`writing-humanize`** — acquire the upstream repo, check out the recorded
+  commit (`e1f0a00e06d55c00502e0ccbea79ab453e7fb118`), and expose only the
+  skill directory at the canonical name. On the authoring machine this was
+  applied on 2026-10-31 (Ticket #6): cloned to
+  `%USERPROFILE%\.agents\repos\ink-and-agency`, junction created. The options
+  remain documented for a fresh machine:
   ```cmd
   mkdir "%USERPROFILE%\.agents\repos" "%USERPROFILE%\.agents\skills" 2>nul
   git clone https://github.com/risadams/ink-and-agency "%USERPROFILE%\.agents\repos\ink-and-agency" && git -C "%USERPROFILE%\.agents\repos\ink-and-agency" checkout e1f0a00e06d55c00502e0ccbea79ab453e7fb118 && mklink /J "%USERPROFILE%\.agents\skills\writing-humanize" "%USERPROFILE%\.agents\repos\ink-and-agency\skills\writing-humanize"
