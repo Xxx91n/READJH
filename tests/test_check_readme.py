@@ -1624,6 +1624,72 @@ class TestFragmentLinks(unittest.TestCase):
             )
             self.assertEqual(code, 0, f"Out:\n{out}")
 
+    def test_quoted_less_than_in_attribute_keeps_anchor(self):
+        """<a title="Node < 20" id="legacy">: a '<' inside a quoted
+        attribute value is legal raw-HTML — the tag is still one tag, the
+        id registers, and [x](#legacy) must resolve."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                '# T\n\n<a title="Node < 20" id="legacy"></a>\n\n[x](#legacy)\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertEqual(code, 0, f"Out:\n{out}")
+
+    def test_quoted_less_than_single_quotes_keeps_anchor(self):
+        """<a name='legacy' title='a < b'>: same protection with
+        single-quoted values — the anchor registers."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                "# T\n\n<a name='legacy' title='a < b'></a>\n\n[x](#legacy)\n\n## Limitations\nNone.\n",
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertEqual(code, 0, f"Out:\n{out}")
+
+    def test_quoted_less_than_multiline_tag_keeps_anchor(self):
+        """A tag spanning newlines with '<' inside a quoted attribute is
+        still one tag — the id registers."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                '# T\n\n<a title="Node < 20"\n   id="legacy"></a>\n\n[x](#legacy)\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertEqual(code, 0, f"Out:\n{out}")
+
+    def test_attribute_value_still_cannot_fake_anchor(self):
+        """<span title='id="ghost"'>: the quote-aware boundary must not
+        resurrect the old attr-value forgery — #ghost still FAILs."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                '# T\n\n<span title=\'id="ghost"\'></span>\n\n[x](#ghost)\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertNotEqual(code, 0)
+            self.assertIn("#ghost", out)
+
 
 class TestStdlibOnly(unittest.TestCase):
     """Ensure scripts/check-readme.py has no third-party dependencies."""
