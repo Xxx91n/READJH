@@ -215,7 +215,8 @@ Git worktree (50 files hashed for the baseline).
 **ROUTE / TRUTH.**
 
 ```text
-scan-project.py <repo-root>   → exit 0 (no README-to-repo mismatches)
+python -s -E -B -X utf8 ~/.agents/skills/readme-crafter-skill/scripts/scan-project.py <repo-root>
+→ exit 0 (no README-to-repo mismatches)
 baseline: SHA-256 of all 50 repo files + git status --porcelain --ignored
 pre  status: !! .coverage, !! .pytest_cache/, !! scripts/__pycache__/,
              !! tests/__pycache__/
