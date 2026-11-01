@@ -688,9 +688,9 @@ reply locked to **at most three lines**
   run with no moves states `Migration ledger: none` on the `[Conclusion]`
   line — inside one of the three lines, never as an extra fourth line.
 
-| Moved span (heading, `<readme>` lines) | Destination file | Re-based targets (`original → new`) |
-|---|---|---|
-| `## Threat model` (lines 210–248) | `docs/threat-model.md` | `docs/spec.md → ../docs/spec.md` |
+| Moved span (heading, `<readme>` lines) | Destination file | Re-based targets (`original → new`) | Inbound anchor remaps (`original → new`) |
+|---|---|---|---|
+| `## Threat model` (lines 210–248) | `docs/threat-model.md` | `docs/spec.md → ../docs/spec.md` | `#threat-model → docs/threat-model.md#threat-model` |
 
 - **Distinguish `FAIL` from `BLOCKED`:** When `ROUTE` resolves a trusted
   `readme-crafter-skill`, `scan-project.py` completes its scan (`exit 0`, or
