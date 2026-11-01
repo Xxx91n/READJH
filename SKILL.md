@@ -424,8 +424,8 @@ a `HIGH` / `MEDIUM` / `LOW` finding with zero README commands executed.
    - **Git-recoverable check, per member:** an existing file is
      Git-recoverable only when it is tracked **and** clean. Tracked is
      proven explicitly — `git --literal-pathspecs -C "<repo-root>"
-     ls-files --error-unmatch -- <repo-relative-path>` must succeed for
-     the member. `ls-files` treats the argument as a **pathspec**, not a
+     ls-files --error-unmatch -- "<repo-relative-path>"` must succeed for
+     the member (quoted, so paths containing spaces stay one argument). `ls-files` treats the argument as a **pathspec**, not a
      literal path: `docs/[1]/guide.md` globs onto `docs/1/guide.md`, so a
      plain `--error-unmatch` query can prove a different tracked file and
      wrongly clear the `.bak` skip — `--` ends option parsing but does not
