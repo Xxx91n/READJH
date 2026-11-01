@@ -1690,6 +1690,24 @@ class TestFragmentLinks(unittest.TestCase):
             self.assertNotEqual(code, 0)
             self.assertIn("#ghost", out)
 
+    def test_stray_less_than_plus_quoted_fragment_no_fake_tag(self):
+        """'a < b \"c\" > d' before <a name="legacy">: a stray '<' plus a
+        later quoted fragment must not assemble a fake tag — the real
+        anchor still registers and [x](#legacy) resolves."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                '# T\n\na < b "c" > d\n\n<a name="legacy"></a>\n\n'
+                '[x](#legacy)\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertEqual(code, 0, f"Out:\n{out}")
+
     def test_mid_heading_underscore_emphasis_slug(self):
         """## Use _this_ flag: mid-heading _x_ emphasis resolves to the
         GitHub-style #use-this-flag anchor, and the literal

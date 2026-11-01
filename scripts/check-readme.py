@@ -538,13 +538,16 @@ def _markdown_anchor_ids(path: Path) -> Optional[set]:
         r"""([^\s=/>]+)\s*(?:=\s*("[^"]*"|'[^']*'|[^\s>]+))?"""
     )
     ids = set()
-    # Quote-aware tag boundary: a match may not cross an unquoted '<' or
-    # '>', but a '<' inside a quoted attribute value is legal raw-HTML
-    # (GFM) — "Node < 20" in prose must not swallow a following <a name>,
-    # while <a title="Node < 20" id="x"> is still one real tag.
-    tag_re = re.compile(r"""<(?:[^<>"']|"[^"]*"|'[^']*')+>""")
+    # GFM raw-HTML tag boundary: the tag name comes immediately after '<'
+    # (prose like "< b" never opens a candidate), and quoted values only
+    # appear inside name=value attributes — so a stray '<' can't join a
+    # later "quoted" fragment into a fake tag, while a real tag's
+    # quoted '<'/'>' stays inside its own brackets.
+    tag_re = re.compile(
+        r"""</?[A-Za-z][^\s/>]*(?:\s+[^\s=/>]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]*))?)*\s*/?>"""
+    )
     for tag in tag_re.findall(_strip_inline_code(html_visible)):
-        m = re.match(r"</?\s*([a-zA-Z][^\s/>]*)", tag)
+        m = re.match(r"</?([a-zA-Z][^\s/>]*)", tag)
         if not m:
             continue
         tag_name = m.group(1).lower()
