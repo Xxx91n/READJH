@@ -65,8 +65,8 @@ Checklist (`references/checklist.md` §§1–8): §1 PASS (probe + scanner recei
 ## 5. Three-line delivery report
 
 ```text
-[Conclusion]: FAIL — audit on D:/Aworker/EgressAPIKEY/README.md (intensity tier: lite); audit completed; findings: HIGH 0 / MEDIUM 2 / LOW 4; 0 files modified.
-[Receipts]: scan-project.py -> exit 0 (1 literal-placeholder ref inside a comment); check-readme.py README.md -> exit 0 (6/6 PASS), README_CN.md -> exit 0 (6/6 PASS), repo-set: N/A; MEDIUM: unowned synced-with anchors (README.md:1, README_CN.md:1); MEDIUM: readme-crafter scaffolding comments (README.md:95-101, README_CN.md:95-101); LOW: scanner literal-placeholder ref (:96-100), Node-20 floor unbacked (:106), repeated fetch_resin span (:23,25,136), shallow-scan caveat; tree snapshot 33801 files identical pre/post, git status identical.
+[Conclusion]: FAIL — audit on D:/Aworker/EgressAPIKEY/README.md (intensity tier: lite); audit completed; findings: HIGH 0 / MEDIUM 2 / LOW 3; 0 files modified.
+[Receipts]: scan-project.py -> exit 0 (1 literal-placeholder ref inside a comment); check-readme.py README.md -> exit 0 (6/6 PASS), README_CN.md -> exit 0 (6/6 PASS), repo-set: N/A; MEDIUM: unowned synced-with anchors (README.md:1, README_CN.md:1); MEDIUM: readme-crafter scaffolding comments (README.md:95-101, README_CN.md:95-101); LOW: scanner literal-placeholder ref (:96-100), Node-20 floor unbacked (:106), repeated fetch_resin span (:23,25,136); tree snapshot 33801 files identical pre/post, git status identical.
 [Residual risk]: README commands need manual verification — pnpm install/build, cargo build --release …egressapikey-headless, bash scripts/fetch_resin.sh, pnpm tauri dev; external shields.io badge URLs and github.com release/RESIN links unfetched offline.
 ```
 

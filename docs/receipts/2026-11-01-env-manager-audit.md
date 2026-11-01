@@ -62,7 +62,7 @@ Checklist (§§1–8): §1 PASS; §2 PASS (claims bound; the 3 env-var flags con
 
 ```text
 [Conclusion]: FAIL — audit on D:/Aworker/env-manager/README.md (intensity tier: lite); audit completed; findings: HIGH 0 / MEDIUM 1 / LOW 4; 0 files modified.
-[Receipts]: scan-project.py -> exit 0 (3 provider-auth env vars flagged vs absent .env.example — context artifact); check-readme.py README.md -> exit 0 (6/6 PASS), repo-set: N/A; MEDIUM: clustered marketing vocabulary ("Adapts seamlessly to every environment" :17, "modern, lightweight" :15); LOW: 18+-command count doc-level, boundary restated ~2x (:83-88), boundary table pre-Install fold (:90-112), untracked .workbuddy/ in baseline; snapshot 29706 files identical pre/post.
+[Receipts]: scan-project.py -> exit 0 (3 provider-auth env vars flagged vs absent .env.example — context artifact); check-readme.py README.md -> exit 0 (6/6 PASS), repo-set: N/A; MEDIUM: clustered marketing vocabulary ("Adapts seamlessly to every environment" :17, "modern, lightweight" :15); LOW: 18+-command count doc-level (:58), boundary restated ~2x (:83-88), boundary table pre-Install fold (:90-112), provider-auth env-var scanner flag (context artifact vs absent .env.example); context notes (not findings): untracked .workbuddy/ in baseline; snapshot 29706 files identical pre/post.
 [Residual risk]: README commands need manual verification — env-manager-cli.exe verbs, npm ci, node scripts/build.mjs, demo capture script; external shields.io + dotnet.microsoft.com links unfetched offline; "18+ commands" count asserted by AGENTS.cli.md not re-counted.
 ```
 

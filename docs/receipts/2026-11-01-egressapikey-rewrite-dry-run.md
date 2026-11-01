@@ -23,7 +23,7 @@ Write mode resolves both executors (audit receipt §1, re-verified):
 
 ## `TRUTH`
 
-Inherited from the same-day audit (same HEAD, same tree hash): `scan-project.py` exit 0 — 0 real mismatches; claims verified (`RESIN_PROXY_TRANSPORT_*` at `sidecar.rs:498-507`, `allocation_policy` trio at `strategy_engine.rs:696-701`, `include_intel_mac` at `ci.yml:31,227`, `v1.2.0` manifest, `14200` at `headless_security.rs`, `resin/` in `.gitignore:94`). Findings carried: no HIGH; the generation-trace MEDIUMs + the literal-placeholder/unbacked-floor LOWs (audit §3) — all resolved by the plan below.
+Inherited from the same-day audit (same HEAD, same tree hash): `scan-project.py` exit 0 — 0 real mismatches; claims verified (`RESIN_PROXY_TRANSPORT_*` at `sidecar.rs:498-507`, `allocation_policy` trio at `strategy_engine.rs:696-701`, `include_intel_mac` at `ci.yml:31,227`, `v1.2.0` manifest, `14200` at `headless_security.rs`, `resin/` in `.gitignore:94`). Findings carried: no HIGH; the generation-trace MEDIUMs + the literal-placeholder/unbacked-floor LOWs (audit §3) — addressed by the plan below; **not resolved in the target** until the plan is applied and re-verified (this run is `--dry-run` — zero writes).
 
 ## `RESTRUCTURE` plan (not executed)
 
@@ -47,8 +47,8 @@ Inherited from the same-day audit (same HEAD, same tree hash): `scan-project.py`
 
 | Moved span (heading, `<readme>` lines) | Destination file | Re-based targets (`original → new`) | Inbound anchor remaps (`original → new`) |
 |---|---|---|---|
-| `<details>` Mermaid source block (README.md:38–64) | `docs/architecture/ARCHITECTURE.md` (existing — merged append) | `assets/readme/architecture.svg → ../assets/readme/architecture.svg` (the `<code>` path mention inside `summary` travels verbatim; only the relative link/image targets re-base) | none (no inbound links to the details block) |
-| `<details>` Mermaid source block (README_CN.md:38–64) | `docs/architecture/ARCHITECTURE.md` (zh section) | same re-base as EN | none |
+| `<details>` Mermaid source block (README.md:38–64) | `docs/architecture/ARCHITECTURE.md` (existing — merged append) | `assets/readme/architecture.svg → ../../assets/readme/architecture.svg` (destination sits two levels below root; the `<code>` path mention inside `summary` travels verbatim; only the relative link/image targets re-base) | none (no inbound links to the details block) |
+| `<details>` Mermaid source block (README_CN.md:38–64) | `docs/architecture/ARCHITECTURE.md` (zh section) | `assets/readme/architecture.svg → ../../assets/readme/architecture.svg` (same re-base as EN) | none |
 
 ## `LANGUAGE` plan (Phase 4 step 5 — `writing-humanize` invoked at `lite` scope)
 

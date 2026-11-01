@@ -79,7 +79,7 @@ ticket exercises it at `lite` scope only.
 ## 6. Acceptance criteria coverage
 
 - [x] **Six audit reports + one baseline comparison produced** — §1 table; seven per-repo receipt files.
-- [x] **Each report carries probe receipts and its residual-risk line** — every receipt file: verbatim scanner/probe commands + exit codes + a §5 three-line report with `[Residual risk]`.
+- [x] **Each report carries probe receipts and its residual-risk line** — each per-repository audit receipt carries verbatim scanner/probe commands + exit codes + a §5 three-line report with `[Residual risk]`; the dry-run receipt carries its probe block and its own three-line report. This file, the umbrella report, carries no probe block of its own — it is the index over the seven per-repo receipts.
 - [x] **EgressAPIKEY full-mode dry-run shows the migration ledger and no frozen-zone edits planned** — `2026-11-01-egressapikey-rewrite-dry-run.md`: 2-entry migration ledger (mermaid details blocks, EN+zh), explicit freeze-zone inventory, "zero freeze-zone edits planned".
 - [x] **Acceptance report files under `docs/` (not committed to target repos)** — all files under `docs/receipts/`; zero-write verified per repo (identical pre/post tree hashes + git status).
 - [x] **`writing-humanize` obedience to distilled rules assessed where exercised** — §4 + the dry-run receipt's assessment table.

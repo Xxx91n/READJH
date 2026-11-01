@@ -35,7 +35,7 @@ RISK SUMMARY: "License metadata exists but no root license file was found".
 
 | Severity | Finding | Receipt |
 |---|---|---|
-| **HIGH** | `README.md:100-102` declares `License: MIT` and `package.json:5` claims MIT, but **no LICENSE file exists at repo root** (`ls LICENSE*` empty; `git ls-files | grep -i licen` finds only `docs/assets/badge-license.svg`). The README's license statement is unbacked by a file — the claim itself matches `package.json` so it is not self-contradictory, but the repository cannot ship what it declares. | `README.md:102` vs `ls` + `package.json:5` + scanner output |
+| **HIGH** | `README.md:100-102` declares `License: MIT` and `package.json:5` claims MIT, but **no LICENSE file exists at repo root** (`ls LICENSE*` empty; `git ls-files` filtered for `licen` finds only `docs/assets/badge-license.svg`). The README's license statement is unbacked by a file — the claim itself matches `package.json` so it is not self-contradictory, but the repository cannot ship what it declares. | `README.md:102` vs `ls` + `package.json:5` + scanner output |
 
 ## 3. `RESTRUCTURE` (diagnose-only, `lite` tier)
 
@@ -43,6 +43,7 @@ RISK SUMMARY: "License metadata exists but no root license file was found".
 |---|---|---|
 | MEDIUM | **Over-completeness:** lines 37–74 are runbook material — per-host install recipes, live-probe run narratives, profile semantics, upgrade runbooks — on the front page. `lines 37-74 → recommended docs/` (install guide / verification-status matrix); the honest run-record prose is the project's signature but belongs in `docs/evidence/` style pages it already links to. | `README.md:37-78` |
 | MEDIUM | **Density/length violations inside runbook prose:** `README.md:47` and `README.md:61` are single paragraphs of ~400 and ~600 words respectively carrying multiple host verdicts — clause-stacked blocks the `sepia` professional-pass #2 density check flags even at `lite`. | `README.md:47,61` |
+| MEDIUM | **Probe-vocabulary gap:** `check-readme.py` `honest-gaps` blocks (exit 1) on a README saturated with real boundaries stated in a vocabulary the check does not match ("declared-unverified", "not live-probed", "retired") — a probe coverage gap; the README defect it signals does not exist here. See D1. | `check-readme.py` exit 1; `README.md:35,45,47,49,59-61` |
 | LOW | **Repeated trust-boundary statement:** "rules version has no enforcement" is stated at `:27`, `:35`, `:45`, `:49` (four touches, each load-bearing for a different host path) — just under the convergence threshold; the README deliberately repeats it per host. | `README.md:27,35,45,49` |
 | N/A — verified | No generation traces, no chatbot wrappers, no unowned comments; the prose is aggressively honest (its declared-unverified vocabulary is the project's doctrine). Skeleton fits an agent-tool README (logo → one-liner → ladder → install → verification → license). | full-file read |
 
@@ -66,8 +67,8 @@ Checklist (§§1–8): §1 PASS (with the honest-gaps exit-1 recorded); §2 FAIL
 ## 5. Three-line delivery report
 
 ```text
-[Conclusion]: FAIL — audit on D:/Aworker/jiahao/README.md (intensity tier: lite); audit completed; findings: HIGH 1 / MEDIUM 2 / LOW 2; probe exit 1 (honest-gaps); 0 files modified.
-[Receipts]: scan-project.py -> exit 0 ("license metadata but no license file"); check-readme.py README.md -> exit 1 (honest-gaps FAIL — false negative vs the README's declared-unverified boundaries), README-zh-CN.md -> exit 1 (same), repo-set: N/A; HIGH: License: MIT claimed but no LICENSE file at root (README.md:102 vs package.json:5); MEDIUM: runbook over-completeness (:37-78), 400-600-word paragraphs (:47,:61); LOW: trust boundary x4, probe vocabulary gap; snapshot 8403 files identical pre/post.
+[Conclusion]: FAIL — audit on D:/Aworker/jiahao/README.md (intensity tier: lite); audit completed; findings: HIGH 1 / MEDIUM 3 / LOW 1; probe exit 1 (honest-gaps); 0 files modified.
+[Receipts]: scan-project.py -> exit 0 ("license metadata but no license file"); check-readme.py README.md -> exit 1 (honest-gaps FAIL — false negative vs the README's declared-unverified boundaries), README-zh-CN.md -> exit 1 (same), repo-set: N/A; HIGH: License: MIT claimed but no LICENSE file at root (README.md:102 vs package.json:5); MEDIUM: runbook over-completeness (:37-78), 400-600-word paragraphs (:47,:61), probe-vocabulary gap (D1); LOW: trust boundary x4 (:27,35,45,49); snapshot 8403 files identical pre/post.
 [Residual risk]: README commands need manual verification — npx skills add, install.js init, all plugin install paths, npm test/release:gate; external raw.githubusercontent + github.com links unfetched offline; on feat/config-dir-per-host-116 branch not main.
 ```
 

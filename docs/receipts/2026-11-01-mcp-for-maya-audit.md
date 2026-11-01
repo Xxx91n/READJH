@@ -66,8 +66,8 @@ Checklist (§§1–8): §1 PASS; §2 PASS (claims bound; tool count verified exa
 ## 5. Three-line delivery report
 
 ```text
-[Conclusion]: FAIL — audit on D:/Aworker/maya/maya-mcp-server/README.md (intensity tier: lite); audit completed; findings: HIGH 0 / MEDIUM 3 / LOW 5; 0 files modified.
-[Receipts]: scan-project.py -> exit 0 (0 mismatches); check-readme.py README.md -> exit 0, README.zh-CN.md -> exit 0 (6/6 PASS), repo-set: N/A; MEDIUM: unowned zh synced-with anchor (zh:2); MEDIUM: front-page issue IDs (#2,#31,#3-#7,D-163 at :53,291,326,330); MEDIUM: docs-worthy spans (Tools Reference :198-270, versioning+roadmap :320-330); LOW: literal 25-tool count verified vs claim, blender comparison unbacked (dated), emoji matrix (:59-72), safety boundary x3 (:24,315,317), GitButler workspace HEAD; snapshot 12665 files identical pre/post.
+[Conclusion]: FAIL — audit on D:/Aworker/maya/maya-mcp-server/README.md (intensity tier: lite); audit completed; findings: HIGH 0 / MEDIUM 3 / LOW 4; 0 files modified.
+[Receipts]: scan-project.py -> exit 0 (0 mismatches); check-readme.py README.md -> exit 0, README.zh-CN.md -> exit 0 (6/6 PASS), repo-set: N/A; MEDIUM: unowned zh synced-with anchor (zh:2); MEDIUM: front-page issue IDs (#2,#31,#3-#7,D-163 at :53,291,326,330); MEDIUM: docs-worthy spans (Tools Reference :198-270, versioning+roadmap :320-330); LOW: blender comparison unbacked (:45), emoji matrix (:59-72), safety boundary x3 (:24,315,317), CoS figure is paper-scoped (:274); context notes (not findings): literal 25-tool count verified vs claim, GitButler workspace HEAD; snapshot 12665 files identical pre/post.
 [Residual risk]: README commands need manual verification — pip/uvx install, uv sync --frozen, pytest/ruff/mypy, commandPort calls; remote raw.githubusercontent assets and PyPI/registry endpoints unfetched offline; blender-mcp "measured 2026-09" comparison unverifiable in-repo.
 ```
 
