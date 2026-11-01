@@ -1606,6 +1606,24 @@ class TestFragmentLinks(unittest.TestCase):
             self.assertIn("हनद", out)
             self.assertNotIn("'#हिन्दी'", out)
 
+    def test_stray_less_than_does_not_hide_anchor(self):
+        """'Node < 20' before <a name="legacy">: a tag match must not span
+        across the stray '<' to the tag's '>' — the anchor is still
+        registered and [x](#legacy) resolves."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            rm = root / "README.md"
+            rm.write_text(
+                '# T\n\nNode < 20 is unsupported.\n\n<a name="legacy"></a>\n\n'
+                '[x](#legacy)\n\n## Limitations\nNone.\n',
+                encoding="utf-8",
+            )
+            code, out, err = run_probe(
+                str(rm), "--repo-root", str(root), "--checks", "dead-links"
+            )
+            self.assertEqual(code, 0, f"Out:\n{out}")
+
 
 class TestStdlibOnly(unittest.TestCase):
     """Ensure scripts/check-readme.py has no third-party dependencies."""

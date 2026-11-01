@@ -534,7 +534,10 @@ def _markdown_anchor_ids(path: Path) -> Optional[set]:
         r"""([^\s=/>]+)\s*(?:=\s*("[^"]*"|'[^']*'|[^\s>]+))?"""
     )
     ids = set()
-    for tag in re.findall(r"<[^>]+>", _strip_inline_code(html_visible)):
+    # <[^<>]+> — never let a match span across a second '<': a stray
+    # "Node < 20" would otherwise swallow the real <a name> that follows
+    # it and hide a valid anchor.
+    for tag in re.findall(r"<[^<>]+>", _strip_inline_code(html_visible)):
         m = re.match(r"</?\s*([a-zA-Z][^\s/>]*)", tag)
         if not m:
             continue
