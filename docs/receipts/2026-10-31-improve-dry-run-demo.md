@@ -208,7 +208,8 @@ rather than re-graded.
 ## Run C2 — `rewrite --dry-run` on the READJH README (2026-11-01, complete receipts)
 
 **Sample:** `<repo-root>\README.md` at branch `ticket-6-improve-rewrite-language`
-HEAD `f522bcd`, real Git worktree (50 files hashed for the baseline).
+HEAD `f522bcd` (README blob `dc1aa76907aa960431c10aade733e23c85af652b`), real
+Git worktree (50 files hashed for the baseline).
 `--dry-run`: rebuild plan and receipts only, no writes.
 
 **ROUTE / TRUTH.**
@@ -223,16 +224,25 @@ pre  status: !! .coverage, !! .pytest_cache/, !! scripts/__pycache__/,
 **Plan (not executed).** Rebuild `README.md` to the skill/tool skeleton —
 name + one-liner, install/prereqs, three modes + `--dry-run` quickstart,
 phase flow, docs map (spec/ADR/UPSTREAM/GLOSSARY pointers). Freeze-zone
-inventory: fenced command blocks (`python3 scripts/check-readme.py …`),
-file paths (`SKILL.md`, `references/`, `docs/spec/…`), badge row,
-version/SHA strings, LICENSE text — byte-identical through any wording
-pass. Per-span LANGUAGE plan (SKILL §3 Phase 4 step 5 form):
+inventory (corrected 2026-11-01 against the real source — the first
+draft listed fenced command blocks and a badge row that this README does
+not contain): the `## Layout` directory-tree fence (`README.md:81–91`),
+inline-code literals (`SKILL.md`, `references/`, mode/flag names like
+`--dry-run`), the dependency-table URLs, relative link targets
+(`UPSTREAM.md`, `NOTICE`, `LICENSE`), version/SHA strings — byte-identical
+through any wording pass. Per-span LANGUAGE plan (SKILL §3 Phase 4 step 5
+form); spans the rebuild carries over unchanged are marked keep rather
+than assigned a transform the source does not need:
 
 | Anchor (`<readme>:lines`) | Tier-allowed transform | Intended before → after shape |
 |---|---|---|
+| `README.md:1–12` (title + intro) | compress meta-commentary → plain verbs | "every claim in the result is checked against what the repository can actually verify with a receipt" → "every claim is checked against a repo-verifiable receipt"; intro keeps both paragraphs, drops connective padding only |
 | `README.md:14–37` (`## What it does`) | compress meta-commentary → plain verbs | feature bullets keep repo-backed facts; phrasing like "under freeze-zone guardrails" stays only if factual, no added flourish |
-| `README.md:66–78` (`## Quickstart`) | split compound commands → one-per-line with expected output | each `python3 scripts/check-readme.py …` invocation gets its own fenced block + result line |
-| `README.md:93–96` (`## Status`) | hedge → plain disclosure | status stated as fact table (branch, checks, known gaps) rather than evaluative prose |
+| `README.md:39–57` (`## Dependencies`) | keep — no LANGUAGE transform | pointer-contract table and upstream names are data/proper nouns; only the trailing pointer sentence is prose and is already plain |
+| `README.md:59–64` (`## Install`) | keep — no LANGUAGE transform | two-sentence instruction already in imperative form |
+| `README.md:66–78` (`## Quickstart`) | keep — no LANGUAGE transform | literal mode/flag names (`` `audit` ``, `` `improve` ``, `` `rewrite` ``, `` `--dry-run` ``) are freeze-zone; the surrounding one-line prose is already plain |
+| `README.md:79–91` (`## Layout`) | keep — no LANGUAGE transform | directory-tree fence is entirely freeze-zone |
+| `README.md:93–96` (`## Status`) | keep — no LANGUAGE transform | already plain disclosure ("Early development; tickets live as GitHub issues") |
 
 **VERIFY.**
 
@@ -266,7 +276,7 @@ fixture-context. Also not demonstrated by that demo: real writes, `.bak`
 creation, ledger execution, runtime suppression behavior — all covered by
 Run B now.
 
-## Post-review probe hardening receipts (rounds 2–13)
+## Post-review probe hardening receipts (rounds 2–19)
 
 - `check-readme.py --checks ",,"` and `--checks ""` → **exit 2** (explicit
   empty selection rejected; omitted flag = all checks); unknown names →
@@ -288,8 +298,8 @@ Run B now.
   rendered).
 - Run B's five probed files re-checked with
   `--checks dead-links,missing-images,code-fences` → all exit 0.
-- Unit tests: `python -m unittest discover -s tests` → **110 tests OK**
-  (76 total new across rounds 2–13: `--checks` subset/empty/dedup/repo-set
+- Unit tests: `python -m unittest discover -s tests` → **118 tests OK**
+  (categories include: `--checks` subset/empty/dedup/repo-set
   combination + fragment same-file/cross-file/dup-suffix/indented-ATX/
   Setext/CJK/underscore/mixed-case cases, incl. negative fixtures for
   fenced, inline-code, and commented `id`/`name` attributes,
@@ -306,8 +316,10 @@ Run B now.
   commented/inline-code dead links and images, unclosed HTML comments,
   explicit-id slug non-collision, angle-bracket destinations carrying
   titles, backtick info strings that are code spans not fences,
-  line-start code spans wrapping link/image samples, and Unicode
-  combining marks preserved in heading slugs).
+  line-start code spans wrapping link/image samples, Unicode
+  combining marks preserved in heading slugs, and malformed tag-like
+  runs (stray `Node < 20`, `a < b "c" > d`, `Vec<u8 then <a name=…>`)
+  that must not consume or forge real anchors).
 
 ## Acceptance mapping
 
