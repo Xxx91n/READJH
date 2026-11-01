@@ -264,10 +264,13 @@ states each phase's behavior per mode.
      targets.
    - Git state: record whether `<repo-root>` is inside a Git worktree
      (`git -C "<repo-root>" rev-parse --is-inside-work-tree` prints `true`),
-     whether `<readme>` is tracked (`git -C "<repo-root>" ls-files
-     --error-unmatch -- "<readme-relative-path>"`), and whether it is clean
-     (`git -C "<repo-root>" status --porcelain -- "<readme-relative-path>"`
-     prints nothing). This seeds the `.bak` rollback decision (§3,
+     whether `<readme>` is tracked (`git --literal-pathspecs -C "<repo-root>"
+     ls-files --error-unmatch -- "<readme-relative-path>"`), and whether it
+     is clean (`git --literal-pathspecs -C "<repo-root>" status --porcelain
+     -- "<readme-relative-path>"` prints nothing). Both file probes take
+     `--literal-pathspecs`: the argument is one specific file, and a
+     `[`/`]`/`*` in it must not glob onto a different path — §3
+     `RESTRUCTURE` step 6's `docs/[1]/guide.md` case. This seeds the `.bak` rollback decision (§3,
      `RESTRUCTURE` step 6 — evaluated there against the whole planned write
      set, not `<readme>` alone) and the `VERIFY` zero-write check.
    - Optional **repo-set mode**: enabled only when `--repo-set <manifest>` is
