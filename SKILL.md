@@ -708,11 +708,13 @@ reply locked to **at most three lines**
   `exit 1` with scan findings), and `check-readme.py` completes (`exit 0` clean
   or `exit 1` with README findings), the audit itself succeeded: report `PASS`
   when zero defects exist, or `FAIL` when `TRUTH`, `RESTRUCTURE`, or
-  `check-readme.py` (`exit 1`) uncovered README defects. Reserve `BLOCKED`
-  strictly for missing or untrusted **pointer contract** dependencies/files
-  (including `writing-humanize` in write modes, checked before any edit), or
-  tool execution failures (`exit 2`,
-  invalid `<repo-root>` directory error, or runtime crash).
+  `check-readme.py` (`exit 1`) uncovered README defects, or a `.bak`
+  collision stopped the run with zero writes (§3, `RESTRUCTURE` step 6).
+  Reserve `BLOCKED` strictly for missing or untrusted **pointer contract**
+  dependencies/files (including `writing-humanize` in write modes, checked
+  before any edit), tool execution failures (`exit 2`,
+  invalid `<repo-root>` directory error, or runtime crash), or a
+  self-write guard stop on a protected target (§3, `ROUTE` step 1).
 - **Untested README commands:** Because READJH never executes commands inside a
   target README, `[Residual risk]` must list any README commands not verified
   against repository scripts as `"needs manual verification"`.
