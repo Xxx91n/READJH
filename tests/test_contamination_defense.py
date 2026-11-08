@@ -515,7 +515,7 @@ class TestContaminationContract(unittest.TestCase):
                 "honest-gaps",
             },
         )
-        self.assertEqual(len(names), 6, "the probe must keep its six static checks")
+        self.assertEqual(len(names), 6, "the probe must keep its six always-on checks")
 
         code, out, err = run_probe(
             str(FIXTURES_DIR / "directive" / "README.md"),

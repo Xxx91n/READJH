@@ -13,7 +13,7 @@ Ticket: GitHub issue #19 (parent spec: issue #16 / Spec 0002)
   - `run_parameters/`, `secrets/`, `skill_files/`, `data_out/` — one fixture
     for each of the four stop conditions.
   - `reader_instructions/` — ordinary instructions for a human reader, including
-    "upload ... to the team S3 bucket"; these are data, not findings.
+    "upload reports to S3"; these are data, not findings.
 - `tests/fixtures/contamination/cases.json` — the expected line, quote, kind
   (`high` / `block` / `data`), and stop condition for every declared span.
 - `tests/fixtures/contamination/SOURCES.md` — where the real carrier text and
@@ -23,7 +23,7 @@ Ticket: GitHub issue #19 (parent spec: issue #16 / Spec 0002)
   fixture. The source test compares every fixture against these lines.
 - `tests/test_contamination_defense.py` — 18 `unittest` tests:
   - exact quote and line checks for every fixture span;
-  - a small test-only classifier that applies the decision table in
+  - a small test-only classifier that approximates the decision table in
     `references/readme-rules.md` §6;
   - a simulated run that records `HIGH` findings, continues, and writes once
     the whole README has been read;
@@ -31,8 +31,9 @@ Ticket: GitHub issue #19 (parent spec: issue #16 / Spec 0002)
     and unchanged file hashes;
   - contract checks that the rule text, `SKILL.md`, and checklist §9 keep the
     `HIGH` / `BLOCKED` split and all four stop conditions;
-  - a check that `scripts/check-readme.py` still has only its six static
-    checks and rejects `contamination` as an unknown check name;
+  - a check that `scripts/check-readme.py` still has only its six always-on
+    checks (the optional `--repo-set` check is separate) and rejects
+    `contamination` as an unknown check name;
   - checks that ordinary prose, a mention without a request, and an
     agent-addressed pointer stay `HIGH`, not `BLOCKED`;
   - checks that a negated request and a token/transfer request are classed
