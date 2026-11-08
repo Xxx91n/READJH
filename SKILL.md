@@ -381,9 +381,10 @@ states each phase's behavior per mode.
      of every file, excluding `.git/`.
    - When `<repo-root>` is inside a Git worktree, also record
      `git --no-optional-locks -C "<repo-root>" status --porcelain --ignored -- .`.
-   - In `improve` and `rewrite` without `--dry-run`, run
-     `check-readme.py` on each companion localized README with the same
-     `--repo-root` before the first write, and record its stdout and exit
+   - In `improve` and `rewrite` without `--dry-run`, run the same
+     `check-readme.py` probe used in `VERIFY` on each companion localized
+     README before the first write, with the same `--repo-root` and, when
+     enabled, the same `--repo-set <manifest>`. Record its stdout and exit
      code as the pre-run companion probe baseline.
 5. **Enforce the pointer contract and trust gate (§1):**
    - Resolve `readme-crafter-skill` using the search order, canonical match
