@@ -343,9 +343,9 @@ and `VERIFY`. The phases below state what each one does in each mode.
      planning. If a resolved write target is this skill's own `SKILL.md`,
      anything under `references/` or `scripts/` of this skill, or inside a
      resolved upstream skill directory (the trusted dependency paths found
-     by finding each skill by its fixed name), stop `BLOCKED` — no writes, no
-     `.bak`. The
-     skill and its dependencies are never their own rewrite targets.
+     by finding each skill by its fixed name), stop `BLOCKED` — no writes,
+     no `.bak`. The skill and its dependencies are never their own rewrite
+     targets.
    - Git state: record whether `<repo-root>` is inside a Git worktree
      (`git -C "<repo-root>" rev-parse --is-inside-work-tree` prints `true`),
      whether `<readme>` is tracked (`git --literal-pathspecs -C "<repo-root>"
@@ -358,8 +358,8 @@ and `VERIFY`. The phases below state what each one does in each mode.
      rollback decision (§3, `RESTRUCTURE` step 6 — evaluated there against
      the whole planned write set, not `<readme>` alone) and the `VERIFY`
      zero-write check.
-   - Optional `--repo-set` option: enabled only when `--repo-set <manifest>`
-     is passed; off by default.
+   - `--repo-set` group check: enabled only when `--repo-set <manifest>` is
+     passed; off by default.
 2. **Select the rewrite strength:**
    - Check repository commits, issues, or writing samples supplied by the user.
      Select `lite` when a distinct author voice is verified; otherwise select
@@ -375,7 +375,7 @@ and `VERIFY`. The phases below state what each one does in each mode.
      as `BLOCKED`; this run has no prose target.
    - `TRUTH` may check the companion for facts, and `RESTRUCTURE` may repair
      its links after a move, but the current window never translates its
-     prose (§2, Native-First Translation Handoff).
+     prose (§2, Native-first translation handoff).
 4. **Capture the zero-write baseline (before any upstream file is read or run):**
    - Record a file-tree snapshot of `<repo-root>`: relative path and SHA-256
      of every file, excluding `.git/`.
@@ -635,8 +635,8 @@ commands run.
 
 **Completion criterion:** All structural, **text that keeps proving itself**,
 **marks left by the pipeline**, **the same README skeleton across repos**, and
-language findings are logged with
-severity (`HIGH` / `MEDIUM` / `LOW`) and `<readme>:<line>` anchors. In `audit`
+language findings are logged with severity (`HIGH` / `MEDIUM` / `LOW`) and
+`<readme>:<line>` anchors. In `audit`
 mode, zero files are modified. In write modes, only the planned structural
 edits have landed (or, in `--dry-run`, nothing has), every `docs/` move has a
 migration ledger entry, the `.bak` rule has fired or been recorded as skipped,
@@ -647,7 +647,7 @@ and no sentence-level wording has changed yet.
 `LANGUAGE` makes sentence-level wording edits on the post-`RESTRUCTURE`
 native-language README only. It never translates and never edits the companion
 README's prose; translation runs later in a new clean window (§2,
-Native-First Translation Handoff). `audit` mode never reaches this phase;
+Native-first translation handoff). `audit` mode never reaches this phase;
 `--dry-run` runs it as plan output only (step 5).
 
 1. **How `writing-humanize` is called (found by its fixed name):**
@@ -694,8 +694,7 @@ Native-First Translation Handoff). `audit` mode never reaches this phase;
 3. **Wording pass by rewrite strength (§2):**
    - `lite`: strip only clustered AI vocabulary, chatbot turn wrappers, and
      passages that keep proving themselves; keep the author's sentence-length
-     habits,
-     punctuation, contractions, and register
+     habits, punctuation, contractions, and register
      (`references/de-ai-language.md` §2.5 whitelist).
    - `standard`: apply the full `writing-humanize` catalog plus
      `references/de-ai-language.md` — collapse abstract-noun chains into
@@ -856,7 +855,7 @@ reply locked to **at most three lines**
   against repository scripts as `"needs manual verification"`.
 - **Translation handoff is a separate reply:** the three-line report stays
   capped. After the user approves the native README, emit the fixed block
-  (§2, Native-First Translation Handoff) in its own message — never fold the
+  (§2, Native-first translation handoff) in its own message — never fold the
   translation into the run report and never translate in this window.
 
 ---
