@@ -480,7 +480,7 @@ Rules:
    - A separate idea is a new fact, topic, or step.
 3. **Keep:** a long sentence that carries one idea. Do not split good prose just to reach a length.
 4. **Work order:** delete filler and repeats; split into two or three short sentences; turn 3 or more parallel items into a list. Move deep material to `docs/` in `RESTRUCTURE`, before this pass, and leave a link in the README.
-5. **Keep no-touch text.** Commands, legal and safety text, and direct quotes stay. Legal and safety text may move to `docs/` only in `RESTRUCTURE` and after asking the author; the README keeps one boundary line and a link.
+5. **Keep text that no language pass may change.** Commands, legal and safety text, and direct quotes stay. Legal and safety text may move to `docs/` only in `RESTRUCTURE` and after asking the author; the README keeps one boundary line and a link.
 6. **No detector.** The count is a prompt check. Do not add a long-sentence or jargon check to `scripts/check-readme.py`.
 
 ### 7.4 Punctuation: ask before changing a dash

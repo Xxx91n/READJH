@@ -110,7 +110,7 @@ A README is the front page of a repository, not its complete manual. Over-comple
 
 ### 5.2 Hard prohibition: no invented personality, gaps, or stories
 
-Neither setting may fabricate authenticity:
+Neither choice may fabricate authenticity:
 
 1. **No invented first-person stories or opinions.** Never insert `"I built this because X annoyed me"`, `"over coffee"`, `"I genuinely don't know how to feel"`, or casual banter not already present in the repository or supplied by the user (`academic-humanizer` §When to use).
 2. **No invented limitations or `"honest gaps"`.** Never add `"Not tested on Windows"`, `"Alpha, expect breakage"`, or `"Probably explodes on older Node"` unless repository **evidence** proves that exact boundary (for example, an OS check in `.github/workflows/`, `engines` in `package.json`, or a documented constraint in source code).

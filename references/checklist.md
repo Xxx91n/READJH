@@ -17,11 +17,11 @@ Run this binary assertion checklist during `VERIFY` (and as the diagnostic rubri
 
 ---
 
-## 2. Facts Preserved and No-Touch Text Intact
+## 2. Facts Preserved and Text That No Language Pass May Change Is Untouched
 
 > **Attribution:** `READJH` (`docs/spec/0001-readjh-orchestration-skill.md` US-6–8, US-12; `references/readme-rules.md` §1); `readme-crafter-skill` (`references/quality-checklist.md` Checks #2, #5–9, #13 & `references/repo-integrity.md` §1–6); `academic-humanizer` (`D:\Aworker\research\ALL\vendor\academic-humanizer\SKILL.md` Layer 3 & Layer 4).
 
-- [ ] **Text that no language pass may change untouched (`references/readme-rules.md` §1):** all six covered span types match the pre-language state or verified repository truth byte-for-byte.
+- [ ] **Text that no language pass may change is untouched (`references/readme-rules.md` §1):** all six covered span types match the pre-language state or verified repository truth byte-for-byte.
 - [ ] **Command and manifest parity (`readme-crafter-skill` Check #2):** install, build, test, and run commands match the repository's manifests and CI workflows.
 - [ ] **Distribution posture (`readme-crafter-skill` Check #8, `repo-integrity.md` §1):** registry install commands appear only when publication is verified in the repo; source-first and hybrid repos match their actual consumption paths.
 - [ ] **Public surface and config parity (`readme-crafter-skill` Checks #6–7, `repo-integrity.md` §2–3):** code examples import only root-exported symbols, and documented env vars/defaults match `.env.example` or config schemas.
@@ -48,7 +48,7 @@ Run this binary assertion checklist during `VERIFY` (and as the diagnostic rubri
 
 ---
 
-## 5. Skeletons That Differ Between Repos
+## 5. Several Repos' READMEs Do Not Share a Skeleton
 
 > **Attribution:** `READJH` (`docs/spec/0001-readjh-orchestration-skill.md` US-20, US-21, US-34; `references/readme-rules.md` §4.2); `readme-crafter-skill` (`SKILL.md` §Core Philosophy #3 & `references/style-guide.md`); `sepia` (`.agents/skills/sepia/references/professional-pass.md` `SLOPSHAPE-2026` & Check #8).
 
