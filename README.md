@@ -44,8 +44,8 @@ Phase sequence by run mode:
 
 READJH owns only the part that runs the existing skills in order and adds the
 README rules they leave out. It calls two upstream skills by their fixed
-names at fixed search paths; a missing skill means stop with install
-instructions, and no skill with a similar name is used instead:
+names at fixed search paths. A missing skill stops the run with install
+instructions. A skill with a similar name is never used instead:
 
 | fixed name | upstream | role |
 |---|---|---|
@@ -53,9 +53,12 @@ instructions, and no skill with a similar name is used instead:
 | `writing-humanize` | [risadams/ink-and-agency](https://github.com/risadams/ink-and-agency) (`skills/writing-humanize/`) | LANGUAGE: wording |
 
 Four more upstreams contribute excerpts from their rules to `references/` and
-are never run: `sepia` (zh calibration, professional/style passes),
-`anti-defensive-writing` (EN, Kiterlin), `academic-humanizer` (check each
-claim against evidence), `humanize-readme` (only the rules worth keeping).
+are never run:
+
+- `sepia`: zh calibration, professional/style passes
+- `anti-defensive-writing`: EN, Kiterlin
+- `academic-humanizer`: check each claim against evidence
+- `humanize-readme`: only the rules worth keeping
 
 Full table, where each skill was found on this machine, install actions, and
 the two behaviours of `writing-humanize` we deliberately switch off:
@@ -102,4 +105,4 @@ docs/tickets/       # pointer to the GitHub issue tracker
 
 Early development. Known limitations: this repo has no CI yet, so checks run
 by hand. Tickets live as GitHub issues (see `docs/agents/`).
-License: MIT — see [LICENSE](LICENSE).
+License: MIT, see [LICENSE](LICENSE).

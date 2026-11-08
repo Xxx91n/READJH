@@ -30,13 +30,13 @@ READJH 管 README 写得准不准、读起来顺不顺。它按顺序把你已�
   再加上从上游规则里挑出来、只适用 README 的那部分。改写时守两道线：
   有些字句一律不许碰，改写力度也有上限，免得润色改坏事实、磨平真正
   的文风。
-- **VERIFY** 用静态检测功能加人工检查清单，产出机器能核对的证据。
-  交付报告最多三行：做了什么、证据、还剩哪些风险。
+- **VERIFY** 先跑静态检测功能，再过一遍人工检查清单，产出机器能核对的
+  证据。交付报告最多三行：做了什么、证据、还剩哪些风险。
 
 ## 依赖
 
 READJH 只负责把几个现成技能串起来，再补上它们没覆盖的 README 规则。
-两个上游技能按固定名字在固定路径下查找；找不到就停下，告诉你怎么装；
+两个上游技能按固定名字在固定路径下查找。找不到就停下，告诉你怎么装。
 不拿名字相近的技能顶上：
 
 | 固定名字 | 上游仓库 | 做什么 |
@@ -44,10 +44,12 @@ READJH 只负责把几个现成技能串起来，再补上它们没覆盖的 REA
 | `readme-crafter-skill` | [linhai0872/readme-crafter-skill](https://github.com/linhai0872/readme-crafter-skill) | TRUTH/RESTRUCTURE：事实与结构 |
 | `writing-humanize` | [risadams/ink-and-agency](https://github.com/risadams/ink-and-agency)（`skills/writing-humanize/`） | LANGUAGE：行文润色 |
 
-另有四个上游只把一部分规则放进 `references/`，从不运行：`sepia`
-（中文校准、职业/文风检查）、`anti-defensive-writing`（英文，
-Kiterlin）、`academic-humanizer`（每条说法都要对得上证据）、
-`humanize-readme`（只收还能用的规则）。
+另有四个上游只把一部分规则放进 `references/`，从不运行：
+
+- `sepia`：中文校准、职业/文风检查
+- `anti-defensive-writing`：英文，Kiterlin
+- `academic-humanizer`：每条说法都要对得上证据
+- `humanize-readme`：只收还能用的规则
 
 完整的表、这些技能在机器上的实际位置、怎么装，以及对
 `writing-humanize` 两处故意关掉的行为，见
@@ -55,7 +57,7 @@ Kiterlin）、`academic-humanizer`（每条说法都要对得上证据）、
 
 ## 安装
 
-把你的 Agent Skills 宿主指向本仓库根目录 —— 根目录就是技能本身。
+把你的 Agent Skills 宿主指向本仓库根目录；根目录就是技能本身。
 再按 `UPSTREAM.md` 里的安装步骤，让这个技能要调用的两个
 上游技能能在 `<skills-root>/<canonical-name>/SKILL.md` 找到。
 

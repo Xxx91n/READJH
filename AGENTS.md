@@ -2,9 +2,9 @@
 
 **Word standard:** `GLOSSARY.md`. Use the wording it recommends; do not use
 the wording each entry says to avoid. The old names stay only in its
-old-to-new table, so an older record can still be looked up. It defines the
-words this repo uses for runs and for planning work; read it before writing
-docs or code.
+old-to-new table and in historical records, so an older record can still be
+looked up. It defines the words this repo uses for runs and for planning
+work; read it before writing docs, tickets, or comments.
 
 ## Layout
 
