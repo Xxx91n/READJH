@@ -68,11 +68,11 @@ Run this binary assertion checklist during `VERIFY` (and as the diagnostic rubri
 
 ## 7. Voice Preserved and De-AI Language Audit
 
-> **Attribution:** `READJH` orchestration layer (`docs/spec/0001-readjh-orchestration-skill.md` US-13–16, US-18–19, US-22–24, US-33–34; `UPSTREAM.md` §Deviation table; `references/readme-rules.md` §5; `references/de-ai-language.md`); `writing-humanize` (`skills/writing-humanize/SKILL.md` & `skills/writing-humanize/references/patterns.md` Patterns #1–29); `sepia` (`.agents/skills/sepia/references/style-pass.md` §2–7 & `references/languages/zh.md` §1–5); `humanize-readme` (`humanize-readme/references/slop-patterns.md`).
+> **Attribution:** `READJH` orchestration layer (`docs/spec/0001-readjh-orchestration-skill.md` US-13–16, US-18–19, US-23–24, US-33–34; `SKILL.md` §2 Native-First Translation Handoff; `UPSTREAM.md` §Deviation table; `references/readme-rules.md` §5; `references/de-ai-language.md`); `writing-humanize` (`skills/writing-humanize/SKILL.md` & `skills/writing-humanize/references/patterns.md` Patterns #1–29); `sepia` (`.agents/skills/sepia/references/style-pass.md` §2–7 & `references/languages/zh.md` §1–5); `humanize-readme` (`humanize-readme/references/slop-patterns.md`).
 
 - [ ] **Intensity tier and suppressions honored (`references/readme-rules.md` §5):** `lite` preserved verified author voice; `standard` cleaned clustered tells to plain prose; zero invented personality, first-person stories, unverified gaps, or out-of-repo `.ink-and-agency/` writes occurred.
 - [ ] **Sentence rhythm and edit tests (`references/de-ai-language.md` §1, §2, §6):** runs of three or more near-equal sentences were broken by moving words without adding filler; all edits pass `sepia`'s deletion test and reversion test.
-- [ ] **Chinese and bilingual rules (when applicable):** Chinese prose passes `references/de-ai-language.md` §3; bilingual README pairs stay aligned in lockstep; no unrequested second-language README was created.
+- [ ] **Chinese and native-first rules (when applicable):** Chinese prose passes `references/de-ai-language.md` §3 when it is the native README; the native README was the only prose target, and any companion README was left for the translation handoff (link repair from a move excepted); no unrequested second-language README was created.
 
 ### Cross-reference to `writing-humanize/references/patterns.md` (29 patterns)
 
