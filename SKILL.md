@@ -367,9 +367,13 @@ states each phase's behavior per mode.
 3. **Detect language and companion files:**
    - Record the primary language of `<readme>` and any existing localized
      companion README. Record which file is native-language; that file is the
-     only prose target for this run. If `<readme>` is not the native-language
-     file, stop and ask the user whether to run the native file instead.
-     `TRUTH` may check the companion for facts, and `RESTRUCTURE` may repair
+     only prose target for write modes. In `audit`, diagnose the named
+     `<readme>`; this guard does not apply.
+   - In `improve` and `rewrite`, if `<readme>` is not the native-language file,
+     stop and ask the user whether to run the native file instead. If yes,
+     re-lock `<readme>` and the step 4 baseline before continuing. If no, stop
+     as `BLOCKED`; this run has no prose target.
+   - `TRUTH` may check the companion for facts, and `RESTRUCTURE` may repair
      its links after a move, but the current window never translates its
      prose (§2, Native-First Translation Handoff).
 4. **Capture the zero-write baseline (before any upstream file is read or run):**
@@ -402,7 +406,8 @@ states each phase's behavior per mode.
 **Completion criterion:** Run mode (`audit` | `improve` | `rewrite`, plus
 `--dry-run` state), `<readme>`, `<repo-root>`, Git state (worktree and
 `<readme>` tracking), **intensity tier** (`lite` | `standard`), **repo-set
-mode** state, the zero-write baseline, and trusted verified paths to
+mode** state, the zero-write baseline, the native-language file identity and
+companion presence, and trusted verified paths to
 `readme-crafter-skill/{SKILL.md,references/repo-integrity.md,scripts/scan-project.py,scripts/scan_project_readme.py,scripts/scan_project_support.py}`
 — and, in `improve` / `rewrite`,
 `writing-humanize/{SKILL.md,references/patterns.md,agents/openai.yaml}` —
@@ -695,9 +700,9 @@ Native-First Translation Handoff). `audit` mode never reaches this phase;
      check to `scripts/check-readme.py` and uses no AI-detector score. A dash
      question left unanswered is listed in `[Residual risk]`.
    - No translation: the companion localized README's prose is left
-     unchanged in this run. The handoff (§2) names it as a file to translate
-     or correct in the new window; no second-language README is created
-     unless requested.
+     unchanged in this run. In a write-mode run (not `--dry-run`), the handoff
+     (§2) names it as a file to translate or correct in the new window; no
+     second-language README is created unless requested.
 4. **No-additions rule:** `LANGUAGE` never adds sentences, sections, claims,
    examples, or personality. Edits move, merge, split, replace, or delete
    existing prose; any new sentence would need a `TRUTH` **receipt**, which
@@ -730,8 +735,7 @@ intensity tier's scope was respected.
      applicable checks** (checks 1–6 on single-repository runs; check 7 enabled
      only when `--repo-set <manifest>` is supplied, otherwise `N/A`). Run the
      same probe on every companion localized README detected in `ROUTE` —
-     a detected companion gets the same verification receipt as `<readme>`
-     so the pair does not drift:
+     a detected companion gets the same verification receipt as `<readme>`:
      1. `dead-links` — dead local markdown and HTML links (including badge link
         targets) and broken fragments: `#anchor` and `file.md#anchor` targets
         resolved against heading-derived and explicit anchors of the target file
@@ -742,6 +746,10 @@ intensity tier's scope was respected.
      5. `boundary-duplicates` — repeated boundary/disclaimer phrases (**self-attestation** count)
      6. `honest-gaps` — presence of repository-backed limitation/caveat/non-goal signals
      7. `repo-set` — cross-repo **skeleton isomorphism** diff when `--repo-set <manifest>` is supplied (`N/A` on single-repository runs)
+
+   A companion finding that existed before this run goes in `[Residual risk]`
+   and does not fail `VERIFY`; a finding introduced by link repair fails and
+   must be fixed before delivery.
 2. **Walk the binary verification checklist (`references/checklist.md`):**
    - Evaluate `references/checklist.md` §§1–9 against the probe **receipt** and
      the `TRUTH` / `RESTRUCTURE` findings.

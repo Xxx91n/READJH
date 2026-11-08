@@ -9,7 +9,7 @@ prompt, and fill in the four values below. Run the job there.
 - **Native language:** `<language of the approved README>`
 - **Native README:** `<path to the approved README>`
 - **Translate to:** `<target language; one per file when they differ>`
-- **Files to translate:** `<one path per line; correct the existing target files>`
+- **Files to translate:** `<one path per line; create the file if it does not exist, otherwise correct it>`
 
 Read the native README in full before writing anything.
 
