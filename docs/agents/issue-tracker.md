@@ -5,19 +5,19 @@ ticket queue; `docs/tickets/README.md` exists only to say this.
 
 Spec 0001 wave (closed):
 
-| # | title | blocked by |
+| # | what it covers | blocked by |
 |---|---|---|
 | #1 | Skeleton docs: README, LICENSE, NOTICE, UPSTREAM.md, AGENTS.md, docs/agents, .gitattributes | — |
-| #2 | check-readme.py static probe + pytest suite (Seam A) | — |
-| #3 | references/: distilled readme-rules, de-ai-language, checklist | — |
-| #4 | SKILL.md audit-mode spine (ROUTE→TRUTH→RESTRUCTURE→VERIFY) | #1, #2, #3 |
-| #5 | Audit smoke run on 6F + scan-project.sh runtime check | #4 |
-| #6 | improve/rewrite modes + LANGUAGE phase + ledger + .bak + dry-run | #4 |
-| #7 | Acceptance run: six-repo audits + baseline + EgressAPIKEY dry-run | #5, #6 |
+| #2 | `check-readme.py` static check and the pytest suite (a place to test from outside) | — |
+| #3 | `references/`: excerpts from upstream rules (readme-rules, de-ai-language, checklist) | — |
+| #4 | The `SKILL.md` audit run (ROUTE→TRUTH→RESTRUCTURE→VERIFY) | #1, #2, #3 |
+| #5 | First audit run on 6F and a live check of `scan-project.sh` | #4 |
+| #6 | improve/rewrite modes, the LANGUAGE step, the move record, `.bak`, and `--dry-run` | #4 |
+| #7 | Acceptance run: audits of six repos, a baseline, and an EgressAPIKEY `--dry-run` | #5, #6 |
 
 Spec 0002 wave (open, all created `ready-for-agent`):
 
-| # | title | blocked by |
+| # | what it covers | blocked by |
 |---|---|---|
 | #17 | T1 Add plain-language rules to the language pass | — |
 | #18 | T3 Rewrite GLOSSARY as the plain-language standard | — |
@@ -40,7 +40,8 @@ Parallel order:
 Rules for agents picking up work:
 
 - Read the issue body **and all comments** before starting; resolution
-  notes land as comments (e.g. the non-canonical-path diagnosis on #1).
+  notes land as comments (e.g. the note on #1 about a skill directory
+  outside the fixed path).
 - A closed issue is not proof a dependency is met — check that the
   upstream ticket's files/commits actually reached your baseline.
 - Link work to the issue in the commit message or PR body.
