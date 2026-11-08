@@ -25,14 +25,15 @@ Read the native README in full before writing anything.
    invent a new compound word or keep an English word without asking.
 4. **No jargon and no translationese.** Use the words people actually say in
    the target language. Do not carry English sentence bones into the
-   translation. Do not use made-up complex words.
+   translation.
 5. **Keep facts fixed.** Do not change code, commands, links, versions,
    numbers, badges, file paths, or direct quotes. Copy them byte for byte.
 6. **New clean window only.** This job runs in the new window, never in the
    window that wrote the native README. Do not go back to that window to
    translate.
-7. **Natural native wording.** Translate and correct the i18n text in each
-   target README so it reads like a person wrote it in the target language.
+7. **Natural native wording.** Translate and correct the target README's
+   existing text so it reads like a person wrote it in the target language.
+   Do not use made-up complex words.
 8. **Return a correspondence table.** List each section and paragraph with its
    source and target text, and mark every term that has no exact equivalent.
 

@@ -287,12 +287,13 @@ The current window finishes and verifies the native-language README, then
 stops. It never translates. Translation is a separate job in a new, clean
 window, driven by `references/translate-prompt.md`.
 
-- **Trigger:** only after the user approves the native README. Approval is the
-  user's explicit "approved" after the `VERIFY` three-line report. Do not emit
-  the handoff before that.
+- **Trigger:** only a write-mode run (`improve` or `rewrite`, not `--dry-run`)
+  that the user approves produces a handoff. Approval is the user's explicit
+  "approved" after the `VERIFY` three-line report. Do not emit the handoff
+  before that.
 - **Leave the companion README's prose alone.** Re-point links in it only when
-  a `RESTRUCTURE` move breaks them (`references/readme-rules.md` §4.1). That
-  is link repair, not translation.
+  a `RESTRUCTURE` move breaks them (`RESTRUCTURE` step 7). That is link repair,
+  not translation.
 - **Emit this fixed block** as a separate reply after approval, with the real
   values filled in:
 
@@ -726,9 +727,9 @@ intensity tier's scope was respected.
      `2` = CLI/usage error → `BLOCKED`) and stdout **receipt** covering **all
      applicable checks** (checks 1–6 on single-repository runs; check 7 enabled
      only when `--repo-set <manifest>` is supplied, otherwise `N/A`). Run the
-     same probe on every companion localized README that this run modified
-     (link repair after a `RESTRUCTURE` move) — its links, images, fragments,
-     and fences need the same verification receipt as `<readme>`:
+     same probe on every companion localized README detected in `ROUTE` —
+     a detected companion gets the same verification receipt as `<readme>`
+     so the pair does not drift:
      1. `dead-links` — dead local markdown and HTML links (including badge link
         targets) and broken fragments: `#anchor` and `file.md#anchor` targets
         resolved against heading-derived and explicit anchors of the target file
