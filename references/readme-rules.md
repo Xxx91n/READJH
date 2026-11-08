@@ -1,4 +1,4 @@
-# README Rules READJH Owns
+# README Rules READJH Adds on Top of Upstream Skills
 
 > **Attribution:** `READJH` (the part that runs the existing skills in order; `docs/spec/0001-readjh-orchestration-skill.md`, `GLOSSARY.md`, `UPSTREAM.md`, ADR-0001); `jiahao` (`D:\Aworker\jiahao\src\SKILL.md`, `D:\Aworker\jiahao\GLOSSARY.md` — Delivery Engineer; every claim needs evidence). Canonical upstream URLs, observed machine paths, and commit hashes are recorded in `UPSTREAM.md`.
 
@@ -10,7 +10,7 @@ This file defines the six README rules that READJH owns across its pipeline (`RO
 
 > **Attribution:** `READJH` (`docs/spec/0001-readjh-orchestration-skill.md` US-12, `GLOSSARY.md`); `humanize-readme` (`humanize-readme/SKILL.md` Step 3); `academic-humanizer` (`vendor/academic-humanizer/SKILL.md` Layer 3); `sepia` (`.agents/skills/sepia/references/languages/zh.md` §0); English Kiterlin variant at `D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md` (§Preserve Necessary Precision — referenced by path; `D:\Aworker\research\ALL\vendor\anti-defensive-skill\` is not used).
 
-**Text that no language pass may change** covers every README region that the prose pass (`writing-humanize` or the excerpts from upstream rule files) may not alter, reword, reformat, or delete.
+**Text that no language pass may change** covers every README region that a language pass (`writing-humanize` or the excerpts from upstream rule files) may not alter, reword, reformat, or delete.
 
 ### Covered spans
 

@@ -53,7 +53,7 @@ Run this binary assertion checklist during `VERIFY` (and as the diagnostic rubri
 > **Attribution:** `READJH` (`docs/spec/0001-readjh-orchestration-skill.md` US-20, US-21, US-34; `references/readme-rules.md` §4.2); `readme-crafter-skill` (`SKILL.md` §Core Philosophy #3 & `references/style-guide.md`); `sepia` (`.agents/skills/sepia/references/professional-pass.md` `SLOPSHAPE-2026` & Check #8).
 
 - [ ] **Project-specific section sequence (`references/readme-rules.md` §4.2):** headings follow this repository's project type and distribution posture rather than a generic boilerplate outline.
-- [ ] **A group of repos in one run (when `--repo-set <manifest>` is enabled):** `python3 scripts/check-readme.py <readme> --repo-set <manifest>` evidence confirms no **shared skeleton across repos** for all repositories listed in the manifest, regardless of project type (`N/A` on default single-repo runs).
+- [ ] **A group of repos in one run (when `--repo-set <manifest>` is enabled):** `python3 scripts/check-readme.py <readme> --repo-set <manifest>` evidence confirms that the repositories listed in the manifest do not share a skeleton, regardless of project type (`N/A` on default single-repo runs).
 
 ---
 
@@ -87,11 +87,11 @@ Run this binary assertion checklist during `VERIFY` (and as the diagnostic rubri
 | #13 | Passive Voice and Subjectless Fragments | **Scoped override (`academic-humanizer` Layer 3 & `sepia` §2.2):** keep passive voice when the actor is irrelevant (`"Tokens are hashed with SHA-256"`) and keep terse CLI/table fragments where brevity is standard. |
 | #14 | Em Dash Overuse | **Scoped override (`sepia` `style-pass.md` §7 & `zh.md` §1b; `references/de-ai-language.md` §7.4):** do not blanket-strip em-dashes. When dashes cluster, stop and ask the author what the dash does, then offer comma, period, colon, parentheses, or keep. Apply only the author's choice. Never touch code, commands, links, or direct quotes. |
 | #15, #16, #18 | Overuse of Boldface / Inline-Header Vertical Lists / Emojis | **Scoped override (`sepia` `professional-pass.md` §Whitelist & `humanize-readme` §6.3):** strip decorative emojis and empty bold-adjective bullets (`🚀 **Fast**`), but keep bold lead-ins and tables for genuinely enumerable technical items (CLI flags, config keys, architecture layers). |
-| #17 | Title Case in Headings | **Enforce in `standard` tier:** prefer sentence case in headings unless the repository's existing docs convention uses Title Case. |
+| #17 | Title Case in Headings | **Enforce at the `standard` setting:** prefer sentence case in headings unless the repository's existing docs convention uses Title Case. |
 | #19 | Curly Quotation Marks | **Scoped override (`sepia` `zh.md` §0):** keep straight quotes in code and English technical prose; in Traditional Chinese venues follow `「」` / `『』`, and in Simplified Chinese keep the repo's established quotation style. Never touch text that no language pass may change. |
 | #20, #21, #22 | Collaborative Artifacts / Knowledge-Cutoff Disclaimers / Sycophantic Tone | **Enforce (zero tolerance):** treat as **marks left by the producing pipeline** (`references/readme-rules.md` §3); delete completely. |
 | #23, #24, #27, #28, #29 | Filler Phrases / Excessive Hedging / Authority Tropes / Signposting / Fragmented Headers | **Enforce:** cut `"in order to"`, `"at its core"`, `"let's dive in"`, and one-line heading restatements (`references/de-ai-language.md` §1, §2.1 #2 & #6). |
-| #26 | Hyphenated Word Pair Overuse | **Scoped override (`jiahao` R4 Plain Language Discipline):** strip self-invented compound buzzwords (`data-driven`, `next-generation`), but **preserve** standard technical compound modifiers (`command-line`, `read-only`, `append-only`, `single-file`, `UTF-8`) and all freeze-zone identifiers. |
+| #26 | Hyphenated Word Pair Overuse | **Scoped override (`jiahao` R4 Plain Language Discipline):** strip self-invented compound buzzwords (`data-driven`, `next-generation`), but **preserve** standard technical compound modifiers (`command-line`, `read-only`, `append-only`, `single-file`, `UTF-8`) and all identifiers in text that no language pass may change. |
 
 ---
 
@@ -108,7 +108,7 @@ Run this binary assertion checklist during `VERIFY` (and as the diagnostic rubri
 
 > **Attribution:** Spec 0002 (GitHub issue #16), `GLOSSARY.md`, `references/de-ai-language.md` §7, `references/readme-rules.md` §6. Manual review only: no static language detector and no AI-detector score.
 
-**Scope:** the plain-language items apply to `improve` / `rewrite` at the `standard` tier. In `audit`, read them as diagnosis questions, not pass/fail. In `lite`, mark them `N/A`. The contamination-defense items apply in every mode and tier.
+**Scope:** the plain-language items apply to `improve` / `rewrite` at the `standard` setting. In `audit`, read them as diagnosis questions, not pass/fail. In `lite`, mark them `N/A`. The contamination-defense items apply in every mode and both settings.
 
 - [ ] **Hard words:** no old term for a `GLOSSARY.md` concept remains in the target README outside the text that no language pass may change (`references/readme-rules.md` §1) and outside the old-to-new table when that table exists, unless the recommendation is itself the harder word and the conflict is recorded for the author; ordinary uses of the same word for a different meaning stay; technical names, commands, versions, links, code identifiers, and check names are unchanged.
 - [ ] **Translationese:** outside the text that no language pass may change (`references/readme-rules.md` §1), no listed pattern survives (`接住反馈`, `更锋利的重构`, `context 不崩`, `赋能`, `闭环`, `抓手`, `值得注意的是`, repeated `不是 X，而是 Y`); one term per concept; empty openers and stacked connectives are cut.
