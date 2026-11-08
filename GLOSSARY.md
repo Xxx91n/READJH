@@ -1,59 +1,128 @@
-# READJH
+# READJH 用词标准
 
-A thin orchestration skill for one-shot README governance and rewrite. It sequences
-existing upstream skills under an evidence-first discipline; it owns no rewriting
-rules of its own except the README-specific gaps upstream skills leave uncovered.
+这份表是写 READJH 的 README、票、注释、审查回复和文档时的用词标准。每条先给推荐说法，再给别怎么说。自己写东西时用推荐说法，别用「别怎么说」里的旧词。
 
-## Language
+要换掉的是让人停一下才能懂的旧叫法，不是技术名字。不造新词；技能名、命令、版本号、链接、代码标识符、检查项名字照原样保留。
 
-**Orchestration Layer (编排层)**:
-The part of READJH that is ours: routing, ordering, constraints, and the
-README-specific rules no upstream skill provides. Excludes upstream rule bodies.
-_Avoid_: our rules, custom logic
+改现在还在用的文档时，按下面的「旧词到新词对照表」换词。旧词只在这张表里出现，别在新写的句子里再用；历史记录和提交记录保持原样。
 
-**Pointer Contract (指针契约)**:
-A dependency declared by canonical skill name, resolved at fixed search paths.
-Missing dependency means stop with install instructions, never name-based fallback.
-_Avoid_: auto-discovery, soft dependency
+## 词条
 
-**Distilled Rules (蒸馏规则)**:
-Subsets of upstream rule files extracted into our own `references/`, with
-per-section source attribution. Used as supplements, never as invoked skills.
-_Avoid_: vendored copy, borrowed rules
+### 把几个现成技能串起来的总调度
 
-**Freeze Zone (冻结区)**:
-README regions no language pass may alter: commands, code blocks, URLs, versions,
-error codes, badge rows, legal and safety boundary text.
-_Avoid_: protected text, locked section
+**推荐怎么说**：说「把几个现成技能串起来的总调度」。它管先调哪个、后调哪个、哪些地方不许改，以及上游技能没覆盖到的 README 规则。上游技能自己的规则正文不算在里面。
 
-**Intensity Tier (强度档)**:
-How much language rewriting is permitted: `lite` for repos with a verified author
-voice or strong personal style, `standard` otherwise. Neither tier may invent
-personality or limitations the repo does not contain.
-_Avoid_: mode, level
+**别怎么说**：别叫它「我们的规则」或者「自定义逻辑」；别把上游技能的规则正文算进来。
 
-**Repo-Set Mode (仓库集模式)**:
-Optional cross-repository check for skeleton isomorphism over a user-supplied
-set of repositories. Off by default.
-_Avoid_: batch mode, fleet check
+### 按固定名字找技能，找不到就停
 
-**Receipt (凭证)**:
-Machine-checkable evidence backing a completion claim: probe script output,
-verified command results, a diff ledger. Inherited from jiahao; detector scores
-do not count.
-_Avoid_: proof, evidence
+**推荐怎么说**：说「按固定名字找技能，找不到就停」。依赖按技能的标准名字记在 `UPSTREAM.md`，运行前到固定的搜索路径里找。找不到就停下，给出安装办法。
 
-**Skeleton Isomorphism (结构同构)**:
-Multiple repositories sharing near-identical README section skeletons, hero
-blocks, or badge density — an AI tell independent of wording.
-_Avoid_: template reuse, sameness
+**别怎么说**：别用「自动发现」或者「软依赖」这类说法；别拿名字相近的技能顶上。
 
-**Self-Attestation (自证)**:
-Text that re-proves its own honesty or verified status. A claim stated more than
-once in a README is a defect; it converges to one statement or a link.
-_Avoid_: defensive repetition, over-justification
+### 从上游规则里挑出来的一部分
 
-**Generation Trace (生成痕迹)**:
-Leftover markers of the producing pipeline inside the README, such as rule
-comments or phase tags (e.g. `readme-crafter rule`).
-_Avoid_: AI residue, metadata leak
+**推荐怎么说**：说「从上游规则里挑出来的一部分」。从上游规则文件里挑出需要的段落，放进 `references/`，每段写明出处。它只当补充材料，不当成一个技能去调用。
+
+**别怎么说**：别说成「抄一份放进来」，也别叫「借来的规则」；别把整份上游规则搬进仓库。
+
+### 不能改的地方
+
+**推荐怎么说**：说「不能改的地方」。指语言改写不许碰的 README 内容：命令、代码块、链接、版本号、错误码、徽章、法律和安全边界的话。
+
+**别怎么说**：别叫「受保护文字」或者「锁住的段落」；别把这段里的字改了、挪了或者删了。
+
+### 静态检测功能
+
+**推荐怎么说**：说「静态检测功能」。它只读文件、跑固定检查，绝不执行 README 里写的命令。对应 `scripts/check-readme.py`。
+
+**别怎么说**：别说它会跑 README 里的命令；别把检查通过说成语言质量已经达标。
+
+### 改写力度档位
+
+**推荐怎么说**：说「改写力度档位」。`lite` 给有真人文风的仓库用，`standard` 是默认档。两档都不许编造作者的性格、缺点或者第一人称故事。
+
+**别怎么说**：别说「模式」或者「级别」；别把档位当成人格许可证。
+
+### 证据
+
+**推荐怎么说**：说「证据」。指能拿机器结果核对的东西：检测脚本的输出、真跑过的命令结果、改动清单。没有证据，不说完成。AI 检测分数不算证据。
+
+**别怎么说**：别用旧叫法（见下面的对照表）；别拿嘴上的说明或者 AI 检测分数顶替机器结果。
+
+### 几个仓库的 README 骨架像一个模子
+
+**推荐怎么说**：说「几个仓库的 README 骨架像一个模子」。指多个仓库的 README 分节骨架、开头区块、徽章密度长得几乎一样。这是整批生成的痕迹，和用词无关。只在用户主动打开「一次看一组仓库」的检查时才查。
+
+**别怎么说**：别说「模板复用」或者「太像了」；别把单个仓库里正常的同款分节也算进去。
+
+### 一次看一组仓库
+
+**推荐怎么说**：说「一次看一组仓库」。用户给一组仓库，跨仓库做骨架对比检查。默认关掉，只有用户要求才开。
+
+**别怎么说**：别叫它「批量检查」；别默认打开。
+
+### 自己给自己作证
+
+**推荐怎么说**：说「自己给自己作证」。指一段文字反复证明自己是真的、已经验证过。同一个说法在 README 里出现两次以上就是毛病，最后只留一句，或者改成一条链接。
+
+**别怎么说**：别说「防御性重复」或者「过度解释」；别用重复的话给自己撑腰。
+
+### 生成时留下的痕迹
+
+**推荐怎么说**：说「生成时留下的痕迹」。指 README 里留下的流水线记号，比如规则注释、阶段标签（如 `readme-crafter rule`）。
+
+**别怎么说**：别说「AI 残留」或者「元数据泄漏」；别把写稿说明留在正文里。
+
+### 现在就能动手的那一批
+
+**推荐怎么说**：说「现在就能动手的那一批」。指前置问题都已经定下来、现在就能问或者能开工的问题和票。上一轮答完，下一批才会露出来。
+
+**别怎么说**：别叫它「范围」；别把还被别的问题卡住的东西算进来。
+
+### 先打穿一小条
+
+**推荐怎么说**：说「先打穿一小条」。指一个测试加一小段实现，先把一条完整路径跑通，再按上一轮学到的东西做下一条。不一次写一大堆测试。
+
+**别怎么说**：别说「试点」或者「样例」；别一次写横向的一排测试再补实现。
+
+### 谁卡着谁
+
+**推荐怎么说**：说「谁卡着谁」。指一张票没做完，另一张就开不了工。
+
+**别怎么说**：别说「依赖线」或者「前置关系」；别把已经关掉的票当成依赖已经满足。
+
+### 能站在外面看结果的地方
+
+**推荐怎么说**：说「能站在外面看结果的地方」。指测试从外面调、能看见行为、不用伸手进内部的那个接口。测试只写在这种地方，不写进内部实现。
+
+**别怎么说**：别叫它「测试点」；别为了测试去改内部结构。
+
+### 阶段交界
+
+**推荐怎么说**：说「阶段交界」。指一个阶段做完、下一个阶段还没开始的那个点。到这里可以整理上下文、核对结果，再往下走。
+
+**别怎么说**：别叫它「断点」；别在阶段中间换目标。
+
+## 旧词到新词对照表
+
+表里的旧词只用来查旧记录原来是什么意思。
+
+| 旧叫法 | 现在怎么说（中文） | 现在怎么说（英文） |
+|---|---|---|
+| orchestration layer / 编排层 | 把几个现成技能串起来的总调度 | the part that runs the existing skills in order |
+| pointer contract / 指针契约 | 按固定名字找技能，找不到就停 | find each skill by its fixed name; stop if it is missing |
+| distilled rules / 蒸馏规则 / 提炼规则 | 从上游规则里挑出来的一部分 | excerpts taken from upstream rule files |
+| freeze zone / 冻结区 | 不能改的地方 | text that no language pass may change |
+| static probe / 静态探针 | 静态检测功能 | the static check |
+| intensity tier / 强度档 / 强度档位 | 改写力度档位 | how much rewriting is allowed |
+| receipt / 凭证 / 凭据 | 证据 | evidence |
+| skeleton isomorphism / 结构同构 / 骨架同构 | 几个仓库的 README 骨架像一个模子 | several repos' READMEs share the same skeleton |
+| repo-set mode / 仓库集模式 | 一次看一组仓库 | check a group of repos in one run |
+| self-attestation / 自证 / 自我声明 | 自己给自己作证 | a text that keeps proving itself |
+| generation trace / 生成痕迹 | 生成时留下的痕迹 | marks left by the producing pipeline |
+| frontier | 现在就能动手的那一批 | the set you can work on now |
+| tracer bullet | 先打穿一小条 | one small end-to-end slice first |
+| blocking edge | 谁卡着谁 | which ticket blocks which |
+| seam | 能站在外面看结果的地方 | a place to test from outside |
+| phase boundary | 阶段交界 | the line between one phase and the next |

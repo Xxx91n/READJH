@@ -1,185 +1,118 @@
-# Spec 0001 — READJH orchestration skill
+# Spec 0001 — READJH, a thin layer that strings existing skills together
 
-Issue: tickets are GitHub issues at `Xxx91n/READJH` (#1–#7); spec-level plan is this file
-Status: ready-for-agent (spec stage, implementation tickets cut by /to-tickets)
-Vocabulary: `GLOSSARY.md` at repo root. Decisions respected: ADR-0001, ADR-0002.
+Issue: tasks are GitHub issues at `Xxx91n/READJH` (#1–#7); this file is the spec-level plan.
+Status: accepted and closed. Tickets #1–#7 are closed.
+Vocabulary: `GLOSSARY.md` at the repo root. Decisions respected: ADR-0001, ADR-0002.
 
 ## Problem Statement
 
-The user's six repositories ship READMEs that read as AI-generated — not from
-banned words, but from structural tells: over-completeness (a README acting as
-product page + reference manual + threat model + versioning policy),
-self-attestation repeated in several sections, near-identical skeletons across
-repos, leftover generation traces, dense abstract-noun chains, and sentences
-carrying too many boundary conditions.
+The user's six repositories have READMEs that read as machine-written. The problem is not banned words. It is structure: one README acts as a product page, a manual, a threat model, and a versioning policy at the same time; the same boundary is stated in several sections; several repos share almost the same section skeleton; machine marks are left in the file; abstract nouns chain together; and one sentence carries too many conditions.
 
-Existing skills each cover one fragment. `readme-crafter-skill` handles facts
-and structure but has no dedicated anti-AI language pass and does not hunt
-self-attestation, cross-repo isomorphism, or generation traces.
-`writing-humanize` cleans language but knows nothing about README constraints
-and tries to inject personality and keep a learnings journal — both wrong for
-README work. `humanize-readme` contradicts itself (it demands added "honest
-gaps" while forbidding added content). Paper-side de-AI and anti-defensive
-skills hold useful rules but carry academic context READMEs do not need.
+Each existing skill covers one small part. `readme-crafter-skill` checks facts and structure, but it has no dedicated anti-AI language pass and does not look for repeated self-proof, cross-repo skeleton sameness, or machine marks. `writing-humanize` cleans language, but it does not know README limits and tries to add personality and keep a learnings journal, which are both wrong for README work. `humanize-readme` contradicts itself: it asks for added "honest gaps" while forbidding added content. The paper-side de-AI and anti-defensive rules are useful, but they carry academic context that READMEs do not need.
 
-The user needs a single entry point that orchestrates these into one
-evidence-first README governance pipeline, and nothing they can install today
-does that.
+The user needs one entry point that strings these skills into one evidence-first README workflow. Nothing installable today does that.
 
 ## Solution
 
-READJH is a thin orchestration skill — the repo root itself is the skill. It
-sequences upstream executable skills through a pointer contract, supplies the
-README-specific orchestration rules no upstream provides as its own
-`references/` files, and closes every run with machine-checkable receipts
-from a static probe script, plus a human checklist. It owns no rewriting
-rules of its own beyond the orchestration layer gaps.
+READJH is a thin layer that strings existing skills together. The repository root is the skill itself. It finds two upstream skills by fixed name, stops with install steps when one is missing, keeps its own README rules in `references/`, and closes every run with evidence from a static check script plus a human checklist. It does not invent a second set of rewriting rules beyond the gaps in that thin layer.
 
-Five phases: ROUTE → TRUTH → RESTRUCTURE → LANGUAGE → VERIFY. Deletion and
-migration always precede wording changes.
+Five phases: ROUTE → TRUTH → RESTRUCTURE → LANGUAGE → VERIFY. Delete and move first, then change wording.
 
 ## User Stories
 
-1. As a repo maintainer, I want to invoke one skill on any README, so that I get a governed rewrite without assembling four tools myself.
-2. As a maintainer, I want `audit` mode to diagnose and prioritize without touching files, so that I can review findings before any edit.
-3. As a maintainer, I want `improve` mode to surgically upgrade an existing README, so that structure and voice I already have are preserved where sound.
-4. As a maintainer, I want `rewrite` mode for a full rebuild, so that a broken README can be redone end to end.
-5. As a maintainer, I want `--dry-run` on every mode, so that I can see the plan before anything lands on disk.
-6. As a maintainer, I want every README claim checked against repository-native evidence (manifest, CI, entry points, real `--help` output), so that the README stops asserting things the repo cannot prove.
-7. As a maintainer, I want claims contradicted by the repo reported as findings instead of silently fixed, so that wrong facts surface as red lights.
-8. As a maintainer, I want claims with no evidence omitted or marked as assumptions/TODO, so that unverifiable marketing never ships.
-9. As a maintainer, I want deep material (full API, threat model, versioning policy, release process) migrated to `docs/` with a migration ledger in the delivery report, so that the README stays a front page and nothing is silently dropped.
-10. As a maintainer, I want each boundary and disclaimer stated exactly once in the README with repeats converging to one statement or a link, so that self-attestation stops repeating.
-11. As a maintainer, I want leftover generation traces (pipeline comments, rule tags) flagged and removed, so that the README carries no scaffolding marks.
-12. As a maintainer, I want commands, code blocks, URLs, versions, error codes, badge rows, and legal/safety text frozen through every language pass, so that cleanup cannot corrupt facts.
-13. As a maintainer, I want the language pass to run `writing-humanize` plus distilled supplement rules, so that AI patterns are removed at README intensity rather than generic-prose intensity.
-14. As a maintainer, I want `lite` intensity when the repo shows a strong personal voice or supplies an author writing sample, so that voice is not flattened.
-15. As a maintainer, I want `standard` intensity as the default, so that no intensity decision is required for ordinary repos.
-16. As a maintainer, I want the skill forbidden from inventing personality, honest gaps, or first-person stories not present in the repo, so that cleanup cannot manufacture authenticity.
-17. As a maintainer, I want defensive long sentences recast as "fact + link", so that boundaries survive precisely and once.
-18. As a maintainer, I want abstract-noun chains replaced by concrete referents, so that the README reads as written by a person who built the thing.
-19. As a maintainer, I want uniform sentence rhythm flagged and broken by moving words (never by adding filler), so that cadence varies without padding.
-20. As a maintainer running several repos, I want optional repo-set mode checking README skeleton isomorphism across repos, so that my repos stop sharing one template.
-21. As a maintainer, I want the repo-set check off by default, so that single-repo runs pay no extra cost.
-22. As a maintainer, I want bilingual READMEs detected and processed in lockstep with structure kept aligned, so that EN and zh variants do not drift.
-23. As a maintainer, I want no second-language README created unless I ask, so that the skill does not sprawl files.
-24. As a maintainer, I want Chinese text to get the zh-calibrated style checks from the distilled sepia rules, so that Chinese READMEs are held to Chinese human rhythm, not English defaults.
-25. As a maintainer, I want a static probe to verify links, images, code-fence balance, badge targets, boundary-phrase duplicates, and honest-gap signals — without executing anything the README says, so that receipts exist and untrusted commands never run.
-26. As a maintainer, I want README commands flagged as "needs manual verification" in the residual-risk line, so that untested commands are never claimed as tested.
-27. As a maintainer, I want the delivery report capped at three lines — conclusion, receipts, residual risk — so that reporting itself follows the evidence-first discipline.
-28. As a maintainer, I want a `.bak` kept before edits when git cannot roll back, so that the original is never lost.
-29. As an installer, I want missing upstream skills to stop the run with exact install instructions, so that a half-installed dependency never degrades a run silently.
-30. As an installer, I want dependency resolution by canonical name at documented search paths only, so that a wrong skill with a similar name is never loaded.
-31. As a user of a different agent host, I want the skill to be plain markdown plus a python3 probe, so that it runs on any Agent Skills host.
-32. As a downstream packager, I want upstream licenses preserved and each distilled rule section attributed, so that redistribution stays compliant and creditable.
-33. As a maintainer, I want `writing-humanize`'s self-evolve journaling and personality injection explicitly suppressed when invoked through READJH, so that no out-of-repo writes or fabricated voice leak into README work.
-34. As a maintainer, I want acceptance measured on real receipts — command truth, first-screen clarity, single-statement boundaries, non-isomorphic skeletons, zero generation traces — never on AI-detector scores.
+1. As a repo maintainer, I want one skill I can run on any README, so I do not have to put four tools together myself.
+2. As a maintainer, I want `audit` mode to list problems and their priority without touching files, so I can review the list before any edit.
+3. As a maintainer, I want `improve` mode to fix an existing README in small steps, so it keeps the structure and voice that already work.
+4. As a maintainer, I want `rewrite` mode to rebuild a broken README from start to finish, so I can recover a README that is beyond patching.
+5. As a maintainer, I want `--dry-run` on every mode, so I can see the plan before anything lands on disk.
+6. As a maintainer, I want every README claim checked against what the repo can prove (manifest, CI, entry points, real `--help` output), so the README stops claiming things the repo cannot back up.
+7. As a maintainer, I want claims the repo contradicts reported as findings, not silently fixed, so wrong facts show up as red lights.
+8. As a maintainer, I want claims with no evidence deleted or marked as assumptions/TODO, so unproven marketing never ships.
+9. As a maintainer, I want deep material (full API, threat model, versioning policy, release process) moved to `docs/` with a migration ledger in the delivery report, so the README stays a front page and nothing is dropped.
+10. As a maintainer, I want each boundary and disclaimer stated once in the README, with repeats turned into one statement or a link, so the README stops repeating itself.
+11. As a maintainer, I want leftover machine marks (pipeline comments, rule tags) found and removed, so the README carries no scaffolding.
+12. As a maintainer, I want commands, code blocks, URLs, versions, error codes, badge rows, and legal/safety text left byte-for-byte alone through every language pass, so cleanup cannot corrupt facts.
+13. As a maintainer, I want the language pass to run `writing-humanize` plus the rules picked out of upstream files, so AI patterns are removed at README strength, not generic-prose strength.
+14. As a maintainer, I want a `lite` rewrite-strength level when the repo shows a strong personal voice or the user gives a writing sample, so the voice is not flattened.
+15. As a maintainer, I want `standard` as the default rewrite-strength level, so I do not have to choose a level for an ordinary repo.
+16. As a maintainer, I want the skill forbidden from inventing personality, gaps, or first-person stories the repo does not contain, so cleanup cannot fake authenticity.
+17. As a maintainer, I want defensive long sentences turned into "fact + link", so boundaries stay precise and appear once.
+18. As a maintainer, I want abstract-noun chains replaced with concrete things, so the README reads like a person who built the thing wrote it.
+19. As a maintainer, I want a flat sentence rhythm flagged and broken by moving words, never by adding filler, so the cadence varies without padding.
+20. As a maintainer with several repos, I want an optional multi-repo check for README skeletons that look like one mold, so my repos stop sharing one template.
+21. As a maintainer, I want the multi-repo check off by default, so single-repo runs pay no extra cost.
+22. As a maintainer, I want bilingual READMEs found and processed together with the same structure, so the English and Chinese versions do not drift.
+23. As a maintainer, I want no second-language README created unless I ask, so the skill does not add files I did not want.
+24. As a maintainer, I want Chinese text checked against Chinese human rhythm, not English defaults, so Chinese READMEs get the right style checks.
+25. As a maintainer, I want a static check to verify links, images, code fences, badge targets, repeated boundary phrases, and gap signals, without running anything the README says, so I get evidence and no untrusted command runs.
+26. As a maintainer, I want README commands listed as "needs manual verification" in the residual-risk line, so untested commands are never called tested.
+27. As a maintainer, I want the delivery report capped at three lines (conclusion, evidence, residual risk), so reporting follows the same evidence-first rule.
+28. As a maintainer, I want a `.bak` copy before edits when Git cannot roll back, so the original is never lost.
+29. As an installer, I want missing upstream skills to stop the run with exact install steps, so a half-installed dependency never degrades a run silently.
+30. As an installer, I want dependencies found by canonical name at documented search paths only, so a wrong skill with a similar name is never loaded.
+31. As a user of another agent host, I want the skill to be plain markdown plus a python3 check script, so it runs on any Agent Skills host.
+32. As a downstream packager, I want upstream licenses kept and each picked-out rule section credited, so redistribution stays legal and credit is kept.
+33. As a maintainer, I want `writing-humanize`'s self-evolve journaling and personality injection explicitly suppressed when READJH runs it, so no out-of-repo writes or fake voice leak into README work.
+34. As a maintainer, I want acceptance measured on real evidence (command truth, first-screen clarity, one statement per boundary, non-isomorphic skeletons, zero machine marks), never on AI-detector scores.
 
 ## Implementation Decisions
 
 ### Modules
 
-- **SKILL.md** (model-invoked): frontmatter `name`, `description` carrying trigger
-  phrasing for README audit/improve/rewrite and de-AI requests; body holds the
-  five-phase pipeline, pointer-contract resolution block, freeze-zone and
-  intensity rules inline (short), and the three-line report format.
-- **references/readme-rules.md**: orchestration-layer rules — freeze-zone
-  definition, self-attestation convergence, generation-trace detection,
-  skeleton-isomorphism definition, no-invented-personality rule; each rule
-  carries its upstream/research attribution line.
-- **references/de-ai-language.md**: supplement rules handed to
-  `writing-humanize` — distilled subsets of sepia professional-pass +
-  style-pass + zh calibration, anti-defensive-writing (EN)
-  defensive→positive-scope transform, academic-humanizer claim↔evidence
-  discipline, and the salvageable humanize-readme rules (burstiness,
-  suspicious-completeness, real-gap signals). Ban tables verbatim with
-  attribution; rationale rewritten; overlapping patterns merged with multiple
-  attributions.
-- **references/checklist.md**: the human verification checklist for VERIFY.
-- **scripts/check-readme.py**: stdlib-only python3 CLI. Arguments: target
-  README path, optional `--repo-root`, optional `--repo-set` manifest file for
-  cross-repo skeleton diff. Exit 0 when no blocking findings; nonzero with a
-  findings list. Emits structured text suitable as a receipt.
-- **UPSTREAM.md**: dependency table (canonical name, upstream URL, license,
-  required files, search paths), install contract, and the deviation table
-  recording READJH's two suppressions of writing-humanize.
+- **SKILL.md** (model-invoked): frontmatter `name` and `description` carry the trigger words for README audit/improve/rewrite and de-AI requests. The body holds the five phases, the find-skills rules, the short no-touch and rewrite-strength rules inline, and the three-line report format.
+- **references/readme-rules.md**: the README rules the thin layer owns: what no language pass may touch, one-statement boundaries, machine marks, skeleton sameness, no invented personality. Each rule carries its credit line.
+- **references/de-ai-language.md**: rules handed to `writing-humanize`, picked from sepia professional/style passes and zh calibration, the English Kiterlin anti-defensive rules, academic-humanizer claim-to-evidence rules, and the usable humanize-readme rules. Ban tables keep their credit; rationale is rewritten.
+- **references/checklist.md**: the human checklist for VERIFY.
+- **scripts/check-readme.py**: stdlib-only python3 CLI. Arguments: README path, optional `--repo-root`, optional `--repo-set` manifest. Exit 0 when no blocking findings; nonzero with a findings list. Output is suitable as evidence.
+- **UPSTREAM.md**: dependency table (canonical name, URL, license, required files, search paths), install steps, and deviation table.
 - **NOTICE**: upstream credits and license texts (all MIT).
-- **LICENSE**: MIT, READJH itself.
-- **README.md**: what READJH is, install, quickstart, pointer contract summary.
-- **AGENTS.md** + **docs/agents/** (issue-tracker, triage-labels, domain):
-  repo housekeeping files — declared extra artifacts, approved in grilling.
-- **docs/spec/**, **docs/tickets/**: file-based spec and ticket tracker; ticket
-  numbers are filenames until a remote exists.
-- **.gitattributes**: `* text=auto eol=lf` — the repo is LF-normalized; current
-  files are LF.
+- **LICENSE**: MIT for READJH itself.
+- **README.md**: what READJH is, install, quickstart, find-skills summary.
+- **AGENTS.md** and **docs/agents/**: repo housekeeping.
+- **docs/spec/** and **docs/tickets/**: spec and ticket tracker.
+- **.gitattributes**: `* text=auto eol=lf`. The repo is LF-normalized.
 
 ### Interfaces
 
-- Pointer contract: canonical names `readme-crafter-skill`, `writing-humanize`;
-  search order `.agents/skills/` → `~/.agents/skills/` → standard skill roots
-  listed in `UPSTREAM.md`; miss → stop + install instructions; never
-  name-similarity fallback.
-- Probe CLI contract: `python3 scripts/check-readme.py <readme> [--repo-root
-  <dir>] [--repo-set <manifest>]` → exit 0/nonzero + findings on stdout.
-- Supplement-rules handoff: `references/de-ai-language.md` and
-  `references/readme-rules.md` are read into context at LANGUAGE phase, not
-  invoked as skills.
-- Migration ledger: required section in the improve/rewrite delivery report
-  listing every moved span and its destination file.
+- **Find-skills rule**: canonical names `readme-crafter-skill` and `writing-humanize`; search order `.agents/skills/` → `~/.agents/skills/` → the standard roots in `UPSTREAM.md`; miss → stop and give install steps; never fall back to a similar name.
+- **Check CLI**: `python3 scripts/check-readme.py <readme> [--repo-root <dir>] [--repo-set <manifest>]` → exit 0/nonzero plus findings on stdout.
+- **Rule handoff**: `references/de-ai-language.md` and `references/readme-rules.md` are read into context at LANGUAGE, not run as skills.
+- **Migration ledger**: a required section in the improve/rewrite report. It lists every moved span and its destination file.
 
-### Do-not list (locked in grilling)
+### Do-not list
 
-- No vendoring upstream repos; no name-based fallback for dependencies.
-- `humanize-readme` never executes; it contributes rules only.
-- No AI-detector score as an acceptance signal.
-- No executing commands found inside a README.
+- No vendoring upstream repos.
+- No name-based fallback for dependencies.
+- `humanize-readme` never runs; it only contributes rules.
+- No AI-detector score as acceptance.
+- No running commands found inside a README.
 - No invented personality, gaps, or first-person stories.
 - No second-language README unless requested.
-- No generator/adapter machinery (ADR-0002).
+- No generator or adapter machinery (ADR-0002).
 
 ## Testing Decisions
 
-Approved seams:
+Approved checkpoints:
 
-- **Seam A — probe script (primary, TDD)**: unit tests on
-  `check-readme.py`'s CLI contract and per-check behavior with fixture
-  READMEs. Test external behavior only: inputs (files on disk + args) →
-  outputs (findings + exit code). Fixture READMEs derive from real upstream
-  examples and the six target repos, not invented content.
-- **Seam B — SKILL.md contract (light)**: frontmatter validity, phase/glossary
-  term consistency, pointer-contract text matching `UPSTREAM.md`. A lint
-  checklist, not a test framework.
-- **Seam C — end-to-end acceptance**: run `audit` mode on the six repos
-  (6F, EgressAPIKEY, mcp-for-maya, env-manager, boxing, jiahao) plus one
-  human-baseline README (ripgrep or user-designated). Judged on the research
-  acceptance list + probe output + the user's blind review.
+- **Checkpoint A, the check script (primary, TDD)**: unit tests on the CLI contract and each check, using fixture READMEs. Test external behavior only: files and arguments in, findings and exit code out. Fixtures come from real upstream examples and the six target repos, not invented content.
+- **Checkpoint B, the SKILL.md contract (light)**: frontmatter validity, phase and glossary term consistency, and find-skills text matching `UPSTREAM.md`. This is a lint checklist, not a test framework.
+- **Checkpoint C, end-to-end acceptance**: run `audit` on the six repos plus one human-baseline README. Judge it on the research acceptance list, the check output, and the user's blind review.
 
-What makes a good test here: binary checks against files on disk and declared
-contracts. No assertions on prose style inside the skill documents — style is
-the rules' job, not a test's. No testing that distilled files "match"
-upstream: attribution lines are the contract.
+What makes a good test here: binary checks against files on disk and declared contracts. Do not assert on prose style inside the skill documents; style is the rules' job. Do not test that picked-out files "match" upstream; the credit lines are the contract.
 
-Prior art: none in this repo (greenfield). The probe's check style follows
-the static-inspection approach of `readme-crafter-skill/scripts/scan-project.py`.
+Prior art: none in this repo. The check script follows the static-inspection approach of `readme-crafter-skill/scripts/scan-project.py`.
 
 ## Out of Scope
 
-- Authoring new rewriting rules beyond the orchestration layer's gaps — that
-  is upstream skills' job.
-- Executing or validating README-documented commands.
+- Writing new rewriting rules beyond the gaps in the thin layer. Upstream skills do that.
+- Running or validating README-documented commands.
 - Multi-host adapter builds (ADR-0002).
-- Running the actual governance pass on the six repos — this spec builds the
-  tool; repo-by-repo passes are separate work.
+- Running the actual governance pass on the six repos. This spec builds the tool; repo-by-repo passes are separate work.
 - AI-detector benchmarking.
 - GitHub remote setup, issue migration, and publishing the skill anywhere.
 
 ## Further Notes
 
-- Runtime validation items carried to implementation tickets: real output of
-  `scan-project.sh` under Git Bash on this host; `writing-humanize`'s
-  obedience to distilled supplement rules in practice. Both are probe-first
-  tasks; a failed probe stops the dependent work.
-- Upstreams are not version-pinned. `UPSTREAM.md` records the upstream commit
-  hash observed at authoring time; a drift note lives there, not in SKILL.md.
-- The two `anti-defensive-writing` upstreams share a name; READJH distills
-  the English Kiterlin variant only and references it by path, never by name.
+- Runtime checks carried to tickets: the real output of `scan-project.sh` under Git Bash on this host, and `writing-humanize`'s obedience to the picked-out rules in practice. Both are check-first tasks; a failed check stops the dependent work.
+- Upstreams are not version-pinned. `UPSTREAM.md` records the upstream commit seen at authoring time; a drift note lives there, not in `SKILL.md`.
+- The two `anti-defensive-writing` upstreams share a name. READJH picks out the English Kiterlin variant only and points to it by path, never by name.

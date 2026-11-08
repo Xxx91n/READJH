@@ -6,33 +6,42 @@ who built the thing — and asserts only what the repo can prove.
 
 ## The problem it solves
 
-AI-generated READMEs fail on structure, not vocabulary: over-complete
-coverage (product page + manual + threat model in one file),
-self-attestation repeated across sections, identical skeletons across a
-maintainer's repos, leftover generation traces, abstract-noun chains,
-and boundary conditions packed into single sentences. Existing skills
-each fix a fragment; none run the whole evidence-first pipeline.
+AI-generated READMEs fail on structure, not vocabulary. They often show:
+
+- too much coverage (product page, manual, and threat model in one file)
+- a text that keeps proving itself across sections
+- identical skeletons across a maintainer's repos
+- marks left by the producing pipeline
+- abstract-noun chains
+- boundary conditions packed into single sentences
+
+Existing skills each fix a fragment; none run the whole evidence-first
+pipeline.
 
 ## Core concepts (full definitions: `GLOSSARY.md`)
 
-- **Orchestration layer** — the part READJH owns: routing, ordering,
-  constraints, README-specific rules. Not upstream rule bodies.
-- **Pointer contract** — executable upstreams resolved by canonical name
-  at fixed paths; miss = stop with install instructions.
-- **Distilled rules** — upstream rule subsets in `references/` with
-  per-section attribution; supplements, never invoked skills.
-- **Freeze zone** — text no language pass may touch: commands, code,
-  URLs, versions, error codes, badges, legal/safety text.
-- **Intensity tier** — `lite` (verified author voice) or `standard`
-  (default); neither may fabricate personality.
-- **Receipt** — machine-checkable evidence for a completion claim;
+- **The part that runs the existing skills in order** — routing, ordering,
+  constraints, and README-specific rules. It does not include the rule
+  bodies of upstream skills.
+- **Find each skill by its fixed name; stop if it is missing** — the run
+  looks for each executable skill at fixed paths. If one is missing, it
+  stops with install instructions.
+- **Excerpts taken from upstream rule files** — only the parts README work
+  needs go into `references/`, and each section names its source. They are
+  supplements, never skills that get called.
+- **Text that no language pass may change** — commands, code, URLs,
+  versions, error codes, badges, and legal or safety text.
+- **How much rewriting is allowed** — `lite` when the repo has a verified
+  author voice, `standard` by default. Neither one may invent personality.
+- **Evidence** — something a machine can check for a completion claim.
   AI-detector scores do not count.
-- **Skeleton isomorphism** — near-identical README section skeletons shared
-  across repos; checked only in opt-in repo-set mode.
-- **Self-attestation** — a claim stated more than once is a defect; it
-  converges to one statement or a link.
-- **Generation trace** — scaffolding marks left in the README (rule
-  comments, phase tags).
+- **Several repos' READMEs share the same skeleton** — near-identical
+  section skeletons across repos. This is checked only when the user asks
+  for a group of repos in one run.
+- **A text that keeps proving itself** — a claim stated more than once is a
+  defect. Cut it to one statement or a link.
+- **Marks left by the producing pipeline** — rule comments, phase tags, and
+  other scaffolding left in the README.
 
 ## The five phases
 
@@ -42,10 +51,10 @@ always precede wording changes. Modes: `audit` (no writes), `improve`
 
 ## Boundaries
 
-- The probe is static: it never executes commands a README documents.
-- Upstream executors are invoked; upstream rule bodies are distilled.
-  READJH does not author new rewriting rules beyond orchestration gaps.
-- Chinese READMEs get zh-calibrated checks from distilled sepia rules.
-  Bilingual work is native-first: the current window finishes the native
-  README, then hands translation to a new clean window; no second-language
-  README is created unless requested.
+- The static check only reads: it never executes commands a README
+  documents.
+- Upstream skills are called; their rule bodies are used as excerpts.
+  READJH writes no new rewriting rules beyond the gaps it must fill itself.
+- Chinese READMEs get zh-calibrated checks from excerpts of sepia. The
+  native-language README is finished first; translation runs later in a new
+  clean window. No second-language README is created unless requested.
