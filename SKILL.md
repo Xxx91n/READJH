@@ -358,8 +358,8 @@ and `VERIFY`. The phases below state what each one does in each mode.
      rollback decision (§3, `RESTRUCTURE` step 6 — evaluated there against
      the whole planned write set, not `<readme>` alone) and the `VERIFY`
      zero-write check.
-   - `--repo-set` group check: enabled only when `--repo-set <manifest>` is
-     passed; off by default.
+   - `--repo-set` (check a group of repos in one run): enabled only when
+     `--repo-set <manifest>` is passed; off by default.
 2. **Select the rewrite strength:**
    - Check repository commits, issues, or writing samples supplied by the user.
      Select `lite` when a distinct author voice is verified; otherwise select
@@ -636,8 +636,8 @@ commands run.
 **Completion criterion:** All structural, **text that keeps proving itself**,
 **marks left by the pipeline**, **the same README skeleton across repos**, and
 language findings are logged with severity (`HIGH` / `MEDIUM` / `LOW`) and
-`<readme>:<line>` anchors. In `audit`
-mode, zero files are modified. In write modes, only the planned structural
+`<readme>:<line>` anchors. In `audit` mode, zero files are modified. In write
+modes, only the planned structural
 edits have landed (or, in `--dry-run`, nothing has), every `docs/` move has a
 migration ledger entry, the `.bak` rule has fired or been recorded as skipped,
 and no sentence-level wording has changed yet.
