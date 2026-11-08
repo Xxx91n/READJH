@@ -68,7 +68,7 @@ Run this binary assertion checklist during `VERIFY` (and as the diagnostic rubri
 
 ## 7. Voice Preserved and De-AI Language Audit
 
-> **Attribution:** `READJH` orchestration layer (`docs/spec/0001-readjh-orchestration-skill.md` US-13–16, US-18–19, US-22–24, US-33–34; `UPSTREAM.md` §Deviation table; `references/readme-rules.md` §5; `references/de-ai-language.md`); `writing-humanize` (`skills/writing-humanize/SKILL.md` & `skills/writing-humanize/references/patterns.md` Patterns #1–29); `sepia` (`.agents/skills/sepia/references/style-pass.md` §2–7 & `references/languages/zh.md` §1–5); `humanize-readme` (`humanize-readme/references/slop-patterns.md`).
+> **Attribution:** `READJH` orchestration layer (`docs/spec/0001-readjh-orchestration-skill.md` US-13–16, US-18–19, US-23–24, US-33–34; `SKILL.md` §2 Native-First Translation Handoff; `UPSTREAM.md` §Deviation table; `references/readme-rules.md` §5; `references/de-ai-language.md`); `writing-humanize` (`skills/writing-humanize/SKILL.md` & `skills/writing-humanize/references/patterns.md` Patterns #1–29); `sepia` (`.agents/skills/sepia/references/style-pass.md` §2–7 & `references/languages/zh.md` §1–5); `humanize-readme` (`humanize-readme/references/slop-patterns.md`).
 
 - [ ] **Intensity tier and suppressions honored (`references/readme-rules.md` §5):** `lite` preserved verified author voice; `standard` cleaned clustered tells to plain prose; zero invented personality, first-person stories, unverified gaps, or out-of-repo `.ink-and-agency/` writes occurred.
 - [ ] **Sentence rhythm and edit tests (`references/de-ai-language.md` §1, §2, §6):** runs of three or more near-equal sentences were broken by moving words without adding filler; all edits pass `sepia`'s deletion test and reversion test.

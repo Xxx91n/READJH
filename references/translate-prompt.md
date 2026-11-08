@@ -8,7 +8,7 @@ prompt, and fill in the four values below. Run the job there.
 
 - **Native language:** `<language of the approved README>`
 - **Native README:** `<path to the approved README>`
-- **Translate to:** `<target language>`
+- **Translate to:** `<target language; one per file when they differ>`
 - **Files to translate:** `<one path per line; correct the existing target files>`
 
 Read the native README in full before writing anything.
@@ -28,6 +28,8 @@ Read the native README in full before writing anything.
    translation.
 5. **Keep facts fixed.** Do not change code, commands, links, versions,
    numbers, badges, file paths, or direct quotes. Copy them byte for byte.
+   If a target file states a different fact, stop and report it to the author
+   instead of fixing it here.
 6. **New clean window only.** This job runs in the new window, never in the
    window that wrote the native README. Do not go back to that window to
    translate.

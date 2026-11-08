@@ -115,6 +115,11 @@ class TestHandoffBlockContract(unittest.TestCase):
         self.assertIn("Open a new, clean window", block)
         self.assertIn("This window never translates.", block)
 
+    def test_handoff_requires_a_companion_or_an_explicit_request(self):
+        text = " ".join(SKILL_PATH.read_text(encoding="utf-8").split())
+        self.assertIn("If no companion README exists", text)
+        self.assertIn("unless the user asks for a translation", text)
+
     def test_handoff_waits_for_approval(self):
         text = " ".join(SKILL_PATH.read_text(encoding="utf-8").split())
         self.assertIn("that the user approves produces a handoff", text)

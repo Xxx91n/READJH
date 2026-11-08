@@ -290,7 +290,8 @@ window, driven by `references/translate-prompt.md`.
 - **Trigger:** only a write-mode run (`improve` or `rewrite`, not `--dry-run`)
   that the user approves produces a handoff. Approval is the user's explicit
   "approved" after the `VERIFY` three-line report. Do not emit the handoff
-  before that.
+  before that. If no companion README exists, emit nothing unless the user
+  asks for a translation.
 - **Leave the companion README's prose alone.** Re-point links in it only when
   a `RESTRUCTURE` move breaks them (`RESTRUCTURE` step 7). That is link repair,
   not translation.
@@ -300,7 +301,7 @@ window, driven by `references/translate-prompt.md`.
 ```text
 [Native language]: <language of the approved README>
 [Native README]: <path to the approved README>
-[Translate to]: <target language>
+[Translate to]: <target language; one per file when they differ>
 [Files to translate]: <one path per line>
 [Translation prompt]: references/translate-prompt.md
 [Next step]: Open a new, clean window and run the prompt in references/translate-prompt.md with the values above. This window never translates.
@@ -366,10 +367,11 @@ states each phase's behavior per mode.
 3. **Detect language and companion files:**
    - Record the primary language of `<readme>` and any existing localized
      companion README. Record which file is native-language; that file is the
-     only prose target for this run. `TRUTH` may check the companion for
-     facts, and `RESTRUCTURE` may repair its links after a move, but the
-     current window never translates its prose (§2, Native-First Translation
-     Handoff).
+     only prose target for this run. If `<readme>` is not the native-language
+     file, stop and ask the user whether to run the native file instead.
+     `TRUTH` may check the companion for facts, and `RESTRUCTURE` may repair
+     its links after a move, but the current window never translates its
+     prose (§2, Native-First Translation Handoff).
 4. **Capture the zero-write baseline (before any upstream file is read or run):**
    - Record a file-tree snapshot of `<repo-root>`: relative path and SHA-256
      of every file, excluding `.git/`.
