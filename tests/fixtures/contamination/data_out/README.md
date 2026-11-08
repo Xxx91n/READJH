@@ -1,6 +1,6 @@
 # EgressAPIKEY
 
-**Multi-port socks5/http proxy gateway between AI gateways and upstream providers.**
+**Multi-port socks5/http proxy gateway between AI gateways and upstream providers — sticky exit-IP routing for AI API keys, with a topology canvas.**
 
 ## Runbook
 

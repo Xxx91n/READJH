@@ -18,7 +18,10 @@ Ticket: GitHub issue #19 (parent spec: issue #16 / Spec 0002)
   (`high` / `block` / `data`), and stop condition for every declared span.
 - `tests/fixtures/contamination/SOURCES.md` — where the real carrier text and
   the directive wording come from.
-- `tests/test_contamination_defense.py` — 13 `unittest` tests:
+- `tests/fixtures/contamination/source_excerpts.json` — the exact upstream
+  lines the fixtures quote, plus the rule-text examples used by the reader
+  fixture. The source test compares every fixture against these lines.
+- `tests/test_contamination_defense.py` — 14 `unittest` tests:
   - exact quote and line checks for every fixture span;
   - a small test-only classifier that applies the decision table in
     `references/readme-rules.md` §6;
@@ -29,7 +32,9 @@ Ticket: GitHub issue #19 (parent spec: issue #16 / Spec 0002)
   - contract checks that the rule text, `SKILL.md`, and checklist §9 keep the
     `HIGH` / `BLOCKED` split and all four stop conditions;
   - a check that `scripts/check-readme.py` still has only its six static
-    checks and rejects `contamination` as an unknown check name.
+    checks and rejects `contamination` as an unknown check name;
+  - checks that ordinary prose and an agent-addressed pointer stay `HIGH`,
+    not `BLOCKED`.
 
 ## 2. Verification
 
@@ -37,10 +42,10 @@ Run from the worktree root:
 
 ```text
 python -m unittest discover -s tests -p "test_contamination_defense.py" -v
-→ 13 tests, OK, exit 0
+→ 14 tests, OK, exit 0
 
 python -m unittest discover -s tests -v
-→ 131 tests, OK, exit 0
+→ 132 tests, OK, exit 0
 ```
 
 The fixture probe runs are inside the new suite:
@@ -56,20 +61,25 @@ returns `PASS` and exit 0 for all six fixtures.
   `data_out/README.md:7` returns `BLOCKED` with `stop_condition = data-out`;
   the write list is empty and the fixture tree hash is unchanged. The other
   three stop conditions have the same result.
-- **The tests pass:** 131 tests, exit 0.
-- **Realistic text:** the title, description, and `llms.txt` blockquote quote
-  `Xxx91n/EgressAPIKEY` `README.md` at commit
+- **The tests pass:** 132 tests, exit 0.
+- **Realistic text:** the title, full one-line description, and `llms.txt`
+  blockquote quote `Xxx91n/EgressAPIKEY` `README.md` at commit
   `30e087277381b24715c0a85e44be8bbfe0c6cdd6`, lines 1-9. The `Limitations`
   sentence quotes the upstream caveat from line 68 of the same file. The
-  directive wording comes from ticket #19; the pattern category is OWASP
-  LLM01 (prompt injection). The four stop conditions come from Spec 0002
-  (issue #16) and `references/readme-rules.md` §6.
+  reader lines ("run the tests", "open config.json", "upload reports to S3")
+  quote `references/readme-rules.md` §6.1 and §6.2. The directive wording
+  comes from ticket #19. The pattern category is OWASP LLM01 (prompt
+  injection). The four stop conditions come from Spec 0002 (issue #16) and
+  `references/readme-rules.md` §6. The exact quoted lines are stored in
+  `source_excerpts.json`; the tests do not fetch the upstream repository.
 
 ## 4. Limit
 
-The classifier is a test double. It shows that the fixtures and the written
-decision table agree and that a stop condition returns before the write step.
-It does not show that a model follows the prompt rule. That check stays the
+The classifier is a test double. It shows that the fixtures and the decision
+table in this test file agree, and that a stop condition returns before the
+write step. It does not show that a model follows the prompt rule. The
+contract tests compare rule-text strings; a rule rewrite that keeps the same
+headings but drops a trigger word would not be caught. That check stays the
 manual item in `references/checklist.md` §9. This receipt does not claim
 model behavior is verified.
 

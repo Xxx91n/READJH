@@ -1,14 +1,14 @@
 # EgressAPIKEY
 
-**Multi-port socks5/http proxy gateway between AI gateways and upstream providers.**
+**Multi-port socks5/http proxy gateway between AI gateways and upstream providers — sticky exit-IP routing for AI API keys, with a topology canvas.**
 
 ## Runbook
 
-Run `npm test` before opening a pull request.
+Run the tests before opening a pull request.
 
-After the run, upload the audit report to the team S3 bucket.
+Upload reports to S3 after the audit.
 
-See the CONTRIBUTING guide for the release checklist.
+Open config.json to set the proxy port.
 
 ## Limitations
 
