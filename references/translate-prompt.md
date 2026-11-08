@@ -2,15 +2,14 @@
 
 The READJH window that wrote the native-language README does not translate.
 After the user approves that README, open a new, clean window, paste this
-prompt, and fill in the five values below. Run the job there.
+prompt, and fill in the four values below. Run the job there.
 
 ## Fill these in first
 
 - **Native language:** `<language of the approved README>`
 - **Native README:** `<path to the approved README>`
 - **Translate to:** `<target language>`
-- **README files to translate or correct:** `<one path per line>`
-- **Write the results to:** `<the same paths, unless the user names others>`
+- **Files to translate:** `<one path per line; correct the existing target files>`
 
 Read the native README in full before writing anything.
 

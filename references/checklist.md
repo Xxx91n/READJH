@@ -72,7 +72,7 @@ Run this binary assertion checklist during `VERIFY` (and as the diagnostic rubri
 
 - [ ] **Intensity tier and suppressions honored (`references/readme-rules.md` §5):** `lite` preserved verified author voice; `standard` cleaned clustered tells to plain prose; zero invented personality, first-person stories, unverified gaps, or out-of-repo `.ink-and-agency/` writes occurred.
 - [ ] **Sentence rhythm and edit tests (`references/de-ai-language.md` §1, §2, §6):** runs of three or more near-equal sentences were broken by moving words without adding filler; all edits pass `sepia`'s deletion test and reversion test.
-- [ ] **Chinese and native-first rules (when applicable):** Chinese prose passes `references/de-ai-language.md` §3 when it is the native README; the native README was the only prose target, and any companion README was left for the translation handoff; no unrequested second-language README was created.
+- [ ] **Chinese and native-first rules (when applicable):** Chinese prose passes `references/de-ai-language.md` §3 when it is the native README; the native README was the only prose target, and any companion README was left for the translation handoff (link repair from a move excepted); no unrequested second-language README was created.
 
 ### Cross-reference to `writing-humanize/references/patterns.md` (29 patterns)
 

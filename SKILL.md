@@ -225,8 +225,9 @@ as a finding with its `file:line` **receipt**. `LANGUAGE` never mutates a
 - **Static safety:** Never execute commands documented inside a target README.
 - **Native-first translation:** Detect existing bilingual README pairs (such
   as `README.md` + `README-ZH.md` or `README.zh-CN.md`) and record which file
-  is the native-language README. This window completes and approves only the
-  native README's prose; it never translates and never rewrites the companion
+  is the native-language README. This window completes and verifies only the
+  native README's prose; the user approves it. The window never translates
+  and never rewrites the companion
   README's wording. Apply Chinese (`zh`) calibration rules
   (`references/de-ai-language.md` §3) when the native README is Chinese.
   After approval, emit the handoff block below and let a new clean window
@@ -529,9 +530,9 @@ is matched to a `<repo-file>:<line>` **receipt** or logged as a `HIGH` /
 6. **Enforce the `.bak` rollback rule (write modes, before the first file
    write; skipped only when every write-set member is Git-recoverable):**
    - **Enumerate the planned write set first** (from the step 7 edit plan):
-     `<readme>`, its companion localized README when one exists, every
-     `docs/` destination — new or existing —, and any other file the run
-     will create or modify.
+     the native `<readme>`, the companion localized README only when link
+     repair changes it, every `docs/` destination — new or existing —, and
+     any other file the run will create or modify.
    - **Git-recoverable check, per member:** an existing file is
      Git-recoverable only when it is tracked **and** clean. Tracked is
      proven explicitly — `git --literal-pathspecs -C "<repo-root>"

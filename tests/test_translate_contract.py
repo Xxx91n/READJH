@@ -15,7 +15,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 PROMPT_PATH = REPO_ROOT / "references" / "translate-prompt.md"
 SKILL_PATH = REPO_ROOT / "SKILL.md"
 
-# The eight required items from Spec 0002 / issue #20, in order.
+# The eight required items from issue #20 (parent spec #16), in order.
 REQUIRED_RULE_LABELS = [
     "Native first.",
     "One-to-one structure.",
@@ -27,7 +27,7 @@ REQUIRED_RULE_LABELS = [
     "Return a correspondence table.",
 ]
 
-# Fields every handoff block must fill in (Spec 0002 / issue #20).
+# Fields every handoff block must fill in (issue #20, parent spec #16).
 REQUIRED_HANDOFF_LABELS = [
     "[Native language]:",
     "[Native README]:",
@@ -62,7 +62,7 @@ class TestTranslatePromptContract(unittest.TestCase):
             "Native language:",
             "Native README:",
             "Translate to:",
-            "README files to translate or correct:",
+            "Files to translate:",
         ):
             self.assertIn(label, text, f"translate-prompt.md is missing {label!r}")
 
