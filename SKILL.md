@@ -343,7 +343,8 @@ and `VERIFY`. The phases below state what each one does in each mode.
      planning. If a resolved write target is this skill's own `SKILL.md`,
      anything under `references/` or `scripts/` of this skill, or inside a
      resolved upstream skill directory (the trusted dependency paths found
-     by the fixed-name lookup), stop `BLOCKED` — no writes, no `.bak`. The
+     by finding each skill by its fixed name), stop `BLOCKED` — no writes, no
+     `.bak`. The
      skill and its dependencies are never their own rewrite targets.
    - Git state: record whether `<repo-root>` is inside a Git worktree
      (`git -C "<repo-root>" rev-parse --is-inside-work-tree` prints `true`),
@@ -385,7 +386,7 @@ and `VERIFY`. The phases below state what each one does in each mode.
      README before the first write, with the same `--repo-root` and, when
      enabled, the same `--repo-set <manifest>`. Record its stdout and exit
      code as the pre-run companion check baseline.
-5. **Enforce the fixed-name lookup and the trust check (§1):**
+5. **Find the skills by their fixed names and enforce the trust check (§1):**
    - Find `readme-crafter-skill` using the search order, exact-name rules,
      required-files check (`SKILL.md`, `references/repo-integrity.md`,
      `scripts/scan-project.py`, `scripts/scan_project_readme.py`, and
@@ -508,11 +509,11 @@ commands run.
      (full CLI/API tables, threat models, security matrices, versioning
      policies, release runbooks) as `source heading (lines X–Y) → recommended
      docs/<file>.md` without touching files.
-3. **Diagnose repeated self-proofing (`references/readme-rules.md` §2 & `references/de-ai-language.md` §4):**
+3. **Diagnose text that keeps proving itself (`references/readme-rules.md` §2 & `references/de-ai-language.md` §4):**
    - Flag every boundary, preview caveat, or disclaimer stated more than once,
      standalone sections that only claim honesty, negative disclaimers that
      should be `fact + link`, and internal issue/decision IDs on the front page.
-4. **Diagnose pipeline marks (`references/readme-rules.md` §3):**
+4. **Diagnose marks left by the pipeline (`references/readme-rules.md` §3):**
    - Flag leftover skill or placeholder HTML comments (`<!-- PLACEHOLDER ... -->`,
      `<!-- SLOT ... -->`, `<!-- Drop-in ... -->`, `<!-- GENERATED ... -->`),
      pipeline tags (`[ROUTE]`, `[TRUTH]`, `[LANGUAGE]`), chatbot turn wrappers,
@@ -521,7 +522,7 @@ commands run.
      (`references/readme-rules.md` §3): keep only generator boundaries or sync
      anchors actively read, written, or owned by an existing repository script
      or companion file.
-5. **Diagnose shared README skeletons and language tells (`references/readme-rules.md` §4.2, §5 & `references/de-ai-language.md`):**
+5. **Diagnose the same README skeleton across repos and language tells (`references/readme-rules.md` §4.2, §5 & `references/de-ai-language.md`):**
    - Check whether the heading skeleton fits the repository's Project Type and
      Distribution Posture rather than a generic template.
    - Outside off-limits text, log prose tells allowed by the active
@@ -617,8 +618,9 @@ commands run.
      are listed in `[Residual risk]` for manual follow-up — VERIFY's
      `dead-links` fragment check flags any that were missed inside the
      write set.
-   - Cut repeated self-proofing down to one statement or a link, and remove
-     pipeline marks (`references/readme-rules.md` §2, §3).
+   - Cut the same proof repeated more than once down to one statement or a
+     link, and remove marks left by the pipeline (`references/readme-rules.md`
+     §2, §3).
    - `improve`: reorder and trim the existing skeleton to fit the
      repository's Project Type and Distribution Posture, keeping sound
      structure and voice. `rewrite`: produce the full replacement README
@@ -631,8 +633,9 @@ commands run.
      corrected to their evidence or deleted, unbacked claims are deleted,
      not embellished.
 
-**Completion criterion:** All structural, **repeated self-proofing**,
-**pipeline mark**, **shared skeleton**, and language findings are logged with
+**Completion criterion:** All structural, **text that keeps proving itself**,
+**marks left by the pipeline**, **the same README skeleton across repos**, and
+language findings are logged with
 severity (`HIGH` / `MEDIUM` / `LOW`) and `<readme>:<line>` anchors. In `audit`
 mode, zero files are modified. In write modes, only the planned structural
 edits have landed (or, in `--dry-run`, nothing has), every `docs/` move has a
@@ -690,7 +693,8 @@ Native-First Translation Handoff). `audit` mode never reaches this phase;
    free wording.
 3. **Wording pass by rewrite strength (§2):**
    - `lite`: strip only clustered AI vocabulary, chatbot turn wrappers, and
-     repeated self-proofing; keep the author's sentence-length habits,
+     passages that keep proving themselves; keep the author's sentence-length
+     habits,
      punctuation, contractions, and register
      (`references/de-ai-language.md` §2.5 whitelist).
    - `standard`: apply the full `writing-humanize` catalog plus
@@ -747,10 +751,10 @@ phase (no moves here), and the rewrite strength's scope was respected.
      3. `code-fences` — unclosed or mismatched backtick/tilde code fences,
         and unclosed HTML comments (both mask trailing rendered content)
      4. `badge-domains` — placeholder or invalid badge URL hosts
-     5. `boundary-duplicates` — repeated boundary/disclaimer phrases (**repeated
-        self-proofing** count)
+     5. `boundary-duplicates` — repeated boundary/disclaimer phrases (**text
+        that keeps proving itself** count)
      6. `honest-gaps` — presence of repository-backed limitation/caveat/non-goal signals
-     7. `repo-set` — cross-repo **shared-skeleton** diff when `--repo-set <manifest>` is supplied (`N/A` on single-repository runs)
+     7. `repo-set` — cross-repo diff of **the same README skeleton** when `--repo-set <manifest>` is supplied (`N/A` on single-repository runs)
 
    In `improve` and `rewrite` without `--dry-run`, compare the companion
    check with the `ROUTE` companion baseline: a finding already present in the
