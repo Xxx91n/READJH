@@ -13,8 +13,8 @@ how this repo uses them.
 
 ## GitHub defaults in use
 
-- **`bug`** — the skill or probe produces wrong results (e.g. a check
-  fires on valid content, pointer contract resolves the wrong file).
+- **`bug`** — the skill or static check produces wrong results (e.g. a
+  check fires on valid content, the skill lookup finds the wrong file).
 - **`documentation`** — changes to README, UPSTREAM.md, references, or
   docs/agents prose.
 - **`enhancement`** — new checks, new modes, scope additions to the
@@ -32,5 +32,5 @@ README-tooling work; do not apply it as a generic label.
 - Every open issue carries at most one status signal:
   `ready-for-agent` (grabbable) or `question` (blocked) or neither
   (in progress / under human review).
-- Dependency edges are recorded in `docs/agents/issue-tracker.md`, not
-  encoded as labels.
+- Which ticket blocks which is recorded in `docs/agents/issue-tracker.md`,
+  not encoded as labels.
