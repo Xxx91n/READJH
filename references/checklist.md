@@ -25,7 +25,7 @@ Run this binary assertion checklist during `VERIFY` (and as the diagnostic rubri
 - [ ] **Command and manifest parity (`readme-crafter-skill` Check #2):** install, build, test, and run commands match the repository's manifests and CI workflows.
 - [ ] **Distribution posture (`readme-crafter-skill` Check #8, `repo-integrity.md` §1):** registry install commands appear only when publication is verified in the repo; source-first and hybrid repos match their actual consumption paths.
 - [ ] **Public surface and config parity (`readme-crafter-skill` Checks #6–7, `repo-integrity.md` §2–3):** code examples import only root-exported symbols, and documented env vars/defaults match `.env.example` or config schemas.
-- [ ] **Claim and [evidence] discipline (`references/de-ai-language.md` §5):** empirical and performance claims cite their repo anchor and use calibrated verbs; contradicted claims were reported as findings; unbacked claims were deleted or marked `TODO`.
+- [ ] **Claim-evidence discipline (`references/de-ai-language.md` §5):** empirical and performance claims cite their repo anchor and use calibrated verbs; contradicted claims were reported as findings; unbacked claims were deleted or marked `TODO`.
 
 ---
 
@@ -53,7 +53,7 @@ Run this binary assertion checklist during `VERIFY` (and as the diagnostic rubri
 > **Attribution:** `READJH` (`docs/spec/0001-readjh-orchestration-skill.md` US-20, US-21, US-34; `references/readme-rules.md` §4.2); `readme-crafter-skill` (`SKILL.md` §Core Philosophy #3 & `references/style-guide.md`); `sepia` (`.agents/skills/sepia/references/professional-pass.md` `SLOPSHAPE-2026` & Check #8).
 
 - [ ] **Project-specific section sequence (`references/readme-rules.md` §4.2):** headings follow this repository's project type and distribution posture rather than a generic boilerplate outline.
-- [ ] **A group of repos in one run (when `--repo-set <manifest>` is enabled):** `python3 scripts/check-readme.py <readme> --repo-set <manifest>` evidence confirms that the repositories listed in the manifest do not share a skeleton, regardless of project type (`N/A` on default single-repo runs).
+- [ ] **Check a group of repos in one run (when `--repo-set <manifest>` is enabled):** `python3 scripts/check-readme.py <readme> --repo-set <manifest>` evidence confirms that the repositories listed in the manifest do not share a skeleton, regardless of project type (`N/A` on default single-repo runs).
 
 ---
 
@@ -70,7 +70,7 @@ Run this binary assertion checklist during `VERIFY` (and as the diagnostic rubri
 
 > **Attribution:** `READJH` (`docs/spec/0001-readjh-orchestration-skill.md` US-13–16, US-18–19, US-23–24, US-33–34; `SKILL.md` §2 Native-First Translation Handoff; `UPSTREAM.md` §Deviation table; `references/readme-rules.md` §5; `references/de-ai-language.md`); `writing-humanize` (`skills/writing-humanize/SKILL.md` & `skills/writing-humanize/references/patterns.md` Patterns #1–29); `sepia` (`.agents/skills/sepia/references/style-pass.md` §2–7 & `references/languages/zh.md` §1–5); `humanize-readme` (`humanize-readme/references/slop-patterns.md`).
 
-- [ ] **Rewriting stayed within the allowed amount, and the suppressions held (`references/readme-rules.md` §5):** `lite` preserved verified author voice; `standard` cleaned clustered tells to plain prose; zero invented personality, first-person stories, unverified gaps, or out-of-repo `.ink-and-agency/` writes occurred.
+- [ ] **How much rewriting is allowed was respected, and the suppressions held (`references/readme-rules.md` §5):** `lite` preserved verified author voice; `standard` cleaned clustered tells to plain prose; zero invented personality, first-person stories, unverified gaps, or out-of-repo `.ink-and-agency/` writes occurred.
 - [ ] **Sentence rhythm and edit tests (`references/de-ai-language.md` §1, §2, §6):** runs of three or more near-equal sentences were broken by moving words without adding filler; all edits pass `sepia`'s deletion test and reversion test.
 - [ ] **Chinese and native-first rules (when applicable):** Chinese prose passes `references/de-ai-language.md` §3 when it is the native README; the native README was the only prose target, and any companion README was left for the translation handoff (link repair from a move excepted); no unrequested second-language README was created.
 

@@ -5,7 +5,7 @@
 > 2. English Kiterlin variant at `D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md` (**referenced by path** — the same-named Chinese variant at `D:\Aworker\research\ALL\vendor\anti-defensive-skill\` is never used)
 > 3. `academic-humanizer` v0.3.3 (`D:\Aworker\research\ALL\vendor\academic-humanizer\SKILL.md`)
 > 4. `humanize-readme` v1.1.0 (`b4r7x/agent-skills`, `humanize-readme/SKILL.md` & `humanize-readme/references/slop-patterns.md` — rules reference only, never executed)
-> Where verbatim upstream text uses a word that `GLOSSARY.md` says to avoid, the replacement appears in square brackets (`[Uniformity]`, `[evidence]`, `[a signal]`), and a helper verb may change to agree with it.
+> Where verbatim upstream text uses a word this repo avoids, the replacement appears in square brackets (`[Uniformity]`, `[a signal]`).
 
 Read these **excerpts from upstream rule files** into context during the `LANGUAGE` phase as supplements to `writing-humanize`. All rules operate strictly outside the **text that no language pass may change** (`references/readme-rules.md` §1) and follow the active `lite` or `standard` setting for **how much rewriting is allowed** (`references/readme-rules.md` §5). Section 7 is READJH's own plain-language pass, not taken from an upstream rule file. Fiction-only rules from `sepia` and grant-proposal / paper-citation rules from `academic-humanizer` are omitted as out of README scope.
 
@@ -175,7 +175,7 @@ AI-generated READMEs frequently negotiate with an imagined critic by listing wha
 - "This paper examines..."
 - "This study shows..."
 - "The analysis focuses on..."
-- "The [evidence] indicates..."
+- "The evidence indicates..."
 - "This design allows..."
 - "The results suggest..."
 - "The central contribution is..."
@@ -198,13 +198,13 @@ Avoid:
 **Replace hedging with precision:**
 
 Prefer:
-> The [evidence] indicates that X influences Y in these cases.
+> The evidence indicates that X influences Y in these cases.
 
 Avoid:
 > This may suggest that X could potentially influence Y.
 
 If uncertainty is real, specify its source:
-> The available [evidence] supports this interpretation, although the design does not estimate population-level effects.
+> The available evidence supports this interpretation, although the design does not estimate population-level effects.
 
 **Examples:**
 
@@ -234,7 +234,7 @@ Stronger:
 
 ---
 
-## 5. `academic-humanizer` — Claim-and-[Evidence] Discipline Subset
+## 5. `academic-humanizer` — Claim-Evidence Discipline Subset
 
 > **Attribution:** `academic-humanizer` v0.3.3 by AIScientists-Dev (`D:\Aworker\research\ALL\vendor\academic-humanizer\SKILL.md`; see `UPSTREAM.md`). Non-overlapping watch lists and before/after pairs below are verbatim from Layer 2 (2.1–2.5) and Layer 4 of `D:\Aworker\research\ALL\vendor\academic-humanizer\SKILL.md` (overlapping items Layer 1, 2.6, 2.7, 2.9, 2.10, and 2.11 are merged into §1 above); rationale is rewritten in READJH's words.
 
@@ -273,11 +273,11 @@ In technical READMEs, neutral and precise prose is the human voice. Do not casua
 - **Before:** *In recent years, tabular deep learning has attracted increasing attention.*
 - **After:** *Tabular deep learning has a structural limitation: most models discard feature-type metadata and must relearn it from data.*
 
-**Layer 4 — Claim-and-[evidence] discipline:**
-- **Unbacked claim -> add the [evidence] pointer or soften.**
+**Layer 4 — Claim-evidence discipline:**
+- **Unbacked claim -> add the evidence pointer or soften.**
   - *Before:* *Our method is more robust.*
   - *After:* *Our method's accuracy drops by 2 points under distribution shift, versus 11 points for the baseline (Figure 3).*
-- **Verb stronger than [evidence] -> downgrade.**
+- **Verb stronger than evidence -> downgrade.**
   - *Before:* *This demonstrates that our method is universally superior.*
   - *After:* *On these three datasets, our method matches or exceeds the strongest baseline (Table 2).*
 - **Vague magnitude -> a number or RANGE, attributed.**
