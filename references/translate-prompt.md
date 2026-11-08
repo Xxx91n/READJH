@@ -29,7 +29,9 @@ Read the native README in full before writing anything.
    translation.
 5. **Keep facts fixed.** Copy code, commands, versions, numbers, badges, file
    paths, and direct quotes from the approved native README, byte for byte.
-   Do not invent or change them on your own. Keep link targets unchanged; if
+   Do not invent or change them on your own. Keep every link pointing at the
+   same resource; when the target file lives in another directory, adjust the
+   relative path so it still resolves, and do not change the destination. If
    a translated heading is the target of a same-page `#anchor` link, keep the
    old fragment working with an explicit anchor. If the target file has an
    older fact, update it to the native value. If the native file is unclear

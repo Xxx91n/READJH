@@ -106,7 +106,7 @@ class TestTranslatePromptContract(unittest.TestCase):
     def test_prompt_keeps_facts_and_links_fixed(self):
         """The prompt copies native facts and keeps link targets fixed."""
         text = prompt_text()
-        self.assertIn("Keep link targets unchanged", text)
+        self.assertIn("Keep every link pointing at the same resource", text)
         self.assertIn("update it to the native value", text)
 
 

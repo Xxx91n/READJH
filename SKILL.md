@@ -752,9 +752,11 @@ intensity tier's scope was respected.
      6. `honest-gaps` — presence of repository-backed limitation/caveat/non-goal signals
      7. `repo-set` — cross-repo **skeleton isomorphism** diff when `--repo-set <manifest>` is supplied (`N/A` on single-repository runs)
 
-   Compare the companion probe with the `ROUTE` companion baseline. A
-   finding already present in the baseline goes in `[Residual risk]`; a new
-   finding fails `VERIFY` and must be fixed before delivery.
+   In `improve` and `rewrite` without `--dry-run`, compare the companion
+   probe with the `ROUTE` companion baseline: a finding already present in the
+   baseline goes in `[Residual risk]`; a new finding fails `VERIFY` and must
+   be fixed before delivery. In `audit` and `--dry-run`, report the companion
+   probe result as-is; no baseline comparison applies.
 2. **Walk the binary verification checklist (`references/checklist.md`):**
    - Evaluate `references/checklist.md` §§1–9 against the probe **receipt** and
      the `TRUTH` / `RESTRUCTURE` findings.
