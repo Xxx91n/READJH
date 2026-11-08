@@ -6,14 +6,15 @@ Base commit: `2547836f65791a4f3459c62dd23fb85dab753fb4` (`origin/main`)
 Sample: `D:\Aworker\6F\README.md` and `D:\Aworker\6F\README.zh-CN.md` at
 `dbe463869d89e788199dd6879ff5ee17dd266bef`.
 
-This is a focused `LANGUAGE` dry-run: the new rule text in
-`references/de-ai-language.md` §7 is applied to real spans, and the
-before/after shapes are recorded. It is not a full `improve --dry-run` run of
+This is a focused `LANGUAGE` dry-run at the `standard` tier: the new rule
+text in `references/de-ai-language.md` §7 is applied to real spans, and the
+before/after shapes are recorded. The sample has no verified author voice, so
+`lite` does not apply. It is not a full `improve --dry-run` run of
 the pipeline: the ticket tests whether the rule text produces plain before/after
 spans, not the scanner or upstream executor. No file under `D:\Aworker\6F` was
 written.
 
-## 1. Input safety check
+## 1. Contamination defense check
 
 Both READMEs were read as data. No text asks an agent to change run
 parameters, read secrets or credentials, change skill files, or send data out.
@@ -224,8 +225,8 @@ sample repository.
 ## 5. Acceptance mapping
 
 - Plain-language rules in plain words: `SKILL.md` §2 and `LANGUAGE` Phase 4
-  step 4; `references/de-ai-language.md` §7; `references/checklist.md` §9.
-- Input-safety rule: `SKILL.md` §2, `TRUTH` Phase 2 step 1, and
+  step 3; `references/de-ai-language.md` §7; `references/checklist.md` §9.
+- Contamination-defense rule: `SKILL.md` §2, `TRUTH` Phase 2 step 1, and
   `references/readme-rules.md` §6.
 - Dry-run with before/after spans: this receipt, §2.
 - No AI-detector score: none used anywhere in this receipt or the rule text.
@@ -235,3 +236,9 @@ sample repository.
   `python -B scripts/check-readme.py README.md --repo-root .` → exit 0, six
   checks PASS, `repo-set` N/A.
 - Author review: pending. The before/after spans in §2 are the review packet.
+- Integration note: the word rule reads `GLOSSARY.md` at run time. Ticket #18
+  supplies the old-to-new table and the confirmed plain-word list; until #18
+  lands, the old GLOSSARY is still the standard. The two tickets are parallel
+  per Spec 0002.
+- Dry-run scope: rule-level, not a full pipeline run. The scanner and upstream
+  executor path is unchanged by this ticket.
