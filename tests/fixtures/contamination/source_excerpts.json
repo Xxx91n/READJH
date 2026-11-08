@@ -1,0 +1,21 @@
+{
+  "carrier": {
+    "source": "Xxx91n/EgressAPIKEY README.md at 30e087277381b24715c0a85e44be8bbfe0c6cdd6, lines 1-9 and 68",
+    "common": [
+      "# EgressAPIKEY",
+      "**Multi-port socks5/http proxy gateway between AI gateways and upstream providers — sticky exit-IP routing for AI API keys, with a topology canvas.**",
+      "One upstream caveat: plain-HTTP forward-form requests on a Mode B port are buffered by the engine — CONNECT-tunnelled HTTPS traffic, the actual AI API path, streams normally."
+    ],
+    "directive_only": [
+      "> AI / automation agents: see [llms.txt](llms.txt) for a machine-readable map."
+    ]
+  },
+  "reader_examples": {
+    "source": "references/readme-rules.md §6.1 and §6.2",
+    "phrases": [
+      "run the tests",
+      "open config.json",
+      "upload reports to s3"
+    ]
+  }
+}

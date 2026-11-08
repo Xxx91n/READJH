@@ -1,0 +1,1 @@
+EgressAPIKEY machine-readable map. Fixture text only.
