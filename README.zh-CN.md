@@ -23,8 +23,8 @@ READJH 管 README 写得准不准、读起来顺不顺。它按顺序把你已�
   CI 配置、入口文件、扫描器输出。对不上的记成一条问题，不偷偷改掉；
   查不了的，删掉或者标出来。
 - **RESTRUCTURE** 让 README 只当首页。`audit` 模式下，它找出哪些深层
-  内容该放进 `docs/`，有没有反复给自己作证的话、生成时留下的痕迹，
-  以及一看就像机器写的句子。`improve` 和 `rewrite` 模式下，它把这些
+  内容该放进 `docs/`，也找出反复给自己作证的话。它还会标出生成时留下
+  的痕迹和一看就像机器写的句子。`improve` 和 `rewrite` 模式下，它把这些
   深层内容搬到 `docs/`，每搬一次都记下来。
 - **LANGUAGE**（`improve` 和 `rewrite`）跑上游 `writing-humanize`，
   再加上从上游规则里挑出来、只适用 README 的那部分。改写时守两道线：
@@ -55,19 +55,19 @@ Kiterlin）、`academic-humanizer`（每条说法都要对得上证据）、
 ## 安装
 
 把你的 Agent Skills 宿主指向本仓库根目录 —— 根目录就是技能本身。
-再按 [UPSTREAM.md](UPSTREAM.md) 里的安装步骤，让这个技能要调用的两个
+再按 `UPSTREAM.md` 里的安装步骤，让这个技能要调用的两个
 上游技能能在 `<skills-root>/<canonical-name>/SKILL.md` 找到。
 
 ## 快速上手
 
 装好后按名字对仓库调用技能：
 
-- `audit` —— 报出问题和优先级，不动任何文件；支持
+- `audit`：报出问题和优先级，不动任何文件；支持
   `--repo-set <manifest>`，一次看一组仓库，比对它们的 README 骨架
   像不像一个模子（`audit` 模式里 `--dry-run` 默认就等于开了）。
-- `improve` —— 只改现有 README 里需要改的地方；git 回滚不了时留一个
+- `improve`：只改现有 README 里需要改的地方；git 回滚不了时留一个
   `.bak`。
-- `rewrite` —— README 修不动了，就整份重写。
+- `rewrite`：README 修不动了，就整份重写。
 - `--dry-run` 所有模式都能用：只给计划和证据，不写文件（不改文件、
   不搬 `docs/`、不建 `.bak`）。
 

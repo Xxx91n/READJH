@@ -27,15 +27,15 @@ Phase sequence by run mode:
   does not match becomes a finding, not a quiet fix; a claim that cannot be
   checked is left out or marked.
 - **RESTRUCTURE** keeps the README a front page. In `audit` mode it looks for
-  deep detail that belongs in `docs/`, text that keeps proving itself, marks
-  left by the producing pipeline, and sentences that give away machine
-  writing. In `improve` and `rewrite` it moves that deep detail to `docs/`
-  and records each move.
+  deep detail that belongs in `docs/` and for text that keeps proving itself.
+  It also flags marks left by the producing pipeline and sentences that give
+  away machine writing. In `improve` and `rewrite` it moves that deep detail
+  to `docs/` and records each move.
 - **LANGUAGE** (`improve` and `rewrite`) runs the upstream `writing-humanize`
   skill plus rules taken from upstream files that apply to READMEs. Two
   guards keep cleanup honest: a fixed list of text no language pass may
-  change, and a cap on how much rewriting is allowed. Neither may corrupt
-  facts or flatten a real voice.
+  change, and a cap on how much rewriting is allowed. Together they stop the
+  cleanup from corrupting facts or flattening a real voice.
 - **VERIFY** produces evidence a machine can check, from the static check and
   a human checklist. The delivery report is capped at three lines: what was
   done, the evidence, and what is still at risk.
@@ -47,7 +47,7 @@ two upstream skills by their fixed names at fixed search paths; a missing
 skill means stop with install instructions, and no skill with a similar name
 is used instead:
 
-| canonical name | upstream | role |
+| fixed name | upstream | role |
 |---|---|---|
 | `readme-crafter-skill` | [linhai0872/readme-crafter-skill](https://github.com/linhai0872/readme-crafter-skill) | TRUTH/RESTRUCTURE: facts and structure |
 | `writing-humanize` | [risadams/ink-and-agency](https://github.com/risadams/ink-and-agency) (`skills/writing-humanize/`) | LANGUAGE: wording |
