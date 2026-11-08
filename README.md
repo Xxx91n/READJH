@@ -5,7 +5,7 @@
 A skill that keeps a README accurate and readable. One entry point runs the
 skills you already have, in order, for `audit`, `improve`, and `rewrite`.
 Every claim in the result is checked against something the repository can
-show, and the result carries that evidence.
+show.
 
 The repository root is the skill itself: `SKILL.md`, `references/` (rules),
 `scripts/` (the static check, stdlib-only python3), and the files in the
@@ -42,10 +42,10 @@ Phase sequence by run mode:
 
 ## Dependencies
 
-READJH owns only the part that runs the existing skills in order. It calls
-two upstream skills by their fixed names at fixed search paths; a missing
-skill means stop with install instructions, and no skill with a similar name
-is used instead:
+READJH owns only the part that runs the existing skills in order and adds the
+README rules they leave out. It calls two upstream skills by their fixed
+names at fixed search paths; a missing skill means stop with install
+instructions, and no skill with a similar name is used instead:
 
 | fixed name | upstream | role |
 |---|---|---|
@@ -58,7 +58,7 @@ are never run: `sepia` (zh calibration, professional/style passes),
 claim against evidence), `humanize-readme` (only the rules worth keeping).
 
 Full table, where each skill was found on this machine, install actions, and
-the two parts of `writing-humanize` we deliberately switch off:
+the two behaviours of `writing-humanize` we deliberately switch off:
 [UPSTREAM.md](UPSTREAM.md). Credits and licenses: [NOTICE](NOTICE).
 
 ## Install

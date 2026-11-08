@@ -3,8 +3,8 @@
 [English](README.md) | **简体中文**
 
 READJH 管 README 写得准不准、读起来顺不顺。它按顺序把你已有的几个技能
-串起来，跑 `audit`、`improve`、`rewrite` 三种任务。结果里的每条说法
-都要拿仓库里查得到的东西核对，有证据才算数。
+串起来，跑 `audit`、`improve`、`rewrite` 三种任务。结果里的每条说法，
+都要拿仓库里查得到的东西核对。
 
 仓库根目录就是技能本体：`SKILL.md`、`references/`（规则）、`scripts/`
 （静态检测功能，只用标准库的 python3），加上下面「目录结构」里列的文件。
@@ -35,8 +35,9 @@ READJH 管 README 写得准不准、读起来顺不顺。它按顺序把你已�
 
 ## 依赖
 
-READJH 只负责把几个现成技能串起来。两个上游技能按固定名字在固定路径
-下查找；找不到就停下，告诉你怎么装；不拿名字相近的技能顶上：
+READJH 只负责把几个现成技能串起来，再补上它们没覆盖的 README 规则。
+两个上游技能按固定名字在固定路径下查找；找不到就停下，告诉你怎么装；
+不拿名字相近的技能顶上：
 
 | 固定名字 | 上游仓库 | 做什么 |
 |---|---|---|
@@ -49,7 +50,7 @@ Kiterlin）、`academic-humanizer`（每条说法都要对得上证据）、
 `humanize-readme`（只收还能用的规则）。
 
 完整的表、这些技能在机器上的实际位置、怎么装，以及对
-`writing-humanize` 两处故意不启用的地方，见
+`writing-humanize` 两处故意关掉的行为，见
 [UPSTREAM.md](UPSTREAM.md)。致谢和许可证见 [NOTICE](NOTICE)。
 
 ## 安装
@@ -64,7 +65,7 @@ Kiterlin）、`academic-humanizer`（每条说法都要对得上证据）、
 
 - `audit`：报出问题和优先级，不动任何文件；支持
   `--repo-set <manifest>`，一次看一组仓库，比对它们的 README 骨架
-  像不像一个模子（`audit` 模式里 `--dry-run` 默认就等于开了）。
+  像不像一个模子（`audit` 模式里，`--dry-run` 的要求默认就满足了）。
 - `improve`：只改现有 README 里需要改的地方；git 回滚不了时留一个
   `.bak`。
 - `rewrite`：README 修不动了，就整份重写。
