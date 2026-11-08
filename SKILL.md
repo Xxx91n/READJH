@@ -636,9 +636,9 @@ commands run.
 **Completion criterion:** All structural, **text that keeps proving itself**,
 **marks left by the pipeline**, **the same README skeleton across repos**, and
 language findings are logged with severity (`HIGH` / `MEDIUM` / `LOW`) and
-`<readme>:<line>` anchors. In `audit` mode, zero files are modified. In write
-modes, only the planned structural
-edits have landed (or, in `--dry-run`, nothing has), every `docs/` move has a
+`<readme>:<line>` anchors. In `audit` mode, zero files are modified.
+In write modes, only the planned structural edits have landed (or, in
+`--dry-run`, nothing has), every `docs/` move has a
 migration ledger entry, the `.bak` rule has fired or been recorded as skipped,
 and no sentence-level wording has changed yet.
 
