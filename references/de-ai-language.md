@@ -115,7 +115,7 @@ AI-generated technical prose gives itself away through predictable section struc
 
 ### Rationale (rewritten)
 
-Load this section whenever the target README is written in Chinese (Simplified or Traditional) or when processing the Chinese half of a bilingual README pair in lockstep:
+Load this section when the native README is written in Chinese (Simplified or Traditional). The companion README is translated later, in the separate clean window described in `SKILL.md` §2:
 
 1. **Link clauses with commas and word order instead of conjunction chains:** Chinese human prose places clauses side by side with commas; LLM Chinese overuses conjunctions (`和`, `以及`, `並且`, `同時`, `此外`, `因此`, `然而`) at nearly three times the human rate (`0.036` vs. `0.013`).
 2. **Use bare base verbs:** strip dummy verb wrappers (`進行討論 → 討論`, `加以說明 → 說明`, `予以處理 → 處理`, `做出決定 → 決定`).

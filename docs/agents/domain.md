@@ -45,6 +45,7 @@ always precede wording changes. Modes: `audit` (no writes), `improve`
 - The probe is static: it never executes commands a README documents.
 - Upstream executors are invoked; upstream rule bodies are distilled.
   READJH does not author new rewriting rules beyond orchestration gaps.
-- Chinese READMEs get zh-calibrated checks from distilled sepia rules;
-  bilingual READMEs are processed in lockstep, and no second-language
+- Chinese READMEs get zh-calibrated checks from distilled sepia rules.
+  Bilingual work is native-first: the current window finishes the native
+  README, then hands translation to a new clean window; no second-language
   README is created unless requested.
