@@ -51,9 +51,9 @@ READJH 只负责把几个现成技能串起来，再补上它们没覆盖的 REA
 - `academic-humanizer`：每条说法都要对得上证据
 - `humanize-readme`：只收还能用的规则
 
-完整的表、这些技能在机器上的实际位置、怎么装，以及对
-`writing-humanize` 两处故意关掉的行为，见
-[UPSTREAM.md](UPSTREAM.md)。致谢和许可证见 [NOTICE](NOTICE)。
+完整的表、怎么装，以及对 `writing-humanize` 两处故意关掉的行为，见
+[UPSTREAM.md](UPSTREAM.md)。这些技能在机器上的实际位置也记在那里。
+致谢和许可证见 [NOTICE](NOTICE)。
 
 ## 安装
 
@@ -65,9 +65,9 @@ READJH 只负责把几个现成技能串起来，再补上它们没覆盖的 REA
 
 装好后按名字对仓库调用技能：
 
-- `audit`：报出问题和优先级，不动任何文件；支持
-  `--repo-set <manifest>`，一次看一组仓库，比对它们的 README 骨架
-  像不像一个模子（`audit` 模式里，`--dry-run` 的要求默认就满足了）。
+- `audit`：报出问题和优先级，不动任何文件。加上 `--repo-set <manifest>`，
+  它一次看一组仓库，比对它们的 README 骨架像不像一个模子。`audit` 模式里，
+  `--dry-run` 的要求默认就满足了。
 - `improve`：只改现有 README 里需要改的地方；git 回滚不了时留一个
   `.bak`。
 - `rewrite`：README 修不动了，就整份重写。

@@ -60,9 +60,9 @@ are never run:
 - `academic-humanizer`: check each claim against evidence
 - `humanize-readme`: only the rules worth keeping
 
-Full table, where each skill was found on this machine, install actions, and
-the two behaviours of `writing-humanize` we deliberately switch off:
-[UPSTREAM.md](UPSTREAM.md). Credits and licenses: [NOTICE](NOTICE).
+Full table, install actions, and the two behaviours of `writing-humanize` we
+deliberately switch off: [UPSTREAM.md](UPSTREAM.md). It also records where
+each skill was found on this machine. Credits and licenses: [NOTICE](NOTICE).
 
 ## Install
 
@@ -75,9 +75,9 @@ Then make the two skills it calls resolvable at
 
 Once installed, invoke the skill by name on a repository:
 
-- `audit`: findings and priorities, touches nothing; supports
-  `--repo-set <manifest>` to check a group of repos in one run and compare
-  their README skeletons (`--dry-run` is already satisfied in `audit` mode).
+- `audit`: reports findings and priorities and touches nothing. With
+  `--repo-set <manifest>`, it checks a group of repos in one run and compares
+  their README skeletons. `--dry-run` is already satisfied in `audit` mode.
 - `improve`: changes an existing README where it needs changing; keeps a
   `.bak` file when git cannot undo the change.
 - `rewrite`: builds a new README when the old one cannot be repaired.

@@ -16,9 +16,9 @@ lives in `scripts/`. Keep it that way; do not add a build step.
 ## Where things are decided
 
 - Spec: `docs/spec/` — numbered, committed on main.
-- ADRs: `docs/adr/` — ADR-0001 (find each skill by its fixed name, and take
-  excerpts from upstream rule files) and ADR-0002 (the repo is the skill)
-  are locked; respect them or propose a new ADR.
+- ADRs: `docs/adr/` — ADR-0001 says find each skill by its fixed name and
+  take excerpts from upstream rule files. ADR-0002 says the repo is the
+  skill. Both are locked; respect them or propose a new ADR.
 - Dependencies: `UPSTREAM.md` is the single record — fixed names, search
   paths, observed locations, install actions, deviations. If you change
   anything dependency-related, this file changes with it.
@@ -49,6 +49,6 @@ lives in `scripts/`. Keep it that way; do not add a build step.
 ## Housekeeping workflow
 
 Normal repo practice: work on a branch, one behavior change per commit,
-review before pushing. This repo has no CI yet, so check the change against
-the acceptance criteria of the ticket you are implementing, and put the
+review before pushing. This repo has no CI yet. Check the change against the
+acceptance criteria of the ticket you are implementing, and put the
 verification command and its result in your report.
