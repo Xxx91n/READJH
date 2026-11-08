@@ -445,7 +445,7 @@ Run this pass inside `LANGUAGE` (`improve` and `rewrite`) after the upstream cat
 
 ### 7.1 Hard words become everyday words
 
-1. **`GLOSSARY.md` is the standard.** When a word has an entry, use the recommended wording. When `GLOSSARY.md` has an old-to-new table, the old wording appears only there; do not write it in a new sentence.
+1. **`GLOSSARY.md` is the standard.** When a word has an entry, use the recommended wording. If the recommendation is itself the harder word, keep the plain word and record the conflict for the author. When `GLOSSARY.md` has an old-to-new table, the old wording appears only there; do not write it in a new sentence.
 2. **Keep technical names.** Skill names, commands, CLI flags, versions, links, code identifiers, check names, and file paths stay unchanged — they are contracts, not prose.
 3. **Do not invent a replacement.** If a word has no entry, keep the technical word. If the word is unclear and the author is available, ask. Never create a new compound word to sound precise.
 4. **Do not bend a name into prose.** A hard word inside a name, command, version, or link is part of the name; leave it alone.

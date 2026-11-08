@@ -236,8 +236,9 @@ splits overloaded sentences, and asks before changing punctuation. This pass
 is part of the `standard` tier; `lite` keeps the author's verified voice.
 
 1. **Words:** `GLOSSARY.md` is the standard. Use the recommended wording.
-   Keep technical names, commands, versions, links, code identifiers, and
-   check names unchanged. If a word has no entry and is unclear, ask the
+   If the recommendation is itself the harder word, keep the plain word and
+   record the conflict for the author. Keep technical names, commands,
+   versions, links, code identifiers, and check names unchanged. If a word has no entry and is unclear, ask the
    author; never invent a new compound word.
 2. **Translationese:** remove English-shaped Chinese. Cut empty openers
    (`值得注意的是`), stacked connectives, and repeated `不是 X，而是 Y`;

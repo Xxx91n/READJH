@@ -29,7 +29,8 @@ the four stop conditions.
 
 ## 2. Before/after spans
 
-The table is the summary; the verbatim spans follow.
+The table is the summary; the verbatim spans follow. Every After span is a
+proposal for the author to review; the dry-run applies and writes nothing.
 
 | Anchor | Rule applied | Change |
 |---|---|---|
