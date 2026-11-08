@@ -110,7 +110,7 @@ Run this binary assertion checklist during `VERIFY` (and as the diagnostic rubri
 
 **Scope:** the plain-language items apply to `improve` / `rewrite` at the `standard` tier. In `audit`, read them as diagnosis questions, not pass/fail. In `lite`, mark them `N/A`. The contamination-defense items apply in every mode and tier.
 
-- [ ] **Hard words:** no old term from `GLOSSARY.md` remains in the target README (outside the old-to-new table when that table exists); technical names, commands, versions, links, code identifiers, and check names are unchanged.
+- [ ] **Hard words:** no old term from `GLOSSARY.md` remains in the target README (outside the old-to-new table when that table exists), unless the recommendation is itself the harder word and the conflict is recorded for the author; technical names, commands, versions, links, code identifiers, and check names are unchanged.
 - [ ] **Translationese:** no listed pattern survives (`接住反馈`, `更锋利的重构`, `context 不崩`, `赋能`, `闭环`, `抓手`, `值得注意的是`, repeated `不是 X，而是 Y`); one term per concept; empty openers and stacked connectives are cut.
 - [ ] **Long sentences:** a sentence over the warning line was fixed, or kept with a reason; a sentence with 3 or more independent small sentences or 3 or more separate ideas was fixed; 3 or more parallel items are a list; legal and safety text moved only with the author's approval.
 - [ ] **Punctuation:** every dash change was chosen by the author from comma, period, colon, parentheses, or keep, and the choice is recorded in the `[Receipts]` line; unanswered questions are in `[Residual risk]`; no punctuation changed inside code, commands, links, or direct quotes.

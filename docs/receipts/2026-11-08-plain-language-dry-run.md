@@ -246,3 +246,7 @@ sample repository.
   executor path is unchanged by this ticket.
 - Tier scope: the pass is gated to `standard` to match the existing tier table;
   Spec 0002 does not name a tier. This is an interpretation, not a spec line.
+- Parent spec file: `docs/spec/0002-plain-language-and-native-first-translation.md`
+  is committed on local `main` (`d2b170f`) but absent from `origin/main` and this
+  branch. The citations use GitHub issue #16; land the local-main spec commits
+  with this branch.
