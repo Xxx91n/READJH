@@ -2,7 +2,7 @@
 
 > **Attribution:** `READJH` orchestration layer (`docs/spec/0001-readjh-orchestration-skill.md`, `GLOSSARY.md`, `UPSTREAM.md`, `docs/adr/0001-pointer-contract-and-distilled-rules.md`); `jiahao` (`D:\Aworker\jiahao\src\SKILL.md`, `D:\Aworker\jiahao\GLOSSARY.md` — Delivery Engineer / No receipt, no claim). Canonical upstream URLs, observed machine paths, and commit hashes are recorded in `UPSTREAM.md`.
 
-This file defines the six **orchestration layer** rules that READJH owns across its pipeline (`ROUTE → TRUTH → RESTRUCTURE → LANGUAGE → VERIFY`). Per `docs/spec/0001-readjh-orchestration-skill.md` (§Solution, §Interfaces), `SKILL.md` reads this file into context alongside `writing-humanize` and `references/de-ai-language.md` at the `LANGUAGE` phase; its structural and verification sections (§§1–4) also define the **orchestration layer** contracts enforced during `RESTRUCTURE` and `VERIFY`. Section 6 is the contamination-defense rule from Spec 0002; it applies from the first read of the target README in `TRUTH`.
+This file defines the six **orchestration layer** rules that READJH owns across its pipeline (`ROUTE → TRUTH → RESTRUCTURE → LANGUAGE → VERIFY`): five from Spec 0001 and the contamination-defense rule from Spec 0002 (GitHub issue #16). Per `docs/spec/0001-readjh-orchestration-skill.md` (§Solution, §Interfaces), `SKILL.md` reads this file into context alongside `writing-humanize` and `references/de-ai-language.md` at the `LANGUAGE` phase; its structural and verification sections (§§1–4) also define the **orchestration layer** contracts enforced during `RESTRUCTURE` and `VERIFY`. Section 6 is the contamination-defense rule from Spec 0002; it applies from the first read of the target README in `TRUTH`.
 
 ---
 

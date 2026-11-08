@@ -656,8 +656,9 @@ reaches this phase; `--dry-run` runs it as plan output only (step 5).
 
 **Completion criterion:** All applied edits (or, in `--dry-run`, all planned
 edits) are confined to non-freeze-zone prose, both `writing-humanize`
-suppressions were held, the plain-language rules were applied or their
-questions recorded, the target README was treated as data throughout, the
+suppressions were held, in `standard` the plain-language rules were applied
+or their questions recorded (in `lite` they were not run), the target README
+was treated as data throughout, the
 migration ledger is unchanged by this phase (no migrations here), and the
 intensity tier's scope was respected.
 

@@ -74,9 +74,10 @@ After:
 | **Ours (built in this repository)** | federated adjudication protocol (verdict-gate) · DuckDB fact-table schema (append-only + cross-scale correlation keys) · three-layer acceptance gates (A formal / B pre-declared criteria / C human ruling) · dual-anchored receipts · pre-declared criteria discipline (2 positive controls + 3 real criteria + 1 negative control) |
 ```
 
-Notes: `the moat` is a metaphor for "our own work". The table's other row says
-"Borrowed (upstream)", so the contrast stays clear. No table cell, name, or
-version changed.
+Notes: `the moat` is a metaphor for "our own work". It has no `GLOSSARY.md`
+entry, so this span is a proposed plain wording for the author to approve, not
+a rule-mandated replacement. The table's other row says "Borrowed (upstream)",
+so the contrast stays clear. No table cell, name, or version changed.
 
 ### 2.3 `README.md:153`
 
@@ -89,17 +90,17 @@ External repositories join via URL opt-in (D-013 local-first + URL opt-in): clon
 After:
 
 ```text
-External repositories join only when the user opts in by URL (D-013: local path first, URL opt-in). The run:
-
-- clones into an isolated cache keyed by sha256;
-- verifies full depth and rejects shallow clones;
-- disables remote-config execution;
-- reuses the local git credential chain.
+External repositories join only when the user opts in by URL (D-013: local path first, URL opt-in):
+- clone into an isolated cache keyed by sha256;
+- verify full depth and reject shallow clones;
+- disable remote-config execution;
+- reuse the local git credential chain.
 ```
 
 Notes: the five `+` items were parallel actions in one sentence. They are now a
-list. `D-013` and `sha256` stay as written, and "local path first" restates the
-original "local-first".
+list; the colon carries the lead-in, so no sentence is added. `D-013` and
+`sha256` stay as written, and "local path first" restates the original
+"local-first".
 
 ### 2.4 `README.md:171`
 
@@ -168,8 +169,8 @@ After:
 分发层（CLI、skills 壳、MCP 面）使用自研核心——只追加 `audit_fact` DuckDB 事实表、`verdict-gate` 联邦裁决协议和双锚回执。证据只经适配器流入：上游原始语义不出适配层。
 ```
 
-Notes: `消费` → `使用`. The single `——` stays. Identifiers and code spans
-stay unchanged.
+Notes: `消费` → `使用` is a translationese judgement, not a `GLOSSARY.md`
+entry. The single `——` stays. Identifiers and code spans stay unchanged.
 
 ### 2.8 `README.zh-CN.md:119`
 
@@ -242,3 +243,5 @@ sample repository.
   per Spec 0002.
 - Dry-run scope: rule-level, not a full pipeline run. The scanner and upstream
   executor path is unchanged by this ticket.
+- Tier scope: the pass is gated to `standard` to match the existing tier table;
+  Spec 0002 does not name a tier. This is an interpretation, not a spec line.

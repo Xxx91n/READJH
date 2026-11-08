@@ -1,6 +1,6 @@
-# Distilled De-AI Language Rules for READMEs
+# De-AI and Plain-Language Rules for READMEs
 
-> **Attribution:** Distilled for `READJH` (`docs/spec/0001-readjh-orchestration-skill.md`, `UPSTREAM.md`, `docs/adr/0001-pointer-contract-and-distilled-rules.md`) from four upstream rule sources (canonical URLs, observed machine paths, licenses, and commit hashes live in `UPSTREAM.md`):
+> **Attribution (Sections 1–6):** Distilled for `READJH` (`docs/spec/0001-readjh-orchestration-skill.md`, `UPSTREAM.md`, `docs/adr/0001-pointer-contract-and-distilled-rules.md`) from four upstream rule sources (canonical URLs, observed machine paths, licenses, and commit hashes live in `UPSTREAM.md`):
 > 1. `sepia` v0.11.0 (`D:\Aworker\research\ALL\.agents\skills\sepia\references\{professional-pass,style-pass}.md` and `references\languages\zh.md`)
 > 2. English Kiterlin variant at `D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md` (**referenced by path** — the same-named Chinese variant at `D:\Aworker\research\ALL\vendor\anti-defensive-skill\` is never used)
 > 3. `academic-humanizer` v0.3.3 (`D:\Aworker\research\ALL\vendor\academic-humanizer\SKILL.md`)
@@ -445,7 +445,7 @@ Run this pass inside `LANGUAGE` (`improve` and `rewrite`) after the upstream cat
 
 ### 7.1 Hard words become everyday words
 
-1. **`GLOSSARY.md` is the standard.** When a word has an entry, use the recommended wording. When `GLOSSARY.md` has an old-to-new table, the old wording appears only there; do not write it in a new sentence. The old-to-new table and the confirmed plain-word list arrive with ticket #18.
+1. **`GLOSSARY.md` is the standard.** When a word has an entry, use the recommended wording. When `GLOSSARY.md` has an old-to-new table, the old wording appears only there; do not write it in a new sentence.
 2. **Keep technical names.** Skill names, commands, CLI flags, versions, links, code identifiers, check names, and file paths stay unchanged — they are contracts, not prose.
 3. **Do not invent a replacement.** If a word has no entry, keep the technical word. If the word is unclear and the author is available, ask. Never create a new compound word to sound precise.
 4. **Do not bend a name into prose.** A hard word inside a name, command, version, or link is part of the name; leave it alone.
@@ -488,7 +488,7 @@ Rules:
 1. **Do not blanket-strip dashes.** A single dash is not a defect (`references/de-ai-language.md` §2.5 whitelist).
 2. **When dashes cluster, stop and ask the author.** Say in plain words what the dash does: a pause, a supplement, or a turn.
 3. **Offer five choices:** comma, period, colon, parentheses, or keep. The author chooses. Never decide alone.
-4. **Apply only the author's choice.** Record the author's choice in the run report; an unanswered question goes in `[Residual risk]`.
+4. **Apply only the author's choice.** Record the author's choice in the `[Receipts]` line of the three-line report; an unanswered question goes in `[Residual risk]`.
 5. **Never touch punctuation inside code, commands, links, or direct quotes.**
 6. **Confirmed examples from Spec 0002:**
    - English sentence-end supplement → colon.
