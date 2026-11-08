@@ -2,7 +2,8 @@
 
 The READJH window that wrote the native-language README does not translate.
 After the user approves that README, open a new, clean window, paste this
-prompt, and fill in the four values below. Run the job there.
+prompt, and fill in the four values below. Run the job there. Use the actual
+prompt path given in the handoff block.
 
 ## Fill these in first
 
@@ -26,10 +27,13 @@ Read the native README in full before writing anything.
 4. **No jargon and no translationese.** Use the words people actually say in
    the target language. Do not carry English sentence bones into the
    translation.
-5. **Keep facts fixed.** Do not change code, commands, links, versions,
-   numbers, badges, file paths, or direct quotes. Copy them byte for byte.
-   If a target file states a different fact, stop and report it to the author
-   instead of fixing it here.
+5. **Keep facts fixed.** Copy code, commands, versions, numbers, badges, file
+   paths, and direct quotes from the approved native README, byte for byte.
+   Do not invent or change them on your own. Keep link targets unchanged; if
+   a translated heading is the target of a same-page `#anchor` link, keep the
+   old fragment working with an explicit anchor. If the target file has an
+   older fact, update it to the native value. If the native file is unclear
+   or contradicts itself, stop and ask the author.
 6. **New clean window only.** This job runs in the new window, never in the
    window that wrote the native README. Do not go back to that window to
    translate.

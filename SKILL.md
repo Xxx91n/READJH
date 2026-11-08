@@ -293,8 +293,8 @@ window, driven by `references/translate-prompt.md`.
   before that. If no companion README exists, emit nothing unless the user
   asks for a translation.
 - **Leave the companion README's prose alone.** Re-point links in it only when
-  a `RESTRUCTURE` move breaks them (`RESTRUCTURE` step 7). That is link repair,
-  not translation.
+  a `RESTRUCTURE` move, rename, or deletion breaks them (`RESTRUCTURE`
+  step 7). That is link repair, not translation.
 - **Emit this fixed block** as a separate reply after approval, with the real
   values filled in:
 
@@ -303,8 +303,8 @@ window, driven by `references/translate-prompt.md`.
 [Native README]: <path to the approved README>
 [Translate to]: <target language; one per file when they differ>
 [Files to translate]: <one path per line>
-[Translation prompt]: references/translate-prompt.md
-[Next step]: Open a new, clean window and run the prompt in references/translate-prompt.md with the values above. This window never translates.
+[Translation prompt]: <actual path to references/translate-prompt.md in the READJH install>
+[Next step]: Open a new, clean window and run the prompt at that path with the values above. This window never translates.
 ```
 
 - **Never translate in this window**, even when the user asks for a quick
@@ -381,6 +381,10 @@ states each phase's behavior per mode.
      of every file, excluding `.git/`.
    - When `<repo-root>` is inside a Git worktree, also record
      `git --no-optional-locks -C "<repo-root>" status --porcelain --ignored -- .`.
+   - In `improve` and `rewrite` without `--dry-run`, run
+     `check-readme.py` on each companion localized README with the same
+     `--repo-root` before the first write, and record its stdout and exit
+     code as the pre-run companion probe baseline.
 5. **Enforce the pointer contract and trust gate (§1):**
    - Resolve `readme-crafter-skill` using the search order, canonical match
      rules, required-files check (`SKILL.md`, `references/repo-integrity.md`,
@@ -702,7 +706,8 @@ Native-First Translation Handoff). `audit` mode never reaches this phase;
    - No translation: the companion localized README's prose is left
      unchanged in this run. In a write-mode run (not `--dry-run`), the handoff
      (§2) names it as a file to translate or correct in the new window; no
-     second-language README is created unless requested.
+     second-language README is created unless requested. A `RESTRUCTURE`
+     move, rename, or deletion may still repair its links.
 4. **No-additions rule:** `LANGUAGE` never adds sentences, sections, claims,
    examples, or personality. Edits move, merge, split, replace, or delete
    existing prose; any new sentence would need a `TRUTH` **receipt**, which
@@ -747,9 +752,9 @@ intensity tier's scope was respected.
      6. `honest-gaps` — presence of repository-backed limitation/caveat/non-goal signals
      7. `repo-set` — cross-repo **skeleton isomorphism** diff when `--repo-set <manifest>` is supplied (`N/A` on single-repository runs)
 
-   A companion finding that existed before this run goes in `[Residual risk]`
-   and does not fail `VERIFY`; a finding introduced by link repair fails and
-   must be fixed before delivery.
+   Compare the companion probe with the `ROUTE` companion baseline. A
+   finding already present in the baseline goes in `[Residual risk]`; a new
+   finding fails `VERIFY` and must be fixed before delivery.
 2. **Walk the binary verification checklist (`references/checklist.md`):**
    - Evaluate `references/checklist.md` §§1–9 against the probe **receipt** and
      the `TRUTH` / `RESTRUCTURE` findings.

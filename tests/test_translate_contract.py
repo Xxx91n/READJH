@@ -33,7 +33,7 @@ REQUIRED_RULE_BODIES = [
     "Keep one chapter to one chapter and one paragraph to one paragraph",
     "stop and ask the author",
     "Do not carry English sentence bones",
-    "Do not change code, commands, links, versions",
+    "Copy code, commands, versions, numbers, badges, file paths",
     "never in the window that wrote the native README",
     "Do not use made-up complex words",
     "mark every term that has no exact equivalent",
@@ -52,13 +52,25 @@ REQUIRED_HANDOFF_LABELS = [
 HANDOFF_BLOCK = re.compile(r"```text\n(\[Native language\].*?)\n```", re.DOTALL)
 
 
+def prompt_text():
+    """Return the prompt file as one whitespace-normalized string."""
+    return " ".join(PROMPT_PATH.read_text(encoding="utf-8").split())
+
+
+def skill_text():
+    """Return SKILL.md as one whitespace-normalized string."""
+    return " ".join(SKILL_PATH.read_text(encoding="utf-8").split())
+
+
 class TestTranslatePromptContract(unittest.TestCase):
     """The prompt file must exist and carry all eight required items."""
 
     def test_prompt_file_exists(self):
+        """The prompt file is present at the fixed path."""
         self.assertTrue(PROMPT_PATH.is_file(), f"Prompt file not found at {PROMPT_PATH}")
 
     def test_prompt_has_all_eight_rules_in_order(self):
+        """The eight numbered rule labels appear in spec order."""
         text = PROMPT_PATH.read_text(encoding="utf-8")
         rules = re.findall(r"^\d+\. \*\*([^*]+)\*\*", text, re.MULTILINE)
         self.assertEqual(
@@ -69,11 +81,13 @@ class TestTranslatePromptContract(unittest.TestCase):
         )
 
     def test_prompt_rule_bodies_keep_required_content(self):
-        text = " ".join(PROMPT_PATH.read_text(encoding="utf-8").split())
+        """Each rule body keeps the phrase the ticket requires."""
+        text = prompt_text()
         for phrase in REQUIRED_RULE_BODIES:
             self.assertIn(phrase, text, f"rule body is missing {phrase!r}")
 
     def test_prompt_has_fill_in_fields(self):
+        """The four values the handoff block supplies are present."""
         text = PROMPT_PATH.read_text(encoding="utf-8")
         for label in (
             "Native language:",
@@ -84,23 +98,28 @@ class TestTranslatePromptContract(unittest.TestCase):
             self.assertIn(label, text, f"translate-prompt.md is missing {label!r}")
 
     def test_prompt_requires_a_new_clean_window(self):
-        text = " ".join(PROMPT_PATH.read_text(encoding="utf-8").lower().split())
+        """The prompt says the job runs in a new, clean window."""
+        text = prompt_text().lower()
         self.assertIn("new, clean window", text)
         self.assertIn("never in the window that wrote the native readme", text)
 
-    def test_prompt_keeps_code_and_facts_fixed(self):
-        text = PROMPT_PATH.read_text(encoding="utf-8")
-        self.assertIn("Do not change code, commands, links, versions", text)
+    def test_prompt_keeps_facts_and_links_fixed(self):
+        """The prompt copies native facts and keeps link targets fixed."""
+        text = prompt_text()
+        self.assertIn("Keep link targets unchanged", text)
+        self.assertIn("update it to the native value", text)
 
 
 class TestHandoffBlockContract(unittest.TestCase):
     """SKILL.md must carry the fixed block and the no-translation rule."""
 
     def test_skill_references_the_prompt_path(self):
+        """SKILL.md names the translation prompt file."""
         text = SKILL_PATH.read_text(encoding="utf-8")
         self.assertIn("references/translate-prompt.md", text)
 
     def test_handoff_block_is_fixed_and_complete(self):
+        """The fenced block carries every required field and the stop rule."""
         text = SKILL_PATH.read_text(encoding="utf-8")
         match = HANDOFF_BLOCK.search(text)
         self.assertIsNotNone(
@@ -116,16 +135,19 @@ class TestHandoffBlockContract(unittest.TestCase):
         self.assertIn("This window never translates.", block)
 
     def test_handoff_requires_a_companion_or_an_explicit_request(self):
-        text = " ".join(SKILL_PATH.read_text(encoding="utf-8").split())
+        """The block is suppressed when no companion README exists."""
+        text = skill_text()
         self.assertIn("If no companion README exists", text)
         self.assertIn("unless the user asks for a translation", text)
 
     def test_handoff_waits_for_approval(self):
-        text = " ".join(SKILL_PATH.read_text(encoding="utf-8").split())
+        """The block is emitted only after the user approves the README."""
+        text = skill_text()
         self.assertIn("that the user approves produces a handoff", text)
         self.assertIn('the user\'s explicit "approved"', text)
 
     def test_current_window_never_translates(self):
+        """The current window forbids translation in both rules and block."""
         text = SKILL_PATH.read_text(encoding="utf-8")
         self.assertIn("It never translates.", text)
         self.assertIn("Never translate in this window", text)
