@@ -180,4 +180,6 @@ What makes a good test: binary checks on files and exact terms. Do not assert th
 - The Chinese dash sources are community-level and medium confidence. They are editing clues, not proof.
 - The full old-to-new term list is a ticket deliverable. The first eight terms are confirmed.
 - Spec 0001 gets a plain-language rewrite with the same objects. Spec 0002 is this file.
-- Open items: the test interface above needs the user's confirmation; the ticket breakdown and serial/parallel order need a separate confirmation; the full term list is not yet built.
+- Test interface confirmed on 2026-11-08: manual author review, exact-term cleanup search, contract checks, and the existing 7 static checks. No new language detector.
+- Ticket plan confirmed on 2026-11-08. Tickets #17-#25 are published as sub-issues of #16, all `ready-for-agent`. The serial/parallel order is recorded in `docs/agents/issue-tracker.md`.
+- Open item: the full old-to-new term list is not yet built. The first eight terms are confirmed.
