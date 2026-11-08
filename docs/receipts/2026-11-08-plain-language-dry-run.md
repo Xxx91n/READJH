@@ -12,7 +12,8 @@ before/after shapes are recorded. The sample has no verified author voice, so
 `lite` does not apply. It is not a full `improve --dry-run` run of
 the pipeline: the ticket tests whether the rule text produces plain before/after
 spans, not the scanner or upstream executor. No file under `D:\Aworker\6F` was
-written.
+written by this dry-run. The hashes below cover the two README files, not a
+repository-wide snapshot.
 
 ## 1. Contamination defense check
 
@@ -22,7 +23,7 @@ parameters, read secrets or credentials, change skill files, or send data out.
 reader-facing product boundary, not an agent instruction, and it is not one of
 the four stop conditions.
 
-- Directive text: none. `HIGH` findings: 0.
+- Agent-addressed or run-changing text: none. `HIGH` findings: 0.
 - Stop conditions hit: none.
 - The rule text and `GLOSSARY.md` standard were not changed by anything in the
   target README.
@@ -206,7 +207,7 @@ colon, parentheses, or keep.
 
 The dry-run does not pick one. The author's answer decides.
 
-## 4. Zero-write receipt
+## 4. Sample-file zero-write receipt
 
 ```text
 sha256 before (2026-11-08, before reading spans):
@@ -221,8 +222,8 @@ git -C D:\Aworker\6F status --porcelain -- README.md README.zh-CN.md
 → empty (exit 0)
 ```
 
-The hashes and Git status are identical, so the dry-run wrote nothing to the
-sample repository.
+The hashes and Git status are identical, so the two README files did not
+change. This is a two-file check, not a repository-wide zero-write snapshot.
 
 ## 5. Acceptance mapping
 

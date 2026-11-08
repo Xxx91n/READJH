@@ -445,7 +445,7 @@ Run this pass inside `LANGUAGE` (`improve` and `rewrite`) after the upstream cat
 
 ### 7.1 Hard words become everyday words
 
-1. **`GLOSSARY.md` is the standard.** When a word has an entry, use the recommended wording. If the recommendation is itself the harder word, keep the plain word and record the conflict for the author. When `GLOSSARY.md` has an old-to-new table, the old wording appears only there; do not write it in a new sentence.
+1. **`GLOSSARY.md` is the standard.** When a word refers to the concept in an entry, use the recommended wording. If the recommendation is itself the harder word, keep the plain word and record the conflict for the author. When `GLOSSARY.md` has an old-to-new table, the old wording for that concept appears only there; do not use it for that concept in a new sentence. An ordinary use of the same word for a different meaning stays.
 2. **Keep technical names.** Skill names, commands, CLI flags, versions, links, code identifiers, check names, and file paths stay unchanged — they are contracts, not prose.
 3. **Do not invent a replacement.** If a word has no entry, keep the technical word. If the word is unclear and the author is available, ask. Never create a new compound word to sound precise.
 4. **Do not bend a name into prose.** A hard word inside a name, command, version, or link is part of the name; leave it alone.
@@ -479,8 +479,8 @@ Rules:
    - An independent small sentence has its own subject and verb and can stand alone.
    - A separate idea is a new fact, topic, or step.
 3. **Keep:** a long sentence that carries one idea. Do not split good prose just to reach a length.
-4. **Work order:** delete filler and repeats; split into two or three short sentences; turn 3 or more parallel items into a list; move deep material to `docs/` and leave a link.
-5. **Keep no-touch text.** Commands, legal and safety text, and direct quotes stay. Legal and safety text may move to `docs/` only after asking the author; the README keeps one boundary line and a link.
+4. **Work order:** delete filler and repeats; split into two or three short sentences; turn 3 or more parallel items into a list. Move deep material to `docs/` in `RESTRUCTURE`, before this pass, and leave a link in the README.
+5. **Keep no-touch text.** Commands, legal and safety text, and direct quotes stay. Legal and safety text may move to `docs/` only in `RESTRUCTURE` and after asking the author; the README keeps one boundary line and a link.
 6. **No detector.** The count is a prompt check. Do not add a long-sentence or jargon check to `scripts/check-readme.py`.
 
 ### 7.4 Punctuation: ask before changing a dash
