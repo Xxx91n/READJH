@@ -82,18 +82,18 @@ A README is the front page of a repository, not its complete manual. Over-comple
 2. **Migrate to `docs/`:** full CLI/API reference tables, threat models and security boundary matrices, versioning and lockfile policies, contributor runbooks, and architecture deep-dives when the architecture is not itself the product.
 3. **Record every move in the migration ledger:** whenever `improve` or `rewrite` moves material out of `<readme>` into `docs/`, record `Moved span (heading + line range) → Destination file path` plus every relative link/image target re-based by the move (`original → new`) and every inbound anchor reference **in `<readme>` and its companion localized README** repointed at the moved heading (`#old-anchor → docs/<file>.md#<anchor>`) in the delivery report's migration ledger so nothing is silently dropped and no moved link or anchor silently breaks. Inbound references in other repository files are outside the write set — list them under `[Residual risk]` for manual follow-up, do not edit them. For `<anchor>`: when the moved span carries an explicit HTML `id`/`name` anchor the inbound link targets, that anchor moves with the span — repoint at it. Otherwise `<anchor>` is the unique slug of the moved heading after the merge, including any `-1` or `-2` suffix GitHub adds to a duplicate heading; confirm that this anchor identifies the moved heading, not the existing one. `{#id}` is not a separate anchor — it folds into the heading slug.
 
-### 4.2 Cross-repo skeletons (check a group of repos in one run)
+### 4.2 Cross-repo skeletons (a run over a group of repos)
 
 **Several repos' READMEs share the same skeleton** means that multiple repositories use near-identical section heading sequences, centered HTML hero blocks, badge counts, or closing rituals regardless of what each project actually is.
 
 1. **Off by default.** Single-repository runs never scan sibling repositories.
-2. **Opt-in via `--repo-set <manifest>`.** When the user passes a group-of-repos manifest, `python3 scripts/check-readme.py <readme> --repo-set <manifest>` compares the heading skeletons, hero blocks, and badge rows across the listed repositories.
+2. **Opt-in via `--repo-set <manifest>`.** When the user passes a manifest that lists a group of repos, `python3 scripts/check-readme.py <readme> --repo-set <manifest>` compares the heading skeletons, hero blocks, and badge rows across the listed repositories.
 3. **Shape follows project type (`readme-crafter-skill` & `humanize-readme`):**
    - **CLI tool:** lead with the install command and a real command + output example; config flags or `--help` link next.
    - **Library / SDK:** lead with package/source install and a minimal import + input/output snippet; link out for full API.
    - **Desktop / web application / plugin:** lead with what it does, a real screenshot or explicit asset-pending note, and the download or local-run path.
    - **Research or benchmark repo:** lead with the problem, paper/spec link, and reproduction commands.
-4. When two repositories of different project types share the same section skeleton in a **group-of-repos run**, reorder and trim each README in `RESTRUCTURE` to match its own project type and distribution posture.
+4. When two repositories of different project types share the same section skeleton in a **run over a group of repos**, reorder and trim each README in `RESTRUCTURE` to match its own project type and distribution posture.
 
 ---
 

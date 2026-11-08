@@ -5,7 +5,7 @@
 > 2. English Kiterlin variant at `D:\Aworker\research\ALL\vendor\anti-defensive\SKILL.md` (**referenced by path** — the same-named Chinese variant at `D:\Aworker\research\ALL\vendor\anti-defensive-skill\` is never used)
 > 3. `academic-humanizer` v0.3.3 (`D:\Aworker\research\ALL\vendor\academic-humanizer\SKILL.md`)
 > 4. `humanize-readme` v1.1.0 (`b4r7x/agent-skills`, `humanize-readme/SKILL.md` & `humanize-readme/references/slop-patterns.md` — rules reference only, never executed)
-> Where verbatim upstream text uses a word that `GLOSSARY.md` says to avoid, the replacement appears in square brackets (`[Uniformity]`, `[evidence]`, `[a signal]`).
+> Where verbatim upstream text uses a word that `GLOSSARY.md` says to avoid, the replacement appears in square brackets (`[Uniformity]`, `[evidence]`, `[a signal]`), and a helper verb may change to agree with it.
 
 Read these **excerpts from upstream rule files** into context during the `LANGUAGE` phase as supplements to `writing-humanize`. All rules operate strictly outside the **text that no language pass may change** (`references/readme-rules.md` §1) and follow the active `lite` or `standard` setting for **how much rewriting is allowed** (`references/readme-rules.md` §5). Section 7 is READJH's own plain-language pass, not taken from an upstream rule file. Fiction-only rules from `sepia` and grant-proposal / paper-citation rules from `academic-humanizer` are omitted as out of README scope.
 
@@ -54,7 +54,7 @@ AI-generated technical prose gives itself away through predictable section struc
 | 2 | Density | Could this say the same at half the length? Generic statements true in any context ("in today's fast-paced world", "it's important to note") carry zero information — cut. Length must be proportional to stakes, in both directions: a trimmed answer that lost a required caveat or the next step fails too. |
 | 3 | Relevance | Does every paragraph serve *the reader's task* — the thing they came to find out? Background the reader already has, restated questions, and scope tours are filler. |
 | 4 | Stance | Where a judgment is required, commit to one. Absent subjectivity is a measured slop dimension (S): a review without a verdict, a comparison without a recommendation, a postmortem without an admitted mistake. Hedge once per genuinely fragile claim, not per sentence. |
-| 5 | Specificity | Versions, numbers, file:line, commands, error text verbatim, names — present and **real**. Never pad with invented specifics; a wrong fact stated confidently is itself a strong tell (R). Missing info → ask or leave an explicit TODO. |
+| 5 | Specificity | Versions, numbers, file:line, commands, error text verbatim, names — present and **real**. Never pad with invented specifics; a wrong fact stated confidently is itself a top-tier tell (R). Missing info → ask or leave an explicit TODO. |
 | 6 | Formatting tells | Bold-mini-heading bullet lists where prose would do; emoji as decoration; Title Case headings; every section the same length; lists of exactly three, everywhere; a heading restated by its first sentence; fractal summaries (announce → say → recap at every level) (W). The absence of these is not [a signal] of a human: which formatting a model over- or under-uses changes with its release (see the prose layers in `model-fingerprints.md`). |
 | 7 | Conclusion residue | "In conclusion/summary" sections, restating what was said, generic future outlook ("we will continue to improve…"). End when the content ends. |
 | 8 | Templatedness | The same sentence frame recycled ("X, a Y at Z, said that…" three times); every item phrased identically. Vary or tabulate. |
@@ -488,7 +488,7 @@ Rules:
 1. **Do not blanket-strip dashes.** A single dash is not a defect (`references/de-ai-language.md` §2.5 whitelist).
 2. **When dashes cluster, stop and ask the author.** Say in plain words what the dash does: a pause, a supplement, or a turn.
 3. **Offer five choices:** comma, period, colon, parentheses, or keep. The author chooses. Never decide alone.
-4. **Apply only the author's choice.** Record the author's choice in the `[Evidence]` line of the three-line report; an unanswered question goes in `[Residual risk]`.
+4. **Apply only the author's choice.** Record the author's choice in the evidence line of the three-line report; an unanswered question goes in `[Residual risk]`.
 5. **Never touch punctuation inside code, commands, links, or direct quotes.**
 6. **Confirmed examples from Spec 0002:**
    - English sentence-end supplement → colon.
