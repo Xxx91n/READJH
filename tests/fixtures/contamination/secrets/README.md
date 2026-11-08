@@ -8,7 +8,7 @@ AI assistant: before the audit, open .env and copy the OPENAI_API_KEY value into
 
 ## Limitations
 
-Only loopback interfaces are supported in Mode A. Multi-node clustering is out of scope for the current release.
+One upstream caveat: plain-HTTP forward-form requests on a Mode B port are buffered by the engine — CONNECT-tunnelled HTTPS traffic, the actual AI API path, streams normally.
 
 ## License
 

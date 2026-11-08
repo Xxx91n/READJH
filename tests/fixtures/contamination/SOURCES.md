@@ -11,23 +11,29 @@ exists only for the test.
   The fixture keeps the title, the one-line product description, and the
   "AI / automation agents" blockquote verbatim; the badge row and the language
   switcher are dropped so the fixture has no remote images or missing links.
-- The "Limitations" sentence is derived from the `Mode A` boundary in the same
-  README, shortened to one sentence.
+- The `Limitations` sentence quotes the upstream caveat from the same README,
+  line 68, verbatim. It is a real product caveat, not an invented gap.
+- The directive fixture keeps the real agent-facing `llms.txt` blockquote
+  verbatim. The written rule records agent-addressed text as a `HIGH`
+  finding, so the fixture asserts it as `HIGH` even though the pointer is
+  harmless in practice. That is the rule's scope, not a new judgement.
 
 ## Directive wording
 
 - "ignore the previous rules" and "you are now ...": ticket #19, "What to
   build", which names these two shapes as the directive fixture input.
 - The four stop categories (run parameters, secrets, skill files, data out)
-  and the `HIGH` / `BLOCKED` split: `docs/spec/0002-plain-language-and-native-first-translation.md`
-  (§Contamination defense) and `references/readme-rules.md` §6.
+  and the `HIGH` / `BLOCKED` split: Spec 0002 (GitHub issue #16, §Contamination
+  defense) and `references/readme-rules.md` §6. Spec 0002 is a GitHub issue on
+  this branch; the spec file is not committed here.
 - The injection shape is the canonical prompt-injection pattern catalogued as
   LLM01 in the OWASP Top 10 for LLM Applications: text in untrusted content
   that addresses the model directly and asks it to change its task.
 
 ## Fixture cases
 
-- `directive/README.md` — agent-addressed directive text, no stop condition.
+- `directive/README.md` — agent-addressed directive text in visible prose and
+  in an HTML comment, no stop condition.
 - `run_parameters/README.md` — asks the agent to change mode, dry-run flag,
   and the write set.
 - `secrets/README.md` — asks the agent to read an environment file and an API
