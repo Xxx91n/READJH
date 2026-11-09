@@ -15,7 +15,7 @@ Spec 0001 wave (closed):
 | #6 | improve/rewrite modes, the LANGUAGE step, the move record, `.bak`, and `--dry-run` | #4 |
 | #7 | Acceptance run: audits of six repos, a baseline, and an EgressAPIKEY `--dry-run` | #5, #6 |
 
-Spec 0002 wave (open, all created `ready-for-agent`):
+Spec 0002 wave (all closed; the `ready-for-agent` label is removed):
 
 | # | what it covers | blocked by |
 |---|---|---|

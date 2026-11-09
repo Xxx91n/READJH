@@ -1,12 +1,13 @@
 READJH
-Orchestration-layer code and text: MIT License, Copyright (c) 2026 READJH
-contributors. See LICENSE.
+Code and text that run the existing skills in order: MIT License, Copyright
+(c) 2026 READJH contributors. See LICENSE.
 
-READJH orchestrates and distills rules from the following upstream works.
-It does not vendor their code; the executors are invoked from their own
-installs, and the distilled rules in references/ carry per-section attribution.
+READJH runs the following upstream works in order and takes excerpts from
+their rules. It does not copy their code into this repository; the skills run
+from their own installs, and the excerpts in references/ carry per-section
+attribution.
 
-Executable skills (pointer contract, invoked from the user's machine):
+Executable skills (found by fixed name, run from the user's machine):
 
   readme-crafter-skill
     Repo:    https://github.com/linhai0872/readme-crafter-skill
@@ -21,7 +22,7 @@ Executable skills (pointer contract, invoked from the user's machine):
     READJH suppresses two upstream behaviors when invoking this skill —
     self-evolve journaling and personality injection (see UPSTREAM.md).
 
-Distilled rule sources (subsets distilled into references/, never invoked):
+Rule sources used as excerpts (subsets copied into references/, never run):
 
   sepia
     Repo:    no canonical public upstream recorded; local mirror at
@@ -34,8 +35,8 @@ Distilled rule sources (subsets distilled into references/, never invoked):
     Repo:    https://github.com/Kiterlin/anti-defensive-writing
     Author:  Kiterlin
     License: MIT, Copyright (c) 2026 Kiterlin
-    Note:    a same-named source exists elsewhere; READJH distills only the
-             Kiterlin variant, referenced by path (ADR-0001, UPSTREAM.md).
+    Note:    a same-named source exists elsewhere; READJH takes excerpts only
+             from the Kiterlin variant, referenced by path (ADR-0001, UPSTREAM.md).
 
   academic-humanizer
     Repo:    https://github.com/AIScientists-Dev/academic-humanizer

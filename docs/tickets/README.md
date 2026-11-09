@@ -21,7 +21,7 @@ Dependency edges:
 - #6 ← #4
 - #7 ← #5, #6
 
-Spec 0002 wave (open, all `ready-for-agent`):
+Spec 0002 wave (closed; the `ready-for-agent` label is removed):
 
 - [#17](https://github.com/Xxx91n/READJH/issues/17) — T1 Add plain-language rules to the language pass
 - [#18](https://github.com/Xxx91n/READJH/issues/18) — T3 Rewrite GLOSSARY as the plain-language standard

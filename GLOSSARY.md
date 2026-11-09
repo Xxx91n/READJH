@@ -115,7 +115,7 @@
 | distilled rules / 蒸馏规则 / 提炼规则 | 从上游规则里挑出来的一部分 | excerpts taken from upstream rule files |
 | freeze zone / 冻结区 | 不能改的地方 | text that no language pass may change |
 | static probe / 静态探针 | 静态检测功能 | the static check |
-| intensity tier / 强度档 / 强度档位 | 改写力度档位 | how much rewriting is allowed |
+| intensity tier / 强度档 / 强度档位 | 改写力度档位 | the rewriting level (`lite` / `standard`) |
 | receipt / 凭证 / 凭据 | 证据 | evidence |
 | skeleton isomorphism / 结构同构 / 骨架同构 | 几个仓库的 README 骨架像一个模子 | several repos' READMEs share the same skeleton |
 | repo-set mode / 仓库集模式 | 一次看一组仓库 | check a group of repos in one run |

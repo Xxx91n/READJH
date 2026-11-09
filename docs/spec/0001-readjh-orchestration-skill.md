@@ -6,7 +6,7 @@ Vocabulary: `GLOSSARY.md` at the repo root. Decisions respected: ADR-0001, ADR-0
 
 ## Problem Statement
 
-The user's six repositories have READMEs that read as machine-written. The problem is not banned words. It is structure: one README acts as a product page, a manual, a threat model, and a versioning policy at the same time; the same boundary is stated in several sections; several repos share almost the same section skeleton; machine marks are left in the file; abstract nouns chain together; and one sentence carries too many conditions.
+The user's six repositories have READMEs that read as machine-written. The problem is not banned words; it is structure. One README acts as a product page, a manual, a threat model, and a versioning policy at the same time. The same boundary is stated in several sections. Several repos share almost the same section skeleton. Machine marks are left in the file. Abstract nouns chain together. One sentence carries too many conditions.
 
 Each existing skill covers one small part. `readme-crafter-skill` checks facts and structure, but it has no dedicated anti-AI language pass and does not look for repeated self-proof, cross-repo skeleton sameness, or machine marks. `writing-humanize` cleans language, but it does not know README limits and tries to add personality and keep a learnings journal, which are both wrong for README work. `humanize-readme` contradicts itself: it asks for added "honest gaps" while forbidding added content. The paper-side de-AI and anti-defensive rules are useful, but they carry academic context that READMEs do not need.
 
@@ -14,7 +14,7 @@ The user needs one entry point that strings these skills into one evidence-first
 
 ## Solution
 
-READJH is a thin layer that strings existing skills together. The repository root is the skill itself. It finds two upstream skills by fixed name, stops with install steps when one is missing, keeps its own README rules in `references/`, and closes every run with evidence from a static check script plus a human checklist. It does not invent a second set of rewriting rules beyond the gaps in that thin layer.
+READJH is a thin layer that strings existing skills together. The repository root is the skill itself. It finds two upstream skills by fixed name. It stops with install steps when one is missing. It keeps its own README rules in `references/`. It closes every run with evidence from a static check script plus a human checklist. It does not invent a second set of rewriting rules beyond the gaps in that thin layer. Spec 0002 adds the plain-language and translation rules; those are the recorded exception.
 
 Five phases: ROUTE → TRUTH → RESTRUCTURE → LANGUAGE → VERIFY. Delete and move first, then change wording.
 
@@ -33,8 +33,8 @@ Five phases: ROUTE → TRUTH → RESTRUCTURE → LANGUAGE → VERIFY. Delete and
 11. As a maintainer, I want leftover machine marks (pipeline comments, rule tags) found and removed, so the README carries no scaffolding.
 12. As a maintainer, I want commands, code blocks, URLs, versions, error codes, badge rows, and legal/safety text left byte-for-byte alone through every language pass, so cleanup cannot corrupt facts.
 13. As a maintainer, I want the language pass to run `writing-humanize` plus the rules picked out of upstream files, so AI patterns are removed at README strength, not generic-prose strength.
-14. As a maintainer, I want a `lite` rewrite-strength level when the repo shows a strong personal voice or the user gives a writing sample, so the voice is not flattened.
-15. As a maintainer, I want `standard` as the default rewrite-strength level, so I do not have to choose a level for an ordinary repo.
+14. As a maintainer, I want a `lite` rewriting level when the repo shows a strong personal voice or the user gives a writing sample, so the voice is not flattened.
+15. As a maintainer, I want `standard` as the default rewriting level, so I do not have to choose a level for an ordinary repo.
 16. As a maintainer, I want the skill forbidden from inventing personality, gaps, or first-person stories the repo does not contain, so cleanup cannot fake authenticity.
 17. As a maintainer, I want defensive long sentences turned into "fact + link", so boundaries stay precise and appear once.
 18. As a maintainer, I want abstract-noun chains replaced with concrete things, so the README reads like a person who built the thing wrote it.
@@ -42,6 +42,8 @@ Five phases: ROUTE → TRUTH → RESTRUCTURE → LANGUAGE → VERIFY. Delete and
 20. As a maintainer with several repos, I want an optional multi-repo check for README skeletons that look like one mold, so my repos stop sharing one template.
 21. As a maintainer, I want the multi-repo check off by default, so single-repo runs pay no extra cost.
 22. As a maintainer, I want bilingual READMEs found and processed together with the same structure, so the English and Chinese versions do not drift.
+
+    *Spec 0002 replaces this: the native-language README is finished and approved first; the other READMEs are translated later in a new clean window.*
 23. As a maintainer, I want no second-language README created unless I ask, so the skill does not add files I did not want.
 24. As a maintainer, I want Chinese text checked against Chinese human rhythm, not English defaults, so Chinese READMEs get the right style checks.
 25. As a maintainer, I want a static check to verify links, images, code fences, badge targets, repeated boundary phrases, and gap signals, without running anything the README says, so I get evidence and no untrusted command runs.
@@ -59,7 +61,7 @@ Five phases: ROUTE → TRUTH → RESTRUCTURE → LANGUAGE → VERIFY. Delete and
 
 ### Modules
 
-- **SKILL.md** (model-invoked): frontmatter `name` and `description` carry the trigger words for README audit/improve/rewrite and de-AI requests. The body holds the five phases, the find-skills rules, the short no-touch and rewrite-strength rules inline, and the three-line report format.
+- **SKILL.md** (model-invoked): frontmatter `name` and `description` carry the trigger words for README audit/improve/rewrite and de-AI requests. The body holds the five phases, the find-skills rules, the short no-touch and rewriting-level rules inline, and the three-line report format.
 - **references/readme-rules.md**: the README rules the thin layer owns: what no language pass may touch, one-statement boundaries, machine marks, skeleton sameness, no invented personality. Each rule carries its credit line.
 - **references/de-ai-language.md**: rules handed to `writing-humanize`, picked from sepia professional/style passes and zh calibration, the English Kiterlin anti-defensive rules, academic-humanizer claim-to-evidence rules, and the usable humanize-readme rules. Ban tables keep their credit; rationale is rewritten.
 - **references/checklist.md**: the human checklist for VERIFY.
@@ -104,7 +106,7 @@ Prior art: none in this repo. The check script follows the static-inspection app
 
 ## Out of Scope
 
-- Writing new rewriting rules beyond the gaps in the thin layer. Upstream skills do that.
+- Writing new rewriting rules beyond the gaps in the thin layer. Upstream skills do that. Spec 0002 adds the plain-language and translation rules; those are the recorded exception.
 - Running or validating README-documented commands.
 - Multi-host adapter builds (ADR-0002).
 - Running the actual governance pass on the six repos. This spec builds the tool; repo-by-repo passes are separate work.

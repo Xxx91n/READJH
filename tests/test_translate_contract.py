@@ -152,6 +152,12 @@ class TestHandoffBlockContract(unittest.TestCase):
         self.assertIn("It never translates.", text)
         self.assertIn("Never translate in this window", text)
 
+    def test_skill_asks_for_the_native_language(self):
+        """The skill asks the user's native language before choosing the file."""
+        text = skill_text()
+        self.assertIn("Ask the user for their native language first", text)
+        self.assertIn("Never guess it from file names", text)
+
 
 if __name__ == "__main__":
     unittest.main()
