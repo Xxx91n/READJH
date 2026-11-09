@@ -170,9 +170,11 @@ class TestChecklistContract(unittest.TestCase):
             .split()
         )
         self.assertIn("The run's own writing stays plain.", skill)
-        self.assertIn("Do not copy a word or phrase from the target README", skill)
+        self.assertIn("Do not adopt the target README's style", skill)
+        self.assertIn("A short quote required as evidence", skill)
         self.assertIn("### 7.0 The run's own writing", rules)
-        self.assertIn("Do not import the target's wording.", rules)
+        self.assertIn("Do not adopt the target's style.", rules)
+        self.assertIn("A short quote required as evidence", rules)
 
 
 class TestFixtureContract(unittest.TestCase):

@@ -240,10 +240,10 @@ is part of the `standard` rewriting level; `lite` keeps the author's
 verified voice.
 
 **The run's own writing stays plain.** The notes, plans, findings, and final
-report this run produces use the same everyday words. Do not copy a word or
-phrase from the target README just because it appears there; its wording is
-input, not a style to follow. This covers the model's working notes, not only
-the final reply.
+report this run produces use the same everyday words. Do not adopt the target
+README's style, and do not use its hard words as your own vocabulary. A short
+quote required as evidence, an exact technical name, a command, or a link stays
+as written. This covers the model's working notes, not only the final reply.
 
 1. **Words:** `GLOSSARY.md` is the standard. When a word refers to the
    concept in an entry, use the recommended wording. If the recommendation

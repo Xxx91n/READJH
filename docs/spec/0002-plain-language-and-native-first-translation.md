@@ -57,7 +57,7 @@ The repo also gets a one-time cleanup. Living docs use `GLOSSARY.md` plain words
 29. As a packager, I want external `/ask-matt` skill files left unchanged, so we do not edit a dependency.
 30. As a maintainer, I want the open acceptance standard recorded as deferred, so no one pretends it is settled.
 31. As a maintainer, I want the skill to ask my native language before choosing the native README, so it never guesses from file names.
-32. As a maintainer, I want the run's own notes and report to stay in plain words and not copy the target README's jargon, so the input cannot pollute the cleanup.
+32. As a maintainer, I want the run's own notes and report to stay in plain words without adopting the target README's style, so the input cannot pollute the cleanup.
 
 ## Implementation Decisions
 
@@ -65,7 +65,7 @@ The repo also gets a one-time cleanup. Living docs use `GLOSSARY.md` plain words
 
 The language pass turns hard words into everyday words. It uses `GLOSSARY.md` as the standard and keeps technical names, commands, versions, and links. It removes translationese: the "bone structure is English, every word is Chinese" pattern. Examples from the research: "接住反馈", "更锋利的重构", "context 不崩", "赋能", "闭环", "抓手", "值得注意的是", "不是 X，而是 Y" repeated across paragraphs.
 
-The same plain words apply to the run's own notes, plans, findings, and report. The target README's wording is input, not a style to copy. A hard word from the input is reported in plain words; it never becomes the run's own term.
+The same plain words apply to the run's own notes, plans, findings, and report. Do not adopt the target README's style or use its hard words as the run's own vocabulary. A short quote required as evidence, an exact technical name, a command, or a link stays as written.
 
 The first eight terms and their plain words are confirmed:
 
@@ -169,7 +169,7 @@ The test interface has four parts:
    - No banned terms remain.
    - No translationese remains.
    - Each dash decision was the author's: keep it or replace it with the chosen symbol. A single dash that stays needs no decision (`references/de-ai-language.md` §7.4).
-   - The run's own notes and report stay plain and do not copy the target README's wording.
+   - The run's own notes and report stay plain and do not adopt the target README's style or vocabulary; a required quote and an exact technical name are allowed.
    - The native language came from the user's answer.
    - Contamination findings were recorded.
    - The translation handoff block is correct.

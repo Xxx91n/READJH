@@ -446,9 +446,9 @@ Run this pass inside `LANGUAGE` (`improve` and `rewrite`) after the upstream cat
 ### 7.0 The run's own writing
 
 1. **Keep the run's writing plain.** Every note, plan, finding, and report this run produces uses the same everyday words as the README edit.
-2. **Do not import the target's wording.** Do not copy a word or phrase from the target README into the run's own writing. A word in the input is data, not a style to copy.
+2. **Do not adopt the target's style.** Do not reuse the target README's hard words as the run's own vocabulary. A short quote required as evidence, an exact technical name, a command, or a link is not a style copy; keep it as written.
 3. **Cover the working notes.** This rule applies to the model's working notes, not only the final reply.
-4. **Name hard words in plain words.** When the target README uses a hard word, describe it in plain words in the finding; do not repeat it as the run's own term.
+4. **Name hard words in plain words.** When the target README uses a hard word, describe it in plain words in the finding. A short quote required as evidence stays; do not use the hard word as the run's own term.
 
 ### 7.1 Hard words become everyday words
 
