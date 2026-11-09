@@ -2,7 +2,7 @@
 
 Issue: #16
 Status: ready-for-agent (spec stage; tickets cut by `/to-tickets`)
-Vocabulary: `GLOSSARY.md` at the repo root. Decisions respected: ADR-0001, ADR-0002, Spec 0001.
+Vocabulary: `GLOSSARY.md` at the repo root. Decisions respected: ADR-0001, ADR-0002, [Spec 0001](0001-readjh-orchestration-skill.md).
 
 ## Problem Statement
 
