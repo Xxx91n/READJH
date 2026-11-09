@@ -259,6 +259,10 @@ README. A full `improve` run would walk every item over the whole file.
 The no-detector rule is §1 of the checklist, not a §9 review item; §1 already
 requires zero detector scores, and the record cites none.
 
+The test-interface line in `docs/spec/0002-...md` was clarified to match
+`references/de-ai-language.md` §7.4: a single dash that stays needs no
+decision; only a dash that changes needs the author's choice.
+
 ## 5. Sample-file zero-write check
 
 ```text
@@ -285,17 +289,18 @@ python3 -B scripts/check-readme.py README.md --repo-root .
   boundary-duplicates, honest-gaps all PASS; repo-set N/A.
 
 python3 -B -m unittest discover -s tests -p "test_plain_language_review.py"
-→ exit 0; 21 tests ran; OK.
+→ exit 0; 22 tests ran; OK.
 
 python3 -B -m unittest discover -s tests
-→ exit 0; 168 tests ran; OK.
+→ exit 0; 169 tests ran; OK.
 ```
 
 The fixture check also compares each fixture string with `prototype_excerpt.json`
-and re-reads the cited commit when the working copy is on this machine. All
-four working copies were present, and every recorded `source_line` matched the
-live commit. On a machine without those copies that one check skips, and the
-recorded text and the prototype hashes are still checked.
+and with the `prototype/plain-readme` data when that ref is present, then
+re-reads the cited commit when the working copy is on this machine. All four
+working copies and the prototype ref were present, and every recorded
+`source_line` matched. On a machine without those refs those checks skip; the
+recorded text and the committed prototype hashes are still checked.
 
 The first command is the existing static check on this repository's own README.
 It shows the same six always-on checks and the optional `repo-set` check; no

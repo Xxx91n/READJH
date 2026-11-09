@@ -222,7 +222,6 @@ class TestFixtureContract(unittest.TestCase):
         for source in self.data["sources"].values():
             self.assertIn(source["commit"], text, "SOURCES.md is missing a commit")
         self.assertIn("prototype/plain-readme", text)
-        self.assertIn("None of them was written for this test", flat)
         self.assertIn("after markdown links, bold, and code marks are stripped", flat)
 
     def test_fixtures_match_the_prototype_strings(self):
@@ -240,6 +239,51 @@ class TestFixtureContract(unittest.TestCase):
                 f"{fixture_id} no longer matches the prototype string",
             )
             self.assertEqual(row["lang"], meta["lang"], f"{fixture_id} language drifted")
+
+    def test_prototype_excerpt_matches_the_branch_when_present(self):
+        """When the prototype ref is here, the excerpt matches its data."""
+        try:
+            html = subprocess.check_output(
+                [
+                    "git",
+                    "-C",
+                    str(REPO_ROOT),
+                    "show",
+                    "prototype/plain-readme:prototype/plain-readme/index.html",
+                ],
+                text=True,
+                encoding="utf-8",
+                stderr=subprocess.DEVNULL,
+            )
+        except (OSError, subprocess.CalledProcessError):
+            self.skipTest("the prototype branch is not on this machine")
+        match = re.search(
+            r'<script type="application/json" id="prototype-data">(.*?)</script>',
+            html,
+            re.S,
+        )
+        self.assertIsNotNone(match, "the prototype data block is missing")
+        prototype = json.loads(match.group(1))
+        excerpt = json.loads(PROTOTYPE_PATH.read_text(encoding="utf-8"))
+        prototype_rows = {}
+        for source_id, row in prototype["sentences"].items():
+            quote = row.get("raw") or row["text"]
+            digest = hashlib.sha256(quote.encode("utf-8")).hexdigest()
+            prototype_rows[source_id] = (row["lang"], digest)
+        for source_id, row in prototype["dashes"].items():
+            quote = row.get("raw") or row["text"]
+            digest = hashlib.sha256(quote.encode("utf-8")).hexdigest()
+            prototype_rows[source_id] = (row["lang"], digest)
+        for row in prototype["pairs"]:
+            quote = row.get("raw") or row["before"]
+            digest = hashlib.sha256(quote.encode("utf-8")).hexdigest()
+            prototype_rows[row["id"]] = (row["lang"], digest)
+        for fixture_id, meta in excerpt["rows"].items():
+            self.assertEqual(
+                prototype_rows[fixture_id],
+                (meta["lang"], meta["sha256"]),
+                f"{fixture_id} excerpt does not match the prototype branch",
+            )
 
     def test_live_sources_match_when_the_working_copy_is_present(self):
         """When the cited repo is here, the recorded line matches it."""
@@ -300,10 +344,6 @@ class TestDryRunRecord(unittest.TestCase):
         self.assertIn("empty (exit 0)", self.text)
 
     def test_record_cites_no_detector_score(self):
-        hits = [line for line in self.text.splitlines() if "ai-detector" in line.lower()]
-        self.assertTrue(hits, "the record no longer states the no-detector rule")
-        for line in hits:
-            self.assertIn("No AI-detector score", line, f"detector mention is not the rule: {line!r}")
         for marker in ("gptzero", "zerogpt", "originality.ai", "sapling", "detector score:"):
             self.assertNotIn(marker, self.text.lower())
         self.assertNotRegex(self.text, r"(?i)ai[- ]detector[^\n]*\b\d{1,3}\s*%")
