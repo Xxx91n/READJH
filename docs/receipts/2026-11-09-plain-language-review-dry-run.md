@@ -120,7 +120,9 @@ After:
 **Headless server** — the same control surface (Platforms, Subscriptions, Nodes, Topology) served in any browser at `http://127.0.0.1:14200`, for Linux servers, Docker, or a remote VPS. The admin bearer token is injected server-side; the browser never sees it. Headless runs data-plane **Mode B**: the Resin engine binds each entry port, and clients present the port's `Platform.Account` proxy credential once (username `Platform.Account`, password = the proxy token). One upstream limit: plain-HTTP forward-form requests on a Mode B port are buffered by the engine — CONNECT-tunnelled HTTPS traffic, the actual AI API path, streams normally. The `@egressapikey/server` npm launcher is **not published to npm** — run from source:
 ```
 
-Notes: `caveat` became `limit`. The buffering sentence still carries two
+Notes: `caveat` became `limit`. The `Headless runs data-plane **Mode B**: ...`
+sentence is exactly 28 words and carries one mechanism idea, so it is kept at
+the warning line rather than split. The buffering sentence still carries two
 ideas; its split needs the dash choice, so it is kept here with that reason
 and the §3 question. If the author chooses period, it reads: `... buffered by
 the engine. CONNECT-tunnelled HTTPS traffic ... streams normally.` The URL,
@@ -236,8 +238,9 @@ README. A full `improve` run would walk every item over the whole file.
   because its split is the pending dash choice; if the author chooses period,
   the split is ready.
 - **Long sentences:** PASS for the sample. Every sentence over the warning line
-  was fixed, or kept with a reason: span 2.4 waits for the dash choice, and
-  the `z2` fixture shows the "one idea, keep it long" case.
+  was fixed, or kept with a reason: the Mode B sentence in span 2.4 is exactly
+  28 words and carries one idea, span 2.4's buffering sentence waits for the
+  dash choice, and the `z2` fixture shows the "one idea, keep it long" case.
 - **Hard words and banned terms:** PASS for the sample. `caveat` became
   `limit`; `first-class` became `fully supported`; `seam` stayed as a technical
   loopback boundary. No `GLOSSARY.md` old term or avoided wording appears in

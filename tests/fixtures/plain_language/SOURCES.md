@@ -7,8 +7,10 @@ names the exact source for each span. None of them was written for this test.
 
 `cases.json` keeps the exact `source_line` for every example, so the test can
 check that each quoted span appears there after markdown links, bold, and code
-marks are stripped and whitespace is collapsed. The full repositories are not
-copied into this repo.
+marks are stripped and whitespace is collapsed. `prototype_excerpt.json` also
+stores the hash of each pair's `after` text, so a replacement cannot drift
+from the prototype proposal. The full repositories are not copied into this
+repo.
 
 ## Where each span comes from
 

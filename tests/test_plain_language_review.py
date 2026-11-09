@@ -239,6 +239,13 @@ class TestFixtureContract(unittest.TestCase):
                 f"{fixture_id} no longer matches the prototype string",
             )
             self.assertEqual(row["lang"], meta["lang"], f"{fixture_id} language drifted")
+            if "after_sha256" in meta:
+                after_digest = hashlib.sha256(row["after"].encode("utf-8")).hexdigest()
+                self.assertEqual(
+                    after_digest,
+                    meta["after_sha256"],
+                    f"{fixture_id} after text no longer matches the prototype proposal",
+                )
 
     def test_prototype_excerpt_matches_the_branch_when_present(self):
         """When the prototype ref is here, the excerpt matches its data."""
@@ -278,10 +285,15 @@ class TestFixtureContract(unittest.TestCase):
             quote = row.get("raw") or row["before"]
             digest = hashlib.sha256(quote.encode("utf-8")).hexdigest()
             prototype_rows[row["id"]] = (row["lang"], digest)
+            after_digest = hashlib.sha256(row["after"].encode("utf-8")).hexdigest()
+            prototype_rows[row["id"]] += (after_digest,)
         for fixture_id, meta in excerpt["rows"].items():
+            expected = (meta["lang"], meta["sha256"])
+            if "after_sha256" in meta:
+                expected += (meta["after_sha256"],)
             self.assertEqual(
                 prototype_rows[fixture_id],
-                (meta["lang"], meta["sha256"]),
+                expected,
                 f"{fixture_id} excerpt does not match the prototype branch",
             )
 

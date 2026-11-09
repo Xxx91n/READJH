@@ -36,11 +36,13 @@
     },
     "p1": {
       "lang": "zh",
-      "sha256": "aee28f9006595fe7cee30733318798096268a773668c68808c96c772496827e3"
+      "sha256": "aee28f9006595fe7cee30733318798096268a773668c68808c96c772496827e3",
+      "after_sha256": "9ca473c723d7b9877b683528d86829ddc0fe0d9102d46c149112458fcf29522d"
     },
     "p2": {
       "lang": "en",
-      "sha256": "b33f6edeeae8010de86df5ffabb399cf77114e1197ef033c1e03710e58dfdeba"
+      "sha256": "b33f6edeeae8010de86df5ffabb399cf77114e1197ef033c1e03710e58dfdeba",
+      "after_sha256": "974ee4bb6a0a0e5401f536a56bc1940dd7d4582bca1da6821b53b234809640f1"
     }
   }
 }
