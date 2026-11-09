@@ -2,7 +2,7 @@
 
 Issue: tasks are GitHub issues at `Xxx91n/READJH` (#1–#7); this file is the spec-level plan.
 Status: accepted and closed. Tickets #1–#7 are closed.
-Vocabulary: `GLOSSARY.md` at the repo root. Decisions respected: ADR-0001, ADR-0002.
+Vocabulary: `GLOSSARY.md` at the repo root. Decisions respected: ADR-0001, ADR-0002. Follow-up spec: [Spec 0002](0002-plain-language-and-native-first-translation.md).
 
 ## Problem Statement
 

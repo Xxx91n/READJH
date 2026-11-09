@@ -2,7 +2,7 @@
 
 Issue: #16
 Status: ready-for-agent (spec stage; tickets cut by `/to-tickets`)
-Vocabulary: `GLOSSARY.md` at the repo root. Decisions respected: ADR-0001, ADR-0002, Spec 0001.
+Vocabulary: `GLOSSARY.md` at the repo root. Decisions respected: ADR-0001, ADR-0002, [Spec 0001](0001-readjh-orchestration-skill.md).
 
 ## Problem Statement
 
@@ -152,7 +152,7 @@ There is no automated language-quality detector. The test is the author's review
 
 The test interface has four parts:
 
-1. **Plain-language review checklist (manual).** A reviewer checks: each sentence carries one idea; long sentences were fixed or kept with a reason; no banned terms remain; no translationese; each dash was kept by the author or replaced with the chosen symbol; contamination findings were recorded; the translation handoff block is correct; the prompt file has all eight items.
+1. **Plain-language review checklist (manual).** A reviewer checks: each sentence carries one idea; long sentences were fixed or kept with a reason; no banned terms remain; no translationese; each dash decision was the author's: keep it or replace it with the chosen symbol, while a single dash that stays needs no decision (`references/de-ai-language.md` §7.4); contamination findings were recorded; the translation handoff block is correct; the prompt file has all eight items.
 2. **Cleanup grep (mechanical, exact terms only).** Search living docs for the old terms and the five workflow terms. Expect zero hits outside the old-to-new table. Check that links still resolve. This is not a language-quality detector.
 3. **Contract checks.** `references/translate-prompt.md` exists and has the eight items; `GLOSSARY.md` has the approved entries; Spec 0001 and Spec 0002 link to each other.
 4. **Existing probe tests stay.** No new language checks in `check-readme.py`.
