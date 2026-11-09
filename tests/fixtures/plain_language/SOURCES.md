@@ -6,8 +6,9 @@ them from the six audited repositories and READJH's own README. None of them
 was written for this test.
 
 `cases.json` keeps the exact `source_line` for every example, so the test can
-check that each quoted span appears there verbatim. The full repositories are
-not copied into this repo.
+check that each quoted span appears there after markdown links, bold, and code
+marks are stripped and whitespace is collapsed. The full repositories are not
+copied into this repo.
 
 ## Where each span comes from
 

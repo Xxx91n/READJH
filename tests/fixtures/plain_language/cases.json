@@ -11,7 +11,7 @@
       "dashes": 3,
       "pairs": 2
     },
-    "note": "Every raw/before span is copied from the throwaway prototype. source_line is the exact text at the cited commit; the review test checks that the span appears in it verbatim after markdown is normalised."
+    "note": "Every raw/before span is copied from the throwaway prototype. source_line is the exact text at the cited commit; the review test checks that the span appears in it after markdown and whitespace are normalised."
   },
   "sources": {
     "readjh": {

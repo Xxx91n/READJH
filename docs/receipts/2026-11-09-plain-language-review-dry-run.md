@@ -1,4 +1,4 @@
-# Receipt — plain-language review dry-run (Ticket #25)
+# Dry-run record — plain-language review (Ticket #25)
 
 Date: 2026-11-09
 Branch: `ticket-25-review-fixtures`
@@ -120,10 +120,12 @@ After:
 **Headless server** — the same control surface (Platforms, Subscriptions, Nodes, Topology) is served in any browser at `http://127.0.0.1:14200`, for Linux servers, Docker, or a remote VPS. The admin bearer token is injected server-side; the browser never sees it. Headless runs data-plane **Mode B**: the Resin engine binds each entry port, and clients present the port's `Platform.Account` proxy credential once (username `Platform.Account`, password = the proxy token). One upstream limit: plain-HTTP forward-form requests on a Mode B port are buffered by the engine — CONNECT-tunnelled HTTPS traffic, the actual AI API path, streams normally. The `@egressapikey/server` npm launcher is **not published to npm** — run from source:
 ```
 
-Notes: `caveat` became `limit`. The buffering sentence was cut into two at the
-dash in the source; that dash change is not applied here, so the dash stays
-and is listed in §3. The URL, the credentials, the env names, the npm name,
-and the commands stay unchanged.
+Notes: `caveat` became `limit`. The buffering sentence still carries two
+ideas; its split needs the dash choice, so it is kept here with that reason
+and the §3 question. If the author chooses period, it reads: `... buffered by
+the engine. CONNECT-tunnelled HTTPS traffic ... streams normally.` The URL,
+the credentials, the env names, the npm name, and the commands stay
+unchanged.
 
 ### 2.5 `README.md:124`
 
@@ -204,17 +206,32 @@ period, colon, parentheses, or keep.
 These are options, not applied changes. The author's answer decides. The
 unanswered questions belong in `[Residual risk]`.
 
+The first example shows what each choice would produce, so the author can
+decide from a shape instead of a symbol name:
+
+```text
+keep:        ... per pair — one AI API key never shares an egress IP ...
+comma:       ... per pair, one AI API key never shares an egress IP ...
+period:      ... per pair. One AI API key never shares an egress IP ...
+colon:       ... per pair: one AI API key never shares an egress IP ...
+parentheses: ... per pair (one AI API key never shares an egress IP ...).
+```
+
+None of these is applied. The dash in the target README stays as written.
+
 ## 4. Checklist walk (sampled spans only)
 
 The dry-run applies the checklist to the seven sampled spans, not the whole
 README. A full `improve` run would walk every item over the whole file.
 
-- **One idea per sentence:** PASS for the sample. Spans 2.1, 2.2, 2.3, 2.4,
-  2.6, and 2.7 split overloaded sentences; 2.5 turned three parallel items
-  into a list.
+- **One idea per sentence:** PASS for the sample, with one recorded reason.
+  Spans 2.1, 2.2, 2.3, 2.6, and 2.7 split overloaded sentences; 2.5 turned
+  three parallel items into a list. Span 2.4 keeps one two-idea sentence
+  because its split is the pending dash choice; if the author chooses period,
+  the split is ready.
 - **Long sentences:** PASS for the sample. Every sentence over the warning line
-  in the sample was fixed. No kept long sentence was needed as an example; the
-  fixtures keep `z2` as the "one idea, keep it long" case.
+  was fixed, or kept with a reason: span 2.4 waits for the dash choice, and
+  the `z2` fixture shows the "one idea, keep it long" case.
 - **Hard words:** PASS for the sample. `caveat` became `limit`; `first-class`
   became `fully supported`; `seam` stayed as a technical loopback boundary.
   No `GLOSSARY.md` old term appears in the sampled prose.
@@ -237,7 +254,7 @@ README. A full `improve` run would walk every item over the whole file.
 - **No detector:** PASS. No AI-detector score is cited. `scripts/check-readme.py`
   keeps its six always-on checks plus the optional `repo-set` check.
 
-## 5. Sample-file zero-write receipt
+## 5. Sample-file zero-write check
 
 ```text
 sha256 before (2026-11-09, before the dry-run):
@@ -263,11 +280,16 @@ python3 -B scripts/check-readme.py README.md --repo-root .
   boundary-duplicates, honest-gaps all PASS; repo-set N/A.
 
 python3 -B -m unittest discover -s tests -p "test_plain_language_review.py"
-→ exit 0; 23 tests ran; OK.
+→ exit 0; 21 tests ran; OK.
 
 python3 -B -m unittest discover -s tests
-→ exit 0; 170 tests ran; OK.
+→ exit 0; 168 tests ran; OK.
 ```
+
+The fixture check also re-reads the cited commit when the working copy is on
+this machine; all four working copies were present, and every recorded
+`source_line` matched the live commit. On a machine without those copies that
+one check skips, and the recorded text is still checked.
 
 The first command is the existing static check on this repository's own README.
 It shows the same six always-on checks and the optional `repo-set` check; no
@@ -279,12 +301,15 @@ language check was added.
   `tests/test_plain_language_review.py`.
 - [x] Fixtures come from real repo text. `cases.json` and `SOURCES.md` name the
   repo, commit, file, and line for every span; the test checks each quote
-  against the recorded source line.
+  against the recorded source line after markdown and whitespace are
+  normalised. The live-source commands are in `SOURCES.md`.
 - [x] A dry-run on one real repo produces before/after spans. §2.
 - [ ] The author reviews and approves the dry-run. **Pending.** The author has
-  not approved these spans yet. This receipt cannot self-approve.
+  not approved these spans yet. This record cannot self-approve.
 - [x] No AI-detector score is used. None is cited.
-- [x] The existing static checks remain unchanged. `ALL_CHECKS` still has the
-  six always-on names; `repo-set` is still optional; the probe run is above.
+- [x] The existing static checks remain unchanged. No file under `scripts/`
+  changed, so the six always-on checks and the optional `repo-set` check are
+  the same code. The full suite still passes its check tests, including the
+  `repo-set` cases; the probe run is above.
 
 Author review: pending.
