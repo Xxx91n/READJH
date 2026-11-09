@@ -1,0 +1,46 @@
+{
+  "source_branch": "prototype/plain-readme",
+  "source_commits": [
+    "8f6dd6b",
+    "7fbeaaa"
+  ],
+  "note": "sha256 is the hash of the prototype's raw or before string, taken from the embedded prototype data. The fixture test hashes its own raw/before string and compares. This keeps the prototype match checkable without the prototype branch.",
+  "rows": {
+    "e1": {
+      "lang": "en",
+      "sha256": "5f3f21b116dfad57ef5dfe9c585e27f039071edafc625e8ca6dd91bdcf675ee3"
+    },
+    "e2": {
+      "lang": "en",
+      "sha256": "75c183ed5812d1ec0a3e0fa6fa6eceb64b16ac797cc95415ee0a5642d72930c1"
+    },
+    "z1": {
+      "lang": "zh",
+      "sha256": "88fd288a862b6dedf313b714d9465e2e44932c4f39dbd135f60f714d41d4b73e"
+    },
+    "z2": {
+      "lang": "zh",
+      "sha256": "f2e58ce90c7b65a284ae9981c0f28ddb2cb1fc44c413580ee0e700b247f132f8"
+    },
+    "d1": {
+      "lang": "en",
+      "sha256": "99d3b5b4c95c23c8796ea57bcecc16d4f8fcf677ff622989a102cbf88196cfcc"
+    },
+    "d2": {
+      "lang": "en",
+      "sha256": "eec02fec0c9628a3367ae448f16df1e44f2183a28716d41117df345ff3ae820f"
+    },
+    "d3": {
+      "lang": "zh",
+      "sha256": "34809ce97abb969ccadc1e20b143d6b7fe14e689ea55f13e97e1bf4ed1acf50a"
+    },
+    "p1": {
+      "lang": "zh",
+      "sha256": "aee28f9006595fe7cee30733318798096268a773668c68808c96c772496827e3"
+    },
+    "p2": {
+      "lang": "en",
+      "sha256": "b33f6edeeae8010de86df5ffabb399cf77114e1197ef033c1e03710e58dfdeba"
+    }
+  }
+}

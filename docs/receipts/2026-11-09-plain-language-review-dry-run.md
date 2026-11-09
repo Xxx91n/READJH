@@ -189,35 +189,41 @@ Notes: `一等支持` is an English-shaped phrase; `有完整支持` is plain. T
 `；` chain is split into sentences. `一并发布` became `一起发布`. The dashes
 are kept; the questions are in §3. The app names, dates, and flag stay.
 
-## 3. Dash questions (author decision pending)
+## 3. Dash decisions (author pending)
 
-No dash was changed. Each sampled cluster needs the author's choice: comma,
-period, colon, parentheses, or keep.
+No dash was changed. Under `references/de-ai-language.md` §7.4, a single dash
+stays and needs no decision; a dash cluster goes to the author.
 
-1. `README.md:21` — one dash, a supplement. Recommendation: keep (single dash).
-2. `README.md:66` — two dashes, both label plus explanation. Recommendation:
+Singles kept, no decision needed:
+
+- `README.md:21` — one dash, a supplement.
+- `README.md:124` — one dash, label plus explanation.
+
+Clusters pending (comma, period, colon, parentheses, or keep):
+
+1. `README.md:66` — two dashes, both label plus explanation. Recommendation:
    keep or colon.
-3. `README.md:68` — two dashes, one label plus explanation and one supplement.
+2. `README.md:68` — two dashes, one label plus explanation and one supplement.
    Recommendation: keep or colon for the label; parentheses for the supplement.
-4. `README.md:124` — one dash, label plus explanation. Recommendation: keep.
-5. `README_CN.md:66` — two dashes, label plus explanation. Recommendation:
+3. `README_CN.md:66` — two dashes, label plus explanation. Recommendation:
    keep or colon.
 
 These are options, not applied changes. The author's answer decides. The
 unanswered questions belong in `[Residual risk]`.
 
-The first example shows what each choice would produce, so the author can
+The first cluster shows what each choice would produce, so the author can
 decide from a shape instead of a symbol name:
 
 ```text
-keep:        ... per pair — one AI API key never shares an egress IP ...
-comma:       ... per pair, one AI API key never shares an egress IP ...
-period:      ... per pair. One AI API key never shares an egress IP ...
-colon:       ... per pair: one AI API key never shares an egress IP ...
-parentheses: ... per pair (one AI API key never shares an egress IP ...).
+keep:        **Headless server** — the same control surface ...
+comma:       **Headless server**, the same control surface ...
+period:      **Headless server**. The same control surface ...
+colon:       **Headless server**: the same control surface ...
+parentheses: **Headless server** (the same control surface ...).
 ```
 
-None of these is applied. The dash in the target README stays as written.
+None of these is applied. The dash in the target README stays as written; the
+sentence splits in §2 do not depend on which symbol the author picks.
 
 ## 4. Checklist walk (sampled spans only)
 
@@ -239,9 +245,9 @@ README. A full `improve` run would walk every item over the whole file.
 - **Translationese:** PASS for the sampled Chinese spans. `携带按 Key 的身份`,
   `一等支持`, and `一并发布` are gone. No listed pattern remains in the
   sample.
-- **Punctuation:** decisions pending. No dash was changed, and the five
-  questions are listed in §3. Code, commands, links, and the compliance notice
-  were not touched.
+- **Punctuation:** decisions pending. Two single dashes stay under §7.4 and
+  need no decision; three dash clusters are listed in §3. No dash was changed.
+  Code, commands, links, and the compliance notice were not touched.
 - **Contamination defense:** PASS. Two `HIGH` findings are recorded in §1; no
   text was acted on; no stop condition was hit; no file was written.
 - **Translation handoff:** PASS as a contract. The block in `SKILL.md` §2 has
@@ -249,9 +255,9 @@ README. A full `improve` run would walk every item over the whole file.
   emits no handoff, because it is not an approved write-mode run.
 - **Translation prompt:** PASS. `tests/test_translate_contract.py` checks the
   eight items in order and the four fill-in values.
-- **No detector:** PASS. No AI-detector score is cited. `scripts/check-readme.py`
-  keeps its six always-on checks plus the optional `repo-set` check; the
-  contract test asserts the same set.
+
+The no-detector rule is §1 of the checklist, not a §9 review item; §1 already
+requires zero detector scores, and the record cites none.
 
 ## 5. Sample-file zero-write check
 
@@ -279,16 +285,17 @@ python3 -B scripts/check-readme.py README.md --repo-root .
   boundary-duplicates, honest-gaps all PASS; repo-set N/A.
 
 python3 -B -m unittest discover -s tests -p "test_plain_language_review.py"
-→ exit 0; 22 tests ran; OK.
+→ exit 0; 21 tests ran; OK.
 
 python3 -B -m unittest discover -s tests
-→ exit 0; 169 tests ran; OK.
+→ exit 0; 168 tests ran; OK.
 ```
 
-The fixture check also re-reads the cited commit when the working copy is on
-this machine; all four working copies were present, and every recorded
-`source_line` matched the live commit. On a machine without those copies that
-one check skips, and the recorded text is still checked.
+The fixture check also compares each fixture string with `prototype_excerpt.json`
+and re-reads the cited commit when the working copy is on this machine. All
+four working copies were present, and every recorded `source_line` matched the
+live commit. On a machine without those copies that one check skips, and the
+recorded text and the prototype hashes are still checked.
 
 The first command is the existing static check on this repository's own README.
 It shows the same six always-on checks and the optional `repo-set` check; no
@@ -297,9 +304,8 @@ language check was added. The contract test reads `ALL_CHECKS` and the
 
 ## 7. Acceptance mapping
 
-- [x] The checklist covers the ticket's eight items plus the existing
-  no-detector item. `references/checklist.md` §9 and
-  `tests/test_plain_language_review.py`.
+- [x] The checklist covers the ticket's eight items. `references/checklist.md`
+  §9 and `tests/test_plain_language_review.py`; the no-detector rule is §1.
 - [x] Fixtures come from real repo text. `cases.json` and `SOURCES.md` name the
   repo, commit, file, and line for every span; the test checks each quote
   against the recorded source line after markdown and whitespace are

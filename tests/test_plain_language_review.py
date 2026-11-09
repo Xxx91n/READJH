@@ -3,12 +3,12 @@
 
 These tests check fixed artifacts, not prose quality:
 
-1. The manual review items are present in `references/checklist.md` §9: the
-   ticket's eight items plus the existing no-detector item.
+1. The manual review items are present in `references/checklist.md` §9.
 2. The fixtures hold four sentences, three dashes, and two before/after
    pairs, and every quoted span appears in its recorded source line after
    markdown and whitespace are normalised.
-3. `references/translate-prompt.md` still has eight numbered rules.
+3. The fixture strings match the prototype excerpt, so "from the prototype"
+   is checkable without the prototype branch.
 4. `scripts/check-readme.py` keeps its six always-on checks and the optional
    `repo-set` check, with no language-quality check.
 5. The dry-run record holds real before/after spans, the contamination
@@ -18,6 +18,7 @@ The author's review of the dry-run is not part of this file. It is a manual
 decision, so no test locks its result.
 """
 
+import hashlib
 import importlib.util
 import json
 import re
@@ -30,8 +31,8 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 FIXTURES_DIR = REPO_ROOT / "tests" / "fixtures" / "plain_language"
 CASES_PATH = FIXTURES_DIR / "cases.json"
 SOURCES_PATH = FIXTURES_DIR / "SOURCES.md"
+PROTOTYPE_PATH = FIXTURES_DIR / "prototype_excerpt.json"
 CHECKLIST_PATH = REPO_ROOT / "references" / "checklist.md"
-PROMPT_PATH = REPO_ROOT / "references" / "translate-prompt.md"
 SCRIPT_PATH = REPO_ROOT / "scripts" / "check-readme.py"
 DRY_RUN_RECORD_PATH = (
     REPO_ROOT / "docs" / "receipts" / "2026-11-09-plain-language-review-dry-run.md"
@@ -46,7 +47,6 @@ REQUIRED_CHECKLIST_ITEMS = (
     "Contamination defense:",
     "Translation handoff:",
     "Translation prompt:",
-    "No detector:",
 )
 
 REQUIRED_HANDOFF_PHRASES = (
@@ -131,7 +131,7 @@ def live_source_span(source, row):
 
 
 class TestChecklistContract(unittest.TestCase):
-    """The manual checklist covers the ticket's eight items plus no-detector."""
+    """The manual checklist covers the ticket's eight items."""
 
     def test_checklist_has_every_required_item(self):
         text = CHECKLIST_PATH.read_text(encoding="utf-8")
@@ -146,10 +146,8 @@ class TestChecklistContract(unittest.TestCase):
 
     def test_checklist_requires_author_choices_for_dashes(self):
         text = CHECKLIST_PATH.read_text(encoding="utf-8")
-        self.assertIn(
-            "each dash was kept by the author or replaced with the symbol the author chose",
-            text,
-        )
+        self.assertIn("a dash cluster was put to the author", text)
+        self.assertIn("each changed dash used the author's choice", text)
 
     def test_checklist_requires_recorded_contamination_findings(self):
         text = CHECKLIST_PATH.read_text(encoding="utf-8")
@@ -213,6 +211,11 @@ class TestFixtureContract(unittest.TestCase):
             )
             self.assertTrue(row["after"].strip(), f"{row['id']} has an empty after span")
 
+    def test_pair_p2_removes_the_old_term(self):
+        row = next(p for p in self.data["pairs"] if p["id"] == "p2")
+        self.assertIn("orchestration", row["before"])
+        self.assertNotIn("orchestration", row["after"])
+
     def test_sources_file_names_the_commits(self):
         text = SOURCES_PATH.read_text(encoding="utf-8")
         flat = " ".join(text.split())
@@ -221,6 +224,22 @@ class TestFixtureContract(unittest.TestCase):
         self.assertIn("prototype/plain-readme", text)
         self.assertIn("None of them was written for this test", flat)
         self.assertIn("after markdown links, bold, and code marks are stripped", flat)
+
+    def test_fixtures_match_the_prototype_strings(self):
+        excerpt = json.loads(PROTOTYPE_PATH.read_text(encoding="utf-8"))
+        rows_by_id = {row["id"]: row for row in self.rows}
+        self.assertEqual(excerpt["source_branch"], "prototype/plain-readme")
+        for fixture_id, meta in excerpt["rows"].items():
+            self.assertIn(fixture_id, rows_by_id, f"prototype row {fixture_id} is missing")
+            row = rows_by_id[fixture_id]
+            quote = quote_of(row)
+            digest = hashlib.sha256(quote.encode("utf-8")).hexdigest()
+            self.assertEqual(
+                digest,
+                meta["sha256"],
+                f"{fixture_id} no longer matches the prototype string",
+            )
+            self.assertEqual(row["lang"], meta["lang"], f"{fixture_id} language drifted")
 
     def test_live_sources_match_when_the_working_copy_is_present(self):
         """When the cited repo is here, the recorded line matches it."""
@@ -239,18 +258,6 @@ class TestFixtureContract(unittest.TestCase):
             self.skipTest("none of the cited working copies is on this machine")
 
 
-class TestPromptContract(unittest.TestCase):
-    """The prompt file still carries eight numbered rules."""
-
-    def test_prompt_file_exists(self):
-        self.assertTrue(PROMPT_PATH.is_file(), f"prompt file not found at {PROMPT_PATH}")
-
-    def test_prompt_has_eight_numbered_rules(self):
-        text = PROMPT_PATH.read_text(encoding="utf-8")
-        rules = re.findall(r"^\d+\. \*\*", text, re.MULTILINE)
-        self.assertEqual(len(rules), 8, f"expected 8 rules, found {len(rules)}")
-
-
 class TestStaticChecksUnchanged(unittest.TestCase):
     """The static check set keeps its six names and the optional repo-set check."""
 
@@ -262,15 +269,6 @@ class TestStaticChecksUnchanged(unittest.TestCase):
         module = load_static_check_module()
         self.assertTrue(callable(module.check_repo_set))
         self.assertNotIn("repo-set", module.ALL_CHECKS)
-
-    def test_no_language_quality_check_name_exists(self):
-        module = load_static_check_module()
-        for name in module.ALL_CHECKS:
-            self.assertNotIn("language", name.lower())
-            self.assertNotIn("sentence", name.lower())
-            self.assertNotIn("jargon", name.lower())
-            self.assertNotIn("translation", name.lower())
-            self.assertNotIn("dash", name.lower())
 
 
 class TestDryRunRecord(unittest.TestCase):
@@ -293,21 +291,22 @@ class TestDryRunRecord(unittest.TestCase):
         self.assertIn("HIGH", self.text)
 
     def test_record_records_zero_writes(self):
-        self.assertIn(
-            "66d37cd9381e051979b2138325d9607fd430db211a753d27dad760c67edbdf7c",
-            self.text,
-        )
-        self.assertIn(
-            "84bfc5f931083ddb3d9f5e41f3d74638c74744ece2693e22de707208126ea9f2",
-            self.text,
-        )
-        self.assertIn("empty", self.text)
+        before_section = self.text.split("sha256 before", 1)[1].split("sha256 after", 1)[0]
+        after_section = self.text.split("sha256 after", 1)[1].split("git -C", 1)[0]
+        before_hashes = re.findall(r"\b[0-9a-f]{64}\b", before_section)
+        after_hashes = re.findall(r"\b[0-9a-f]{64}\b", after_section)
+        self.assertEqual(len(before_hashes), 2, "two README hashes are expected")
+        self.assertEqual(before_hashes, after_hashes, "before and after hashes differ")
+        self.assertIn("empty (exit 0)", self.text)
 
     def test_record_cites_no_detector_score(self):
         hits = [line for line in self.text.splitlines() if "ai-detector" in line.lower()]
         self.assertTrue(hits, "the record no longer states the no-detector rule")
         for line in hits:
             self.assertIn("No AI-detector score", line, f"detector mention is not the rule: {line!r}")
+        for marker in ("gptzero", "zerogpt", "originality.ai", "sapling", "detector score:"):
+            self.assertNotIn(marker, self.text.lower())
+        self.assertNotRegex(self.text, r"(?i)ai[- ]detector[^\n]*\b\d{1,3}\s*%")
 
 
 if __name__ == "__main__":
