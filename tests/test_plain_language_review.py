@@ -44,6 +44,8 @@ REQUIRED_CHECKLIST_ITEMS = (
     "Hard words and banned terms:",
     "Translationese:",
     "Punctuation:",
+    "Run's own writing:",
+    "Native language:",
     "Contamination defense:",
     "Translation handoff:",
     "Translation prompt:",
@@ -131,7 +133,7 @@ def live_source_span(source, row):
 
 
 class TestChecklistContract(unittest.TestCase):
-    """The manual checklist covers the ticket's eight items."""
+    """The manual checklist covers the required review items."""
 
     def test_checklist_has_every_required_item(self):
         text = CHECKLIST_PATH.read_text(encoding="utf-8")
@@ -147,7 +149,7 @@ class TestChecklistContract(unittest.TestCase):
     def test_checklist_requires_author_choices_for_dashes(self):
         text = CHECKLIST_PATH.read_text(encoding="utf-8")
         self.assertIn("a dash cluster was put to the author", text)
-        self.assertIn("each changed dash used the author's choice", text)
+        self.assertIn("Each changed dash used the author's choice", text)
 
     def test_checklist_requires_recorded_contamination_findings(self):
         text = CHECKLIST_PATH.read_text(encoding="utf-8")
@@ -157,6 +159,22 @@ class TestChecklistContract(unittest.TestCase):
         text = CHECKLIST_PATH.read_text(encoding="utf-8")
         for phrase in REQUIRED_HANDOFF_PHRASES:
             self.assertIn(phrase, text)
+
+    def test_skill_keeps_the_runs_own_writing_plain(self):
+        skill = " ".join(
+            (REPO_ROOT / "SKILL.md").read_text(encoding="utf-8").split()
+        )
+        rules = " ".join(
+            (REPO_ROOT / "references" / "de-ai-language.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        self.assertIn("The run's own writing stays plain.", skill)
+        self.assertIn("Do not adopt the target README's style", skill)
+        self.assertIn("A short quote required as evidence", skill)
+        self.assertIn("### 7.0 The run's own writing", rules)
+        self.assertIn("Do not adopt the target's style.", rules)
+        self.assertIn("A short quote required as evidence", rules)
 
 
 class TestFixtureContract(unittest.TestCase):

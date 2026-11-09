@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""scripts/check-readme.py — stdlib-only python3 static probe for README governance.
+"""scripts/check-readme.py — stdlib-only python3 static check for README governance.
 
 Seven static checks:
 1. dead local links (markdown links & <a> tags pointing to missing local files, including badge
@@ -11,7 +11,7 @@ Seven static checks:
 4. badge URL domain sanity (valid hosts, flags placeholders e.g. TODO, example.com, username/repo)
 5. boundary-phrase duplicate counting (ensures boundaries & disclaimers are stated at most once)
 6. honest-gap signal presence (detects suspicious completeness when limitations/caveats/gaps are absent)
-7. --repo-set cross-repo README skeleton diff (detects cross-repo skeleton isomorphism)
+7. --repo-set cross-repo README skeleton diff (detects several repos sharing the same skeleton)
 
 CLI contract:
     python3 scripts/check-readme.py <readme> [--repo-root <dir>] [--repo-set <manifest>]
@@ -36,7 +36,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Optional, Set, Tuple
 
-# Standard recognized boundary / disclaimer / self-attestation phrases
+# Standard recognized boundary / disclaimer / self-proof phrases
 BOUNDARY_PHRASES = [
     "out of scope",
     "at your own risk",
@@ -944,7 +944,7 @@ def compute_skeleton_similarity(
     """Compute structural similarity between two heading skeletons.
 
     Considers both hierarchy structure (levels) and normalized section topics,
-    catching skeleton isomorphism even when exact titles are lightly varied.
+    catching the same skeleton even when exact titles are lightly varied.
     """
     if not headings_a and not headings_b:
         return 1.0
@@ -962,10 +962,10 @@ def compute_skeleton_similarity(
     matcher_lvl = difflib.SequenceMatcher(None, seq1_lvl, seq2_lvl)
     ratio_lvl = matcher_lvl.ratio()
 
-    # High full similarity indicates verbatim skeleton isomorphism
+    # High full similarity indicates the exact same skeleton
     if ratio_full >= 0.85:
         return ratio_full
-    # Identical level structure with high topic overlap indicates skeleton isomorphism
+    # Identical level structure with high topic overlap indicates the same skeleton
     if ratio_lvl >= 0.95 and ratio_full >= 0.60:
         return max(ratio_full, 0.85)
 
@@ -1055,7 +1055,7 @@ def check_repo_set(
     for skeleton in resolved_readmes:
         summary_lines.append(f"  - {skeleton.label} ({skeleton.path.name}): {len(skeleton.headings)} headings")
 
-    summary_lines.append("  Pairwise skeleton isomorphism:")
+    summary_lines.append("  Pairwise skeleton comparison:")
 
     # Compare pairwise
     for i in range(len(resolved_readmes)):
@@ -1152,7 +1152,7 @@ def run_checks(
         else:
             report.passed_checks.append("honest-gaps")
 
-    # 7. Optional repo-set mode
+    # 7. Optional check of a group of repos in one run (--repo-set)
     if repo_set_manifest:
         repo_set_findings, skeleton_info = check_repo_set(repo_set_manifest, readme_path, repo_root)
         report.skeleton_info = skeleton_info
@@ -1171,7 +1171,7 @@ def main() -> int:
         sys.stderr.reconfigure(encoding="utf-8")
 
     parser = argparse.ArgumentParser(
-        description="check-readme.py — stdlib-only python3 static probe for README governance."
+        description="check-readme.py — stdlib-only python3 static check for README governance."
     )
     parser.add_argument("readme", nargs="?", default=None, help="Path to README file to verify")
     parser.add_argument("--repo-root", default=None, help="Root directory of repository (default: README parent dir)")
@@ -1180,7 +1180,7 @@ def main() -> int:
         "--checks",
         default=None,
         help="Comma-separated subset of checks to run (default: all). "
-        f"Names: {', '.join(ALL_CHECKS)}. Used by VERIFY to scope probes, "
+        f"Names: {', '.join(ALL_CHECKS)}. Used by VERIFY to choose which checks to run, "
         "e.g. --checks dead-links,missing-images on docs/ migration destinations.",
     )
 

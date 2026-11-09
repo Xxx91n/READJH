@@ -6,9 +6,9 @@ READJH 管 README 写得准不准、读起来顺不顺。它按顺序把你已�
 串起来，跑 `audit`、`improve`、`rewrite` 三种任务。结果里的每条说法，
 都要拿仓库里查得到的东西核对。
 
-仓库根目录就是技能本体：`SKILL.md`、`references/`（规则）、`scripts/`
+仓库根目录就是这个技能本身：`SKILL.md`、`references/`（规则）、`scripts/`
 （静态检测功能，只用标准库的 python3），加上下面「目录结构」里列的文件。
-纯 markdown 加 python3，不用构建，也没有宿主适配层（ADR-0002）。
+纯 markdown 加 python3，不用构建，也没有为不同宿主单独写的适配代码（ADR-0002）。
 
 ## 它做什么
 
@@ -77,10 +77,10 @@ READJH 只负责把几个现成技能串起来，再补上它们没覆盖的 REA
 ## 目录结构
 
 ```
-SKILL.md            # 技能本体（模型调用）：流程 + 约定
+SKILL.md            # 技能本身（模型调用）：流程 + 约定
 references/         # 几个技能怎么串起来的规则 + 从上游挑出来的补充规则
 scripts/            # check-readme.py —— 静态检测功能，只用标准库的 python3
-tests/              # 静态检测的 unittest 测试与 fixtures
+tests/              # 静态检测的 unittest 测试和测试样例文件
 UPSTREAM.md         # 依赖、技能按什么名字找、偏差记录
 NOTICE              # 上游致谢与许可证
 GLOSSARY.md         # 大白话用词标准 + 旧词到新词对照表

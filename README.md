@@ -90,7 +90,7 @@ Once installed, invoke the skill by name on a repository:
 SKILL.md            # the skill (model-invoked): pipeline + contracts
 references/         # rules for running the existing skills + excerpts from upstream
 scripts/            # check-readme.py — static check, stdlib-only python3
-tests/              # unittest suite + fixtures for the check
+tests/              # unittest suite + sample files for the check
 UPSTREAM.md         # dependencies, how each skill is found, deviations
 NOTICE              # upstream credits and licenses
 GLOSSARY.md         # plain words + old-to-new term table

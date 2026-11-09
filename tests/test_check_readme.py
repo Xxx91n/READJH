@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Seam A test suite for check-readme.py static probe CLI.
+"""Test suite for the check-readme.py static check CLI.
 
 Tests the CLI contract and all seven checks against real-world derived fixtures:
 1. dead local links
@@ -39,7 +39,7 @@ class TestCheckReadmeCLI(unittest.TestCase):
     """Test CLI contract and execution."""
 
     def test_probe_script_exists(self):
-        self.assertTrue(SCRIPT_PATH.is_file(), f"Probe script not found at {SCRIPT_PATH}")
+        self.assertTrue(SCRIPT_PATH.is_file(), f"Check script not found at {SCRIPT_PATH}")
 
     def test_help_flag(self):
         code, out, err = run_probe("--help")

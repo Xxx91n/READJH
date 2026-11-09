@@ -371,9 +371,9 @@ class TestContaminationFixtures(unittest.TestCase):
             self.assertEqual(
                 code,
                 0,
-                f"{case['name']}: probe exited {code}\n{out}\n{err}",
+                f"{case['name']}: check run exited {code}\n{out}\n{err}",
             )
-            self.assertIn("PASS", out, f"{case['name']}: probe did not pass")
+            self.assertIn("PASS", out, f"{case['name']}: check run did not pass")
 
     def test_fixtures_match_recorded_source_lines(self):
         excerpts = json.loads(
@@ -401,7 +401,7 @@ class TestContaminationFixtures(unittest.TestCase):
 
 
 class TestContaminationContract(unittest.TestCase):
-    """Contract checks on the rule text and the static probe boundary."""
+    """Contract checks on the rule text and the static check boundary."""
 
     def test_rules_keep_high_finding_and_four_stop_conditions(self):
         rules = normalized(RULES_PATH.read_text(encoding="utf-8"))
@@ -515,7 +515,7 @@ class TestContaminationContract(unittest.TestCase):
                 "honest-gaps",
             },
         )
-        self.assertEqual(len(names), 6, "the probe must keep its six always-on checks")
+        self.assertEqual(len(names), 6, "the static check must keep its six always-on checks")
 
         code, out, err = run_probe(
             str(FIXTURES_DIR / "directive" / "README.md"),
