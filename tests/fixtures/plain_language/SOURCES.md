@@ -2,8 +2,8 @@
 
 These examples are copied from the throwaway prototype branch
 `prototype/plain-readme` (commits `8f6dd6b` and `7fbeaaa`). The prototype took
-them from the six audited repositories and READJH's own README. None of them
-was written for this test.
+them from the audited repositories and READJH's own README; the table below
+names the exact source for each span. None of them was written for this test.
 
 `cases.json` keeps the exact `source_line` for every example, so the test can
 check that each quoted span appears there after markdown links, bold, and code
@@ -34,10 +34,12 @@ git -C "D:/Aworker/6F" show dbe463869d89e788199dd6879ff5ee17dd266bef:README.md |
 
 For the multi-line `p2` span, use `sed -n '5,8p'` instead.
 
-The recorded `source_line` is the text the test checks. On a machine without
-those working copies, the test still runs against the recorded text; it does
-not reach outside this repository. The earlier prototype checked the live
-files, but a shipped test cannot depend on those absolute paths.
+The recorded `source_line` is the text the main test checks. When a cited
+working copy and commit are present, an extra test re-reads the live commit
+and compares it with the recorded text. On a machine without those copies,
+the extra test skips and the recorded text is still checked. The earlier
+prototype checked the live files; this repo keeps that check where it can, but
+does not make the whole suite depend on the absolute paths.
 
 ## What stays out
 

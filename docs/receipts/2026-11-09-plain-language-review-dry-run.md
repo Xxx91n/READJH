@@ -117,7 +117,7 @@ Before:
 After:
 
 ```text
-**Headless server** — the same control surface (Platforms, Subscriptions, Nodes, Topology) is served in any browser at `http://127.0.0.1:14200`, for Linux servers, Docker, or a remote VPS. The admin bearer token is injected server-side; the browser never sees it. Headless runs data-plane **Mode B**: the Resin engine binds each entry port, and clients present the port's `Platform.Account` proxy credential once (username `Platform.Account`, password = the proxy token). One upstream limit: plain-HTTP forward-form requests on a Mode B port are buffered by the engine — CONNECT-tunnelled HTTPS traffic, the actual AI API path, streams normally. The `@egressapikey/server` npm launcher is **not published to npm** — run from source:
+**Headless server** — the same control surface (Platforms, Subscriptions, Nodes, Topology) served in any browser at `http://127.0.0.1:14200`, for Linux servers, Docker, or a remote VPS. The admin bearer token is injected server-side; the browser never sees it. Headless runs data-plane **Mode B**: the Resin engine binds each entry port, and clients present the port's `Platform.Account` proxy credential once (username `Platform.Account`, password = the proxy token). One upstream limit: plain-HTTP forward-form requests on a Mode B port are buffered by the engine — CONNECT-tunnelled HTTPS traffic, the actual AI API path, streams normally. The `@egressapikey/server` npm launcher is **not published to npm** — run from source:
 ```
 
 Notes: `caveat` became `limit`. The buffering sentence still carries two
@@ -232,9 +232,10 @@ README. A full `improve` run would walk every item over the whole file.
 - **Long sentences:** PASS for the sample. Every sentence over the warning line
   was fixed, or kept with a reason: span 2.4 waits for the dash choice, and
   the `z2` fixture shows the "one idea, keep it long" case.
-- **Hard words:** PASS for the sample. `caveat` became `limit`; `first-class`
-  became `fully supported`; `seam` stayed as a technical loopback boundary.
-  No `GLOSSARY.md` old term appears in the sampled prose.
+- **Hard words and banned terms:** PASS for the sample. `caveat` became
+  `limit`; `first-class` became `fully supported`; `seam` stayed as a technical
+  loopback boundary. No `GLOSSARY.md` old term or avoided wording appears in
+  the sampled prose.
 - **Translationese:** PASS for the sampled Chinese spans. `携带按 Key 的身份`,
   `一等支持`, and `一并发布` are gone. No listed pattern remains in the
   sample.
@@ -248,11 +249,9 @@ README. A full `improve` run would walk every item over the whole file.
   emits no handoff, because it is not an approved write-mode run.
 - **Translation prompt:** PASS. `tests/test_translate_contract.py` checks the
   eight items in order and the four fill-in values.
-- **Fixtures:** PASS. `tests/test_plain_language_review.py` checks the
-  four/three/two counts, the two-language split, and each quote against its
-  recorded source line.
 - **No detector:** PASS. No AI-detector score is cited. `scripts/check-readme.py`
-  keeps its six always-on checks plus the optional `repo-set` check.
+  keeps its six always-on checks plus the optional `repo-set` check; the
+  contract test asserts the same set.
 
 ## 5. Sample-file zero-write check
 
@@ -280,10 +279,10 @@ python3 -B scripts/check-readme.py README.md --repo-root .
   boundary-duplicates, honest-gaps all PASS; repo-set N/A.
 
 python3 -B -m unittest discover -s tests -p "test_plain_language_review.py"
-→ exit 0; 21 tests ran; OK.
+→ exit 0; 22 tests ran; OK.
 
 python3 -B -m unittest discover -s tests
-→ exit 0; 168 tests ran; OK.
+→ exit 0; 169 tests ran; OK.
 ```
 
 The fixture check also re-reads the cited commit when the working copy is on
@@ -293,11 +292,13 @@ one check skips, and the recorded text is still checked.
 
 The first command is the existing static check on this repository's own README.
 It shows the same six always-on checks and the optional `repo-set` check; no
-language check was added.
+language check was added. The contract test reads `ALL_CHECKS` and the
+`check_repo_set` function to assert the same set.
 
 ## 7. Acceptance mapping
 
-- [x] The checklist covers the eight items. `references/checklist.md` §9 and
+- [x] The checklist covers the ticket's eight items plus the existing
+  no-detector item. `references/checklist.md` §9 and
   `tests/test_plain_language_review.py`.
 - [x] Fixtures come from real repo text. `cases.json` and `SOURCES.md` name the
   repo, commit, file, and line for every span; the test checks each quote
@@ -310,6 +311,6 @@ language check was added.
 - [x] The existing static checks remain unchanged. No file under `scripts/`
   changed, so the six always-on checks and the optional `repo-set` check are
   the same code. The full suite still passes its check tests, including the
-  `repo-set` cases; the probe run is above.
+  `repo-set` cases; the static check run is above.
 
 Author review: pending.

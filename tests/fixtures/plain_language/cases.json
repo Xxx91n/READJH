@@ -16,6 +16,7 @@
   "sources": {
     "readjh": {
       "repo": "Xxx91n/READJH",
+      "local": true,
       "commit": "2547836f65791a4f3459c62dd23fb85dab753fb4",
       "date": "2026-11-01"
     },
