@@ -1,0 +1,183 @@
+{
+  "meta": {
+    "ticket": 25,
+    "prototype_branch": "prototype/plain-readme",
+    "prototype_commits": [
+      "8f6dd6b",
+      "7fbeaaa"
+    ],
+    "counts": {
+      "sentences": 4,
+      "dashes": 3,
+      "pairs": 2
+    },
+    "note": "Every raw/before span is copied from the throwaway prototype. source_line is the exact text at the cited commit; the review test checks that the span appears in it verbatim after markdown is normalised."
+  },
+  "sources": {
+    "readjh": {
+      "repo": "Xxx91n/READJH",
+      "commit": "2547836f65791a4f3459c62dd23fb85dab753fb4",
+      "date": "2026-11-01"
+    },
+    "6f": {
+      "repo": "D:/Aworker/6F",
+      "commit": "dbe463869d89e788199dd6879ff5ee17dd266bef",
+      "date": "2026-11-06"
+    },
+    "egress": {
+      "repo": "D:/Aworker/EgressAPIKEY",
+      "commit": "30e087277381b24715c0a85e44be8bbfe0c6cdd6",
+      "date": "2026-11-02"
+    },
+    "maya": {
+      "repo": "D:/Aworker/maya/maya-mcp-server",
+      "commit": "89bcbb348da1778edf5ff8b2da93a66a8115925c",
+      "date": "2026-11-08"
+    }
+  },
+  "sentences": [
+    {
+      "id": "e1",
+      "lang": "en",
+      "label": "English A",
+      "rule": "long sentence",
+      "note": "The sentence puts five audit scale names in the middle, then adds two clauses.",
+      "text": "Five audit scales — Macro-A cross-repo strategy, Macro-B repo quadrant, Macro-C evolution archaeology, Micro-A PR diff, Micro-B file level — share one fact base and one adjudication layer, and differ in triggers and report slices.",
+      "raw": "Five audit scales — Macro-A cross-repo strategy, Macro-B repo quadrant, Macro-C evolution archaeology, Micro-A PR diff, Micro-B file level — share one fact base and one adjudication layer, and differ in triggers and report slices.",
+      "source": "6f",
+      "file": "README.md",
+      "line": 18,
+      "source_line": "6F is a macro + micro engineering-content audit product for git-healthy repositories, distributed as a **Claude Code Agent Plugin** ([`engine/`](engine/)). Evidence collection comes largely from upstream components; the adjudication protocol, fact-table schema, acceptance gates, and verifiable receipts are this project's own work. Five audit scales — Macro-A cross-repo strategy, Macro-B repo quadrant, Macro-C evolution archaeology, Micro-A PR diff, Micro-B file level — share one fact base and one adjudication layer, and differ in triggers and report slices."
+    },
+    {
+      "id": "e2",
+      "lang": "en",
+      "label": "English B",
+      "rule": "long sentence",
+      "note": "One sentence carries two actions with a semicolon, then adds a loopback-only condition.",
+      "text": "The proxy engine is the Resin sidecar v1.2.0; scripts/fetch_resin.sh pulls its binary from the upstream Release at build time, and the shell reaches it only over a loopback REST seam.",
+      "raw": "The proxy engine is the Resin sidecar v1.2.0; [`scripts/fetch_resin.sh`](scripts/fetch_resin.sh) pulls its binary from the upstream Release at build time, and the shell reaches it only over a loopback REST seam.",
+      "source": "egress",
+      "file": "README.md",
+      "line": 23,
+      "source_line": "A single unified proxy cannot carry per-key identity for HTTPS upstreams (the CONNECT tunnel hides the destination), so multi-port is the correct identity mechanism. The shell backend core is `crates/resin-core` (Rust: tokio, reqwest, rusqlite). The proxy engine is the Resin sidecar v1.2.0; [`scripts/fetch_resin.sh`](scripts/fetch_resin.sh) pulls its binary from the upstream Release at build time, and the shell reaches it only over a loopback REST seam. The `resin/` directory on disk is a gitignored local reference clone, not part of the repo."
+    },
+    {
+      "id": "z1",
+      "lang": "zh",
+      "label": "中文 A",
+      "rule": "long sentence",
+      "note": "One sentence carries the product definition, the distribution form, and the in-house scope, with a dash and parentheses in the middle.",
+      "text": "面向 git 记录健全仓库的工程内容审计产品——Claude Code Agent Plugin（分发形态见 engine/）：证据采集大部分来自上游组合件，裁决协议、事实表 schema、验收闸门与可核验回执是本项目自研的护城河与黏合剂。",
+      "raw": "面向 git 记录健全仓库的工程内容审计产品——**Claude Code Agent Plugin**（分发形态见 [`engine/`](engine/)）：证据采集大部分来自上游组合件，裁决协议、事实表 schema、验收闸门与可核验回执是本项目自研的护城河与黏合剂。",
+      "source": "6f",
+      "file": "README.zh-CN.md",
+      "line": 22,
+      "source_line": "面向 git 记录健全仓库的工程内容审计产品——**Claude Code Agent Plugin**（分发形态见 [`engine/`](engine/)）：证据采集大部分来自上游组合件，裁决协议、事实表 schema、验收闸门与可核验回执是本项目自研的护城河与黏合剂。5 档审计粒度（Macro-A 跨仓战略 / Macro-B 仓库级四象限 / Macro-C 演化考古 / Micro-A PR diff / Micro-B file level）共享同一事实底座与裁决层，差异在触发器与报告切片。"
+    },
+    {
+      "id": "z2",
+      "lang": "zh",
+      "label": "中文 B",
+      "rule": "long sentence",
+      "note": "It looks long, but it carries one idea: what it is plus what it can do.",
+      "text": "mcp-for-maya 是一个 Model Context Protocol (MCP) 服务器，让Agent（Codex、Claude 等）直接操控 Autodesk Maya，进行三维建模、场景规划和工程级项目落地。",
+      "raw": "`mcp-for-maya` 是一个 [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) 服务器，让Agent（Codex、Claude 等）直接操控 Autodesk Maya，进行三维建模、场景规划和工程级项目落地。",
+      "source": "maya",
+      "file": "README.zh-CN.md",
+      "line": 17,
+      "source_line": "`mcp-for-maya` 是一个 [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) 服务器，让Agent（Codex、Claude 等）直接操控 Autodesk Maya，进行三维建模、场景规划和工程级项目落地。"
+    }
+  ],
+  "dashes": [
+    {
+      "id": "d1",
+      "lang": "en",
+      "label": "English example 1: supplement at the end",
+      "text": "It exposes many socks5/http entry ports; each port is the identity of one (platform, account) pair, and a Resin Go sidecar guarantees a distinct sticky exit IP per pair — one AI API key never shares an egress IP with another unless you decide it should.",
+      "raw": "It exposes many socks5/http entry ports; each port is the identity of one (platform, account) pair, and a Resin Go sidecar guarantees a distinct sticky exit IP per pair — one AI API key never shares an egress IP with another unless you decide it should.",
+      "plain": "The semicolon part has already made the main point. The dash adds a condition: one key does not share an exit IP with another.",
+      "why": "This dash works like parentheses: it adds a condition, not a turn.",
+      "options": [
+        "comma",
+        "period",
+        "colon",
+        "parentheses",
+        "keep"
+      ],
+      "source": "egress",
+      "file": "README.md",
+      "line": 21,
+      "source_line": "EgressAPIKEY is a desktop application (Tauri 2 + React 19) that sits between your AI gateway (OmniRoute / LiteLLM / CLIProxy) and upstream OpenAI-compatible v1 providers. It exposes many socks5/http entry ports; each port is the identity of one (platform, account) pair, and a Resin Go sidecar guarantees a distinct sticky exit IP per pair — one AI API key never shares an egress IP with another unless you decide it should."
+    },
+    {
+      "id": "d2",
+      "lang": "en",
+      "label": "English example 2: label followed by an explanation",
+      "text": "Forensics — evolution archaeology digs repository history into evidence (Macro-C).",
+      "raw": "**Forensics** — evolution archaeology digs repository history into evidence (Macro-C).",
+      "plain": "Before the dash there is only the label Forensics; the explanation comes after it.",
+      "why": "A label followed by an explanation reads more like a colon.",
+      "options": [
+        "comma",
+        "period",
+        "colon",
+        "parentheses",
+        "keep"
+      ],
+      "source": "6f",
+      "file": "README.md",
+      "line": 24,
+      "source_line": "- **Forensics** — evolution archaeology digs repository history into evidence (Macro-C)."
+    },
+    {
+      "id": "d3",
+      "lang": "zh",
+      "label": "中文例：破折号后面接例外",
+      "text": "它暴露多个 socks5/http 入口端口；每个端口即一个（平台，账户）身份对的标识，Resin Go 侧车保证每一对都拥有独立的粘性出口 IP —— 除非你明确允许，一个 AI API Key 绝不与其他 Key 共享出口 IP。",
+      "raw": "它暴露多个 socks5/http 入口端口；每个端口即一个（平台，账户）身份对的标识，Resin Go 侧车保证每一对都拥有独立的粘性出口 IP —— 除非你明确允许，一个 AI API Key 绝不与其他 Key 共享出口 IP。",
+      "plain": "The first half says each pair has its own exit IP. The part after the dash adds an exception.",
+      "why": "This is the common Chinese form where the dash introduces an exception. A comma or parentheses would need the sentence rebuilt.",
+      "options": [
+        "comma",
+        "period",
+        "colon",
+        "parentheses",
+        "keep"
+      ],
+      "source": "egress",
+      "file": "README_CN.md",
+      "line": 21,
+      "source_line": "EgressAPIKEY 是一款桌面应用（Tauri 2 + React 19），位于你的 AI 网关（OmniRoute / LiteLLM / CLIProxy）与上游 OpenAI 兼容 v1 服务商之间。它暴露多个 socks5/http 入口端口；每个端口即一个（平台，账户）身份对的标识，Resin Go 侧车保证每一对都拥有独立的粘性出口 IP —— 除非你明确允许，一个 AI API Key 绝不与其他 Key 共享出口 IP。"
+    }
+  ],
+  "pairs": [
+    {
+      "id": "p1",
+      "lang": "zh",
+      "label": "中文 before/after",
+      "before": "单一统一代理无法为 HTTPS 上游携带按 Key 的身份（CONNECT 隧道对目的地不可见），因此多端口才是正确的身份机制。",
+      "raw": "单一统一代理无法为 HTTPS 上游携带按 Key 的身份（CONNECT 隧道对目的地不可见），因此多端口才是正确的身份机制。",
+      "after": "一个代理没法让不同的 Key 用不同身份：HTTPS 隧道里看不见目的地。所以要按 Key 开多个端口，一个端口一个身份。",
+      "why": "Replace 携带按 Key 的身份 with 让不同的 Key 用不同身份, and split the conclusion after 因此 into its own sentence.",
+      "source": "egress",
+      "file": "README_CN.md",
+      "line": 23,
+      "source_line": "单一统一代理无法为 HTTPS 上游携带按 Key 的身份（CONNECT 隧道对目的地不可见），因此多端口才是正确的身份机制。壳侧后端核心是 `crates/resin-core`（Rust：tokio、reqwest、rusqlite）；代理引擎是 Resin 侧车 v1.2.0，仅通过环回 REST 接缝访问，构建期由 [`scripts/fetch_resin.sh`](scripts/fetch_resin.sh) 从上游 Release 拉取二进制。磁盘上的 `resin/` 目录是 gitignored 的本地参考克隆，不属于本仓库。"
+    },
+    {
+      "id": "p2",
+      "lang": "en",
+      "label": "English before/after",
+      "before": "An orchestration skill for README governance. One entry point sequences upstream skills across audit, improve, and rewrite — every claim in the result is checked against what the repository can actually verify with a receipt.",
+      "raw": "An orchestration skill for README governance. One entry point sequences upstream skills across `audit`, `improve`, and `rewrite` — every claim in the result is checked against what the repository can actually verify with a receipt.",
+      "after": "A skill that checks and rewrites README files. It calls existing skills for audit, improve and rewrite; every claim in the result must point to evidence the repository really has.",
+      "why": "Replace orchestration skill for README governance with a skill that checks and rewrites README files, and replace checked against what the repository can actually verify with must point to evidence the repository really has.",
+      "source": "readjh",
+      "file": "README.md",
+      "line_start": 5,
+      "line_end": 8,
+      "source_line": "An orchestration skill for README governance. One entry point sequences\nupstream skills across `audit`, `improve`, and `rewrite` — every claim in the\nresult is checked against what the repository can actually verify with a\nreceipt."
+    }
+  ]
+}
